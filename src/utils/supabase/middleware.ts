@@ -65,10 +65,8 @@ export const createClient = (request: NextRequest) => {
   return { supabase, response };
 };
 
-// TODO: Why do we declare this in here?
 export const updateSession = async (request: NextRequest) => {
   try {
-    console.log("Running update session middleware");
     const { supabase, response } = createClient(request);
 
     // This will refresh session if expired - required for Server Components

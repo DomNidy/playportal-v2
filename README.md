@@ -10,11 +10,17 @@
 
 Note: We use prisma, but also the supabase generated types. This prevents some eslint errors with the supabase client.
 
-### When to use prisma client, and when to use supabase client?
+### Drizzle migrations guide
 
-We will use the prisma client on our backend for complex queries, as well as for easier generation of migrations.
+- `npm run db:pull`
+  Will try to pull the changes from the db, and define them in drizzle schema file
+  You can edit the config in `drizzle.config.ts`
 
-We will use the supabase js client on the client side to listen for realtime updates using supabase subscriptions.
+- `npm run db:generate`
+  Will create the migration script in `/migrations` folder
+
+- `npm run db:migrate`
+  Will attempt to apply to migration to our supabase DB by running the `supabase/migration.ts` script
 
 ## What's next? How do I make an app with this?
 

@@ -1,17 +1,14 @@
-import { PrismaClient } from "@prisma/client";
+import "dotenv/config";
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
 
-import { env } from "~/env";
+// Read directly from process.env since our env.js module will throw errors if ran from using npx
+const connectionString = process.env.DATABASE_URL;
 
-const createPrismaClient = () =>
-  new PrismaClient({
-    log:
-      env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
-  });
+if (!connectionString) {
+  throw new Error("DATABASE_URL is not defined");
+}
 
-const globalForPrisma = globalThis as unknown as {
-  prisma: ReturnType<typeof createPrismaClient> | undefined;
-};
-
-export const db = globalForPrisma.prisma ?? createPrismaClient();
-
-if (env.NODE_ENV !== "production") globalForPrisma.prisma = db;
+// Disable prefetch as it is not supported for "Transaction" pool mode
+export const client = postgres(connectionString, { prepare: false });
+export const db = drizzle(client);

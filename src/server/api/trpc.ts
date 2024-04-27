@@ -6,11 +6,17 @@
  * TL;DR - This is where all the tRPC server stuff is created and plugged in. The pieces you will
  * need to use are documented accordingly near the end.
  */
-import { initTRPC } from "@trpc/server";
+import { type Session } from "@supabase/supabase-js";
+import { TRPCError, initTRPC } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
 import { db } from "~/server/db";
+
+interface CreateContextOptions {
+  session: Session | null;
+  headers: Headers;
+}
 
 /**
  * 1. CONTEXT
@@ -24,7 +30,7 @@ import { db } from "~/server/db";
  *
  * @see https://trpc.io/docs/server/context
  */
-export const createTRPCContext = async (opts: { headers: Headers }) => {
+export const createTRPCContext = async (opts: CreateContextOptions) => {
   return {
     db,
     ...opts,
@@ -81,3 +87,31 @@ export const createTRPCRouter = t.router;
  * are logged in.
  */
 export const publicProcedure = t.procedure;
+
+// TODO: Figure out how to integrate supabase auth with trpc router so we have access to the sesssion
+// TODO: We might just need to parse out the cookie
+/**
+ * Reusable middleware that enforces users are logged in before running the procedure.
+ */
+const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
+  console.log("enforceUserIsAuthed Middleware ran");
+
+  if (!ctx.session?.user) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  }
+  return next({
+    ctx: {
+      // infers the `session` as non-nullable
+      session: { ...ctx.session, user: ctx.session.user },
+    },
+  });
+});
+
+/**
+ * Protected (authenticated) procedure
+ *
+ * If you want a query or mutation to ONLY be accessible to logged in users, use this. It verifies
+ * the session is valid and guarantees `ctx.session.user` is not null.
+ *
+ */
+export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);

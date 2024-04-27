@@ -1,6 +1,10 @@
+"use client";
 import Link from "next/link";
+import { api } from "~/trpc/react";
 
 export default function Home() {
+  const data = api.post.getLatest.useQuery();
+
   return (
     <main className="flex min-h-screen flex-col items-center bg-gradient-to-b ">
       <div className="container flex flex-row items-start justify-center   px-4 py-8">
@@ -14,6 +18,7 @@ export default function Home() {
           Sign up
         </Link>
       </div>
+      {data.data}
     </main>
   );
 }
