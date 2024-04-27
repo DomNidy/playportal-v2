@@ -2,7 +2,11 @@ import { eq } from "drizzle-orm";
 import { users } from "drizzle/schema";
 import { z } from "zod";
 
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "~/server/api/trpc";
 
 export const postRouter = createTRPCRouter({
   hello: publicProcedure
@@ -23,7 +27,6 @@ export const postRouter = createTRPCRouter({
 
   getLatest: protectedProcedure.query(async ({ ctx }) => {
     console.log("Session", ctx.session);
-
     // TODO: We need to include our supabase auth state in our trpc context
     const res = await ctx.db
       .select({
@@ -31,7 +34,7 @@ export const postRouter = createTRPCRouter({
         createdAt: users.createdAt,
       })
       .from(users)
-      .where(eq(users.id, "123"));
-    return 1;
+      .where(eq(users.id, ctx.session.user.id));
+    return res;
   }),
 });

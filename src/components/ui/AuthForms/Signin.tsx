@@ -6,7 +6,6 @@ import { z } from "zod";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -16,6 +15,8 @@ import { Input } from "../Input";
 import { Button } from "../Button";
 import { useState } from "react";
 import { createClient } from "~/utils/supabase/client";
+import { getStatusRedirect } from "~/utils/helpers";
+import { RedirectType, redirect, useRouter } from "next/navigation";
 
 const SignInSchema = z.object({
   email: z.string().email(),
@@ -24,6 +25,7 @@ const SignInSchema = z.object({
 
 export default function SignUp() {
   const supabase = createClient();
+  const router = useRouter();
 
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
@@ -33,14 +35,23 @@ export default function SignUp() {
 
   async function onSubmit(data: z.infer<typeof SignInSchema>) {
     setIsSubmitting(true);
-    // TODO: After the user confirms their email address, they get redirected to `localhost:3000/?code={SOME CODE HERE}`
-    // TODO: We might want to do something with this code, check supabase docs
+
     await supabase.auth
       .signInWithPassword({
         email: data.email,
         password: data.password,
       })
       .then((res) => {
+        if (res.data.user && res.data.session) {
+          const redirectPath = getStatusRedirect(
+            "/dashboard",
+            "Successfully logged in",
+            "Welcome to playportal, you have logged in!",
+          );
+
+          router.push("/dashboard");
+        }
+
         if (res.error) {
           form.setError("email", { message: res.error.message });
         }
