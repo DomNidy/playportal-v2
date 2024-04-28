@@ -1,8 +1,7 @@
 "use client";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-
+import { type z } from "zod";
 import { Button } from "~/components/ui/Button";
 import {
   Form,
@@ -14,9 +13,12 @@ import {
   FormMessage,
 } from "~/components/ui/Form";
 import { Input } from "~/components/ui/Input";
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { Label } from "~/components/ui/Label";
 import { CreateVideoFormSchema } from "~/definitions/form-schemas";
+import { api } from "~/trpc/react";
+import { getFileExtension } from "~/utils/helpers";
+import { toast } from "../Toasts/use-toast";
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
 const MAX_AUDIO_SIZE = 60 * 1024 * 1024; // 60MB
@@ -24,6 +26,8 @@ const MAX_AUDIO_SIZE = 60 * 1024 * 1024; // 60MB
 export default function CreateVideoForm() {
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
+
+  const genUploadURL = api.upload.generateUploadURL.useMutation();
 
   const form = useForm({
     resolver: zodResolver(CreateVideoFormSchema),
@@ -36,7 +40,30 @@ export default function CreateVideoForm() {
 
   // Form submit handler
   async function onSubmit(data: z.infer<typeof CreateVideoFormSchema>) {
-    // Call the gen-upload-url api
+    if (!audioFile) {
+      toast({
+        title: "Error",
+        description: "No audio file was entered.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const audioFileExtension = getFileExtension(audioFile.name);
+    const imageFileExtension = imageFile
+      ? getFileExtension(imageFile?.name)
+      : null;
+
+    //* Send request to api to generate a presigned-url so that we can upload the files
+    const generatedURL = genUploadURL.mutate({
+      videoTitle: data.videoTitle,
+      audioFileContentType: audioFile.type,
+      audioFileExtension: audioFileExtension,
+      audioFileSize: audioFile.size,
+      imageFileContentType: imageFile?.type,
+      imageFileExtension: imageFileExtension,
+      imageFileSize: imageFile?.size,
+    });
   }
 
   function onAudioFileChange(event: React.ChangeEvent<HTMLInputElement>) {

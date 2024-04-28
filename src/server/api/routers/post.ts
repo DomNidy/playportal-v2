@@ -1,6 +1,4 @@
 import { TRPCClientError } from "@trpc/client";
-import { eq } from "drizzle-orm";
-import { auth_users } from "drizzle/schema";
 import { z } from "zod";
 
 import {

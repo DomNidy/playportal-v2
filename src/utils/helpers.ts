@@ -92,3 +92,15 @@ export const getErrorRedirect = (
     disableButton,
     arbitraryParams,
   );
+
+export function getFileExtension(fileName: string): string | null {
+  // Find the position of the last dot in the file name
+  const dotIndex = fileName.lastIndexOf(".");
+
+  // If the dotIndex is -1, there is no dot in the file name
+  if (dotIndex === -1) {
+    return null; // Return an empty string for files without an extension
+  }
+  // Return the substring starting from the position of the last dot
+  return fileName.substring(dotIndex + 1);
+}

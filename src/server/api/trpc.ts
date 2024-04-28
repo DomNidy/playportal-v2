@@ -12,7 +12,6 @@ import { headers } from "next/headers";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
-import { db } from "~/server/db";
 import { createClient } from "~/utils/supabase/server";
 
 interface CreateContextOptions {
@@ -34,7 +33,7 @@ interface CreateContextOptions {
  */
 export const createTRPCContext = async (opts: CreateContextOptions) => {
   return {
-    db,
+    db: createClient(),
     ...opts,
   };
 };
