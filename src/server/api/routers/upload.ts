@@ -25,6 +25,7 @@ export const uploadRouter = createTRPCRouter({
 
       console.log("Users credits:", userCredits);
 
+      throw new TRPCClientError("Insufficient credits");
       if (error) {
         throw new TRPCClientError("Insufficient credits");
       }

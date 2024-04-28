@@ -55,15 +55,28 @@ export default function CreateVideoForm() {
       : null;
 
     //* Send request to api to generate a presigned-url so that we can upload the files
-    const generatedURL = genUploadURL.mutate({
-      videoTitle: data.videoTitle,
-      audioFileContentType: audioFile.type,
-      audioFileExtension: audioFileExtension,
-      audioFileSize: audioFile.size,
-      imageFileContentType: imageFile?.type,
-      imageFileExtension: imageFileExtension,
-      imageFileSize: imageFile?.size,
-    });
+    const generatedURL = genUploadURL.mutate(
+      {
+        videoTitle: data.videoTitle,
+        audioFileContentType: audioFile.type,
+        audioFileExtension: audioFileExtension,
+        audioFileSize: audioFile.size,
+        imageFileContentType: imageFile?.type,
+        imageFileExtension: imageFileExtension,
+        imageFileSize: imageFile?.size,
+      },
+      {
+        onError(error) {
+          toast({
+            title: "Error",
+            description: error.message,
+            variant: "destructive",
+          });
+        },
+      },
+    );
+
+    generatedURL;
   }
 
   function onAudioFileChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -218,7 +231,9 @@ export default function CreateVideoForm() {
           )}
         />
 
-        <Button type="submit">Create Video</Button>
+        <Button type="submit" disabled={genUploadURL.isPending}>
+          Create Video
+        </Button>
       </form>
     </Form>
   );
