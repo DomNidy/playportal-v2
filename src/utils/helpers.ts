@@ -33,6 +33,7 @@ const toastKeyMap: Record<ToastType, string[]> = {
 
 // Returns a redirect path containing toast props
 // Useful for redirecting to a page with toast props
+//* We will parse these in the toaster provider component
 const getToastRedirect = (
   path: string,
   toastType: ToastType,

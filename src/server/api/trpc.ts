@@ -6,15 +6,17 @@
  * TL;DR - This is where all the tRPC server stuff is created and plugged in. The pieces you will
  * need to use are documented accordingly near the end.
  */
-import { type Session } from "@supabase/supabase-js";
+import { type User } from "@supabase/supabase-js";
 import { TRPCError, initTRPC } from "@trpc/server";
+import { headers } from "next/headers";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
 import { db } from "~/server/db";
+import { createClient } from "~/utils/supabase/server";
 
 interface CreateContextOptions {
-  session: Session | null;
+  user: User | null;
   headers: Headers;
 }
 
@@ -93,16 +95,19 @@ export const publicProcedure = t.procedure;
 /**
  * Reusable middleware that enforces users are logged in before running the procedure.
  */
-const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
-  console.log("enforceUserIsAuthed Middleware ran");
+const enforceUserIsAuthed = t.middleware(async ({ ctx, next }) => {
+  const supabase = createClient();
+  const { data } = await supabase.auth.getUser();
 
-  if (!ctx.session?.user) {
+  if (!data.user) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
+
   return next({
     ctx: {
       // infers the `session` as non-nullable
-      session: { ...ctx.session, user: ctx.session.user },
+      user: data.user,
+      headers: ctx.headers,
     },
   });
 });

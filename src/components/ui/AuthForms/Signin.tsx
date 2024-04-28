@@ -15,8 +15,8 @@ import { Input } from "../Input";
 import { Button } from "../Button";
 import { useState } from "react";
 import { createClient } from "~/utils/supabase/client";
-import { getStatusRedirect } from "~/utils/helpers";
-import { RedirectType, redirect, useRouter } from "next/navigation";
+import { getStatusRedirect, getURL } from "~/utils/helpers";
+import { useRouter } from "next/navigation";
 
 const SignInSchema = z.object({
   email: z.string().email(),
@@ -49,7 +49,7 @@ export default function SignUp() {
             "Welcome to playportal, you have logged in!",
           );
 
-          router.push("/dashboard");
+          router.push(redirectPath);
         }
 
         if (res.error) {
@@ -60,43 +60,59 @@ export default function SignUp() {
   }
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input placeholder="Enter your email" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+    <div>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter your email" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="password"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Password</FormLabel>
-              <FormControl>
-                <Input
-                  type="password"
-                  placeholder="Enter your password"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button type="submit" disabled={isSubmitting}>
-          Sign in
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Password</FormLabel>
+                <FormControl>
+                  <Input
+                    type="password"
+                    placeholder="Enter your password"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button type="submit" disabled={isSubmitting}>
+            Sign in
+          </Button>
+        </form>
+      </Form>
+      <div className="flex flex-col gap-2">
+        <Button
+          onClick={() =>
+            supabase.auth.signInWithOAuth({
+              provider: "google",
+              options: {
+                redirectTo: getURL("/auth/callback"),
+              },
+            })
+          }
+        >
+          Sign in with Google
         </Button>
-      </form>
-    </Form>
+      </div>
+    </div>
   );
 }

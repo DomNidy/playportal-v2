@@ -1,12 +1,9 @@
 import "~/styles/globals.css";
 
 import { Inter } from "next/font/google";
-import { Toaster } from "~/components/ui/Toasts/toaster";
-import { TRPCReactProvider } from "~/trpc/react";
 import type { Metadata } from "next";
 import { getURL } from "~/utils/helpers";
-import { Suspense } from "react";
-import Providers from "~/providers/Providers";
+import Providers from "~/providers/providers";
 
 const inter = Inter({
   subsets: ["latin"],

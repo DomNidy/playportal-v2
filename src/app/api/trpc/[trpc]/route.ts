@@ -15,7 +15,7 @@ const createContext = async (req: NextRequest) => {
 
   return createTRPCContext({
     headers: req.headers,
-    session: (await client.supabase.auth.getSession()).data.session,
+    user: (await client.supabase.auth.getUser()).data.user,
   });
 };
 

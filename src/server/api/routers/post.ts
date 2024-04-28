@@ -1,3 +1,4 @@
+import { TRPCClientError } from "@trpc/client";
 import { eq } from "drizzle-orm";
 import { auth_users } from "drizzle/schema";
 import { z } from "zod";
@@ -7,6 +8,7 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
+import { createClient } from "~/utils/supabase/server";
 
 export const postRouter = createTRPCRouter({
   hello: publicProcedure
@@ -26,15 +28,19 @@ export const postRouter = createTRPCRouter({
     }),
 
   getLatest: protectedProcedure.query(async ({ ctx }) => {
-    console.log("Session", ctx.session);
-    // TODO: We need to include our supabase auth state in our trpc context
-    const res = await ctx.db
-      .select({
-        email: auth_users.email,
-        createdAt: auth_users.createdAt,
-      })
-      .from(auth_users)
-      .where(eq(auth_users.id, ctx.session.user.id));
-    return res;
+    const supabase = createClient();
+
+    const { data: posts, error } = await supabase
+      .from("posts")
+      .select("author_id, content, created_at")
+      .order("created_at", { ascending: false })
+      .limit(5);
+
+    if (error) {
+      console.error(error);
+      throw new TRPCClientError("Error occured while fetching data");
+    }
+
+    return posts;
   }),
 });
