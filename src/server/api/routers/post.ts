@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { users } from "drizzle/schema";
+import { auth_users } from "drizzle/schema";
 import { z } from "zod";
 
 import {
@@ -30,11 +30,11 @@ export const postRouter = createTRPCRouter({
     // TODO: We need to include our supabase auth state in our trpc context
     const res = await ctx.db
       .select({
-        email: users.email,
-        createdAt: users.createdAt,
+        email: auth_users.email,
+        createdAt: auth_users.createdAt,
       })
-      .from(users)
-      .where(eq(users.id, ctx.session.user.id));
+      .from(auth_users)
+      .where(eq(auth_users.id, ctx.session.user.id));
     return res;
   }),
 });

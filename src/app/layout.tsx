@@ -6,6 +6,7 @@ import { TRPCReactProvider } from "~/trpc/react";
 import type { Metadata } from "next";
 import { getURL } from "~/utils/helpers";
 import { Suspense } from "react";
+import Providers from "~/providers/Providers";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -58,10 +59,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`font-sans ${inter.variable}`}>
-        <TRPCReactProvider>{children}</TRPCReactProvider>
-        <Suspense>
-          <Toaster />
-        </Suspense>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

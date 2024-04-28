@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "next build",
+    "db:gen-types": "npx supabase gen types typescript --linked > types_db.ts",
     "db:generate": "drizzle-kit generate:pg",
     "db:migrate": "npx tsx drizzle/migration.ts",
     "db:pull": "drizzle-kit introspect:pg",
