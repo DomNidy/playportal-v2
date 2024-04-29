@@ -1,45 +1,35 @@
-// "use client";
-// import { type User } from "@supabase/supabase-js";
-// import { useRouter } from "next/navigation";
-// import { createContext, useEffect, useState } from "react";
-// import { createClient } from "~/utils/supabase/client";
+"use client";
+import { type Session, type User } from "@supabase/supabase-js";
+import { createContext, useState } from "react";
+import useOnAuthStateChange from "~/hooks/use-on-auth-state-change";
 
-// interface IAuthContext {
-//   user: User | null;
-// }
+interface AuthContext {
+  session: Session | null;
+  user: User | null;
+}
 
-// export const AuthContext = createContext<IAuthContext>({
-//   // The currently authed user, null if not authed
-//   user: null,
-// });
+export const authContext = createContext<AuthContext>({
+  session: null,
+  user: null,
+});
 
-// export default function AuthProvider({
-//   children,
-// }: {
-//   children: React.ReactNode;
-// }) {
-//   const supabase = createClient();
-//   const [user, setUser] = useState<User | null>(null);
-//   const router = useRouter();
-//   // Add event listeners for auth changes
+export default function AuthProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
 
-//   useEffect(() => {
-//     const { data } = supabase.auth.onAuthStateChange(async (event) => {
-//       // getUser() is more secure as it directly contacts the auth server
-//       const _user = await supabase.auth.getUser();
-//       setUser(_user.data.user);
+  // Update this state whenever our auth state changes
+  useOnAuthStateChange((ev, session) => {
+    setSession(session);
+    setUser(session?.user ?? null);
+  });
 
-//       if (event === "SIGNED_OUT") {
-//         alert("siged")
-//         router.push("/sign-in");
-//       }
-//     });
-
-//     // Remove event listeners on unmount
-//     return () => data.subscription.unsubscribe();
-//   }, [router, supabase.auth]);
-
-//   return (
-//     <AuthContext.Provider value={{ user }}>{children}</AuthContext.Provider>
-//   );
-// }
+  return (
+    <authContext.Provider value={{ session, user }}>
+      {children}
+    </authContext.Provider>
+  );
+}

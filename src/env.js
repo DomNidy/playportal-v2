@@ -11,7 +11,13 @@ export const env = createEnv({
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
-
+    AMAZON_ACCESS_KEY_ID: z.string().min(1),
+    AMAZON_SECRET_ACCESS_KEY: z.string().min(1),
+    S3_INPUT_BUCKET_NAME: z.string().min(1),
+    S3_OUTPUT_BUCKET_NAME: z.string().min(1),
+    S3_REGION: z.string().min(1),
+    SQS_QUEUE_URL: z.string().min(1),
+    SQS_REGION: z.string().min(1),
   },
 
   /**
@@ -37,6 +43,13 @@ export const env = createEnv({
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
     NEXT_PUBLIC_VERCEL_URL: process.env.NEXT_PUBLIC_VERCEL_URL,
+    AMAZON_ACCESS_KEY_ID: process.env.AMAZON_ACCESS_KEY_ID,
+    AMAZON_SECRET_ACCESS_KEY: process.env.AMAZON_SECRET_ACCESS_KEY,
+    S3_INPUT_BUCKET_NAME: process.env.S3_INPUT_BUCKET_NAME,
+    S3_OUTPUT_BUCKET_NAME: process.env.S3_OUTPUT_BUCKET_NAME,
+    S3_REGION: process.env.S3_REGION,
+    SQS_QUEUE_URL: process.env.SQS_QUEUE_URL,
+    SQS_REGION: process.env.SQS_REGION,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

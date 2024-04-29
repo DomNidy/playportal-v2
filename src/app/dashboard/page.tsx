@@ -1,32 +1,37 @@
-"use server";
-import { Suspense } from "react";
+"use client";
+import { useQuery } from "@tanstack/react-query";
 import CreateVideoForm from "~/components/ui/CreateVideoForm/create-video-form";
 import UserCard from "~/components/ui/UserCard/user-card";
-import { api } from "~/trpc/server";
-import { createClient } from "~/utils/supabase/server";
+import useAuth from "~/hooks/use-auth";
+import { createClient } from "~/utils/supabase/client";
 
-export default async function Dashboard() {
+export default function Dashboard() {
+  const auth = useAuth();
   const supabase = createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const userData = useQuery({
+    queryKey: ["user", "data"],
+    queryFn: async () => {
+      if (!auth.user) {
+        return;
+      }
 
-  const posts = await api.post.getLatest();
+      const { data } = await supabase
+        .from("user_data")
+        .select("credits")
+        .single();
+
+      return data?.credits;
+    },
+  });
 
   return (
     <div>
       <h1 className="text-4xl font-bold ">Dashboard</h1>
-      <UserCard user={user} />
+      <UserCard user={auth.user} />
       <h2 className="text-2xl font-bold">Latest Posts</h2>
-      {posts.map((post, idx) => (
-        <div key={idx}>
-          {post.author_id} {post.content} {post.created_at}
-        </div>
-      ))}
-      <Suspense fallback={<p>Loading..</p>}>
-        <CreateVideoForm />
-      </Suspense>
+      <p>Credits: {userData.data}</p>
+      <CreateVideoForm />
     </div>
   );
 }

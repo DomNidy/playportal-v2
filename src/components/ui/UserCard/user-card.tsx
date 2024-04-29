@@ -11,7 +11,7 @@ export default function UserCard({ user }: { user: User | null }) {
   const supabase = createClient();
 
   return (
-    <div className="flex w-fit flex-col rounded-lg border-2 border-border bg-secondary p-4">
+    <div className="flex w-fit flex-col rounded-lg border-2 border-border  p-4">
       <p className="text-lg font-bold">{user?.email ?? "Not logged in"}</p>
       <p className="text-sm">{user?.id}</p>
       <Button
