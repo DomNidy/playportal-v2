@@ -25,7 +25,7 @@ export default function UserCard({ user }: { user: User | null }) {
                 "Signed out",
                 "You've successfully signed out",
               );
-              router.push(redirectPath);
+              router.replace(redirectPath);
             }
           });
         }}

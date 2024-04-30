@@ -9,11 +9,13 @@ export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
 
+  console.log(requestUrl);
+
   if (code) {
     const supabase = createClient();
 
     const { error } = await supabase.auth.exchangeCodeForSession(code);
-
+    console.log(error, "err", code);
     if (error) {
       return NextResponse.redirect(
         getErrorRedirect(

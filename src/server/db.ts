@@ -1,13 +1,19 @@
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
+import { S3Client } from "@aws-sdk/client-s3";
+import { SQSClient } from "@aws-sdk/client-sqs";
+import { env } from "~/env";
 
-// Read directly from process.env since our env.js module will throw errors if ran from using npx
-const connectionString = process.env.DATABASE_URL;
+export const s3Client = new S3Client({
+  credentials: {
+    accessKeyId: env.AMAZON_ACCESS_KEY_ID,
+    secretAccessKey: env.AMAZON_SECRET_ACCESS_KEY,
+  },
+  region: env.S3_REGION,
+});
 
-if (!connectionString) {
-  throw new Error("DATABASE_URL is not defined");
-}
-
-// Disable prefetch as it is not supported for "Transaction" pool mode
-export const client = postgres(connectionString, { prepare: false });
-export const db = drizzle(client);
+export const sqsClient = new SQSClient({
+  credentials: {
+    accessKeyId: env.AMAZON_ACCESS_KEY_ID,
+    secretAccessKey: env.AMAZON_SECRET_ACCESS_KEY,
+  },
+  region: env.SQS_REGION,
+});

@@ -1,31 +1,40 @@
-import { useQuery } from "@tanstack/react-query";
-import { useContext } from "react";
-import { authContext } from "~/providers/auth-provider";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { createClient } from "~/utils/supabase/client";
+import useAuth from "./use-auth";
 
 export default function useUserData() {
-  const context = useContext(authContext);
+  const auth = useAuth();
+  const queryClient = useQueryClient();
   const supabase = createClient();
 
-  if (context === undefined) {
-    throw new Error("useUserData must be used within a AuthProvider");
-  }
-
-  return useQuery({
+  const query = useQuery({
     queryKey: ["userData"],
     queryFn: async () => {
-      if (!context.user) {
-        return;
+      console.log("Fetching query", auth);
+      if (!auth.user) {
+        return 0;
       }
 
-      const { data } = await supabase
+      const creds = supabase
         .from("user_data")
         .select("credits")
-        .eq("id", context.user.id)
-        .single();
+        .eq("id", auth.user.id)
+        .single()
+        .then((res) => res.data?.credits);
 
-      return data?.credits;
+      return creds ?? 0;
     },
     refetchOnWindowFocus: "always",
+    retryOnMount: true,
   });
+
+  // Invalidate the query whenever auth state changes
+  useEffect(() => {
+    void queryClient.invalidateQueries({
+      queryKey: ["userData"],
+    });
+  }, [auth.user?.id, queryClient]);
+
+  return query;
 }

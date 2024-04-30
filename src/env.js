@@ -18,6 +18,7 @@ export const env = createEnv({
     S3_REGION: z.string().min(1),
     SQS_QUEUE_URL: z.string().min(1),
     SQS_REGION: z.string().min(1),
+    SUPABASE_SERVICE_ROLE: z.string().min(1)
   },
 
   /**
@@ -50,6 +51,7 @@ export const env = createEnv({
     S3_REGION: process.env.S3_REGION,
     SQS_QUEUE_URL: process.env.SQS_QUEUE_URL,
     SQS_REGION: process.env.SQS_REGION,
+    SUPABASE_SERVICE_ROLE: process.env.SUPABASE_SERVICE_ROLE
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

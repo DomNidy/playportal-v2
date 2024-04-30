@@ -1,13 +1,13 @@
 "use client";
 
 import { type GoTrueClient } from "@supabase/supabase-js";
-import { useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { createClient } from "~/utils/supabase/client";
 
 export default function useOnAuthStateChange(
   callback: Parameters<GoTrueClient["onAuthStateChange"]>["0"],
 ) {
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
 
   useEffect(() => {
     const {
@@ -19,5 +19,5 @@ export default function useOnAuthStateChange(
     return () => {
       subscription.unsubscribe();
     };
-  }, [supabase.auth, callback]);
+  }, [supabase.auth]);
 }

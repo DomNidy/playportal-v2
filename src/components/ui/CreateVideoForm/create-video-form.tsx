@@ -19,6 +19,7 @@ import { CreateVideoFormSchema } from "~/definitions/form-schemas";
 import { api } from "~/trpc/react";
 import { getFileExtension } from "~/utils/helpers";
 import { toast } from "../Toasts/use-toast";
+import { useQueryClient } from "@tanstack/react-query";
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
 const MAX_AUDIO_SIZE = 60 * 1024 * 1024; // 60MB
@@ -27,6 +28,7 @@ export default function CreateVideoForm() {
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
 
+  const queryClient = useQueryClient();
   const genUploadURL = api.upload.generateUploadURL.useMutation();
 
   const form = useForm({
@@ -73,10 +75,13 @@ export default function CreateVideoForm() {
             variant: "destructive",
           });
         },
+        onSettled: () => {
+          void queryClient.invalidateQueries({
+            queryKey: ["userData"],
+          });
+        },
       },
     );
-
-    generatedURL;
   }
 
   function onAudioFileChange(event: React.ChangeEvent<HTMLInputElement>) {

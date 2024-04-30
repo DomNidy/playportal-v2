@@ -1,6 +1,5 @@
 "use client";
-import { Session, User } from "@supabase/supabase-js";
-import { createContext, useContext } from "react";
+import { useContext } from "react";
 import { authContext } from "~/providers/auth-provider";
 
 export default function useAuth() {
