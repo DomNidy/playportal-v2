@@ -78,10 +78,12 @@ export default function CreateVideoForm() {
           });
         },
         onSettled: () => {
-          void clearCacheByServerAction("/dashboard/transactions", "page");
-
           void queryClient.invalidateQueries({
             queryKey: ["userData"],
+          });
+
+          void queryClient.invalidateQueries({
+            queryKey: ["transactions", "getTransaction"],
           });
         },
       },

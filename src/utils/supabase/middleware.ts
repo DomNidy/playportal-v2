@@ -67,9 +67,11 @@ export const createClient = (request: NextRequest) => {
 
 export const updateSession = async (request: NextRequest) => {
   try {
+    console.log("Middleware called");
     const { supabase, response } = createClient(request);
 
     // This will refresh session if expired - required for Server Components
+    // https://github.com/supabase/auth-js/blob/59ec9affa01c780fb18f668291fa7167a65c391d/src/GoTrueClient.ts#L1152
     await supabase.auth.getUser();
 
     return response;

@@ -1,22 +1,30 @@
-import { redirect } from "next/navigation";
+"use client";
 import { columns } from "~/components/ui/TransactionsTable/columns";
 import { DataTable } from "~/components/ui/TransactionsTable/data-table";
-import { createClient } from "~/utils/supabase/server";
+import { api } from "~/trpc/react";
 
-export default async function TransactionsPage() {
-  const supabase = createClient();
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
+export default function TransactionsPage() {
+  // TODO: This behavior where we navigate back and it refetches all pages that it has is likely due to caching
+  // We maybe want to use separate query hashes for different pages
+  const transactions = api.transactions.getTransactions.useInfiniteQuery(
+    { limit: 20 },
+    {
+      getNextPageParam: (lastPage) => {
+        return lastPage.nextCursor ?? undefined;
+      },
+    },
+  );
 
-  if (!user) redirect("/sign-in");
-
-  const { data } = await supabase
-    .from("transactions")
-    .select("*")
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false });
-
-  return <DataTable columns={columns} data={data ?? []} />;
+  return (
+    <DataTable
+      columns={columns}
+      data={
+        transactions.data?.pages
+          .flatMap((page) => page.data ?? [])
+          .map((transaction) => transaction) ?? []
+      }
+      fetchNext={transactions.fetchNextPage}
+      fetchPrevious={transactions.fetchPreviousPage}
+    />
+  );
 }

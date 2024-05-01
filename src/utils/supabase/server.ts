@@ -8,6 +8,7 @@ import { type Database } from "types_db";
 export const createClient = () => {
   const cookieStore = cookies();
 
+  // https://github.com/supabase/auth-helpers/blob/627c57c7042c1306f0c5bc5e2816dad7c789b558/packages/ssr/src/createServerClient.ts#L17
   return createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
