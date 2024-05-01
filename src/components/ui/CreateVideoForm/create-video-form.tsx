@@ -20,6 +20,8 @@ import { api } from "~/trpc/react";
 import { getFileExtension } from "~/utils/helpers";
 import { toast } from "../Toasts/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import { revalidatePath } from "next/cache";
+import { clearCacheByServerAction } from "~/utils/revalidate";
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
 const MAX_AUDIO_SIZE = 60 * 1024 * 1024; // 60MB
@@ -76,6 +78,8 @@ export default function CreateVideoForm() {
           });
         },
         onSettled: () => {
+          void clearCacheByServerAction("/dashboard/transactions", "page");
+
           void queryClient.invalidateQueries({
             queryKey: ["userData"],
           });

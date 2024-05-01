@@ -30,7 +30,6 @@ export const env = createEnv({
     NEXT_PUBLIC_SUPABASE_URL: z.string(),
     NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string(),
     NEXT_PUBLIC_SITE_URL: z.string(),
-    NEXT_PUBLIC_VERCEL_URL: z.string()
   },
 
   /**
@@ -43,7 +42,6 @@ export const env = createEnv({
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
-    NEXT_PUBLIC_VERCEL_URL: process.env.NEXT_PUBLIC_VERCEL_URL,
     AMAZON_ACCESS_KEY_ID: process.env.AMAZON_ACCESS_KEY_ID,
     AMAZON_SECRET_ACCESS_KEY: process.env.AMAZON_SECRET_ACCESS_KEY,
     S3_INPUT_BUCKET_NAME: process.env.S3_INPUT_BUCKET_NAME,

@@ -101,18 +101,21 @@ export type Database = {
           id: string
           status: Database["public"]["Enums"]["operation_status"] | null
           user_id: string | null
+          video_title: string
         }
         Insert: {
           created_at?: string
           id?: string
           status?: Database["public"]["Enums"]["operation_status"] | null
           user_id?: string | null
+          video_title?: string
         }
         Update: {
           created_at?: string
           id?: string
           status?: Database["public"]["Enums"]["operation_status"] | null
           user_id?: string | null
+          video_title?: string
         }
         Relationships: [
           {
@@ -191,18 +194,21 @@ export type Database = {
       transactions: {
         Row: {
           amount: number | null
+          created_at: string | null
           id: string
           type: Database["public"]["Enums"]["transaction_type"]
           user_id: string | null
         }
         Insert: {
           amount?: number | null
+          created_at?: string | null
           id?: string
           type?: Database["public"]["Enums"]["transaction_type"]
           user_id?: string | null
         }
         Update: {
           amount?: number | null
+          created_at?: string | null
           id?: string
           type?: Database["public"]["Enums"]["transaction_type"]
           user_id?: string | null

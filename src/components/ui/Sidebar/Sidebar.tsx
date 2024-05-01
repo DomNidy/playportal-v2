@@ -37,6 +37,13 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
               icon={PackageIcon}
               label="My Videos"
             />
+
+            <SidebarButton
+              currentPath={location}
+              href="/dashboard/transactions"
+              icon={PackageIcon}
+              label="Transaction History"
+            />
           </nav>
         </aside>
         <div className="ml-14 flex-1">

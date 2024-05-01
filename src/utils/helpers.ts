@@ -1,7 +1,6 @@
 import { env } from "~/env";
 
 export const getURL = (path = "") => {
-  console.log("Public site url", env.NEXT_PUBLIC_SITE_URL);
   // Check if NEXT_PUBLIC_SITE_URL is set and non-empty. Set this to your site URL in production env.
   let url = env.NEXT_PUBLIC_SITE_URL;
 
