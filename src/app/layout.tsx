@@ -1,5 +1,5 @@
 import "~/styles/globals.css";
-
+import { Analytics } from "@vercel/analytics/react";
 import { IBM_Plex_Sans_Thai_Looped } from "next/font/google";
 import type { Metadata } from "next";
 import { getURL } from "~/utils/helpers";
@@ -66,6 +66,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={` ${ibmPlexSansThaiLooped.className} bg-black`}>
         <Providers>{children}</Providers>
+        <Analytics />
       </body>
     </html>
   );
