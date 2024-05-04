@@ -17,11 +17,11 @@ export const Pricing = () => {
   const Heading = () => (
     <div className="relative z-10 my-12 flex flex-col items-center justify-center gap-4 bg-black">
       <div className="flex w-full flex-col items-start justify-center space-y-4 md:items-center">
-        <div className="bg-colors-background-950 text-colors-primary-500 mb-2 inline-block rounded-full border-2 px-2 py-[0.20rem] text-xs font-medium uppercase">
+        <div className="mb-2 inline-block rounded-full border-2 bg-colors-background-950 px-2 py-[0.20rem] text-xs font-medium uppercase text-colors-primary-500">
           {" "}
           Pricing
         </div>
-        <p className="text-colors-text-50 mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
+        <p className="mt-2 text-3xl font-bold tracking-tight text-colors-text-50 sm:text-4xl">
           Fair pricing, unfair advantage.
         </p>
         <p className="text-md max-w-xl text-colors-text-200 md:text-center">
@@ -33,7 +33,7 @@ export const Pricing = () => {
           onClick={() => setBillingCycle("M")}
           className={`rounded-lg px-4 py-2 text-sm font-medium ${
             billingCycle === "M"
-              ? "bg-colors-primary-500 relative text-white"
+              ? "relative bg-colors-primary-500 text-white"
               : "text-colors-text-700 hover:bg-colors-primary-100"
           }`}
         >
@@ -44,7 +44,7 @@ export const Pricing = () => {
           onClick={() => setBillingCycle("A")}
           className={`rounded-lg px-4 py-2 text-sm font-medium ${
             billingCycle === "A"
-              ? "text bg-colors-primary-500 relative text-white"
+              ? "text relative bg-colors-primary-500 text-white"
               : "text-colors-text-700 hover:bg-colors-primary-100"
           }`}
         >
@@ -60,12 +60,14 @@ export const Pricing = () => {
       {pricingPlans.map((plan, index) => (
         <div
           key={index}
-          className=" bg-black border-[1px] border-colors-accent-300 h-full w-full rounded-xl  p-2 text-left"
+          className=" h-full w-full rounded-xl border-[1px] border-colors-accent-300 bg-black  p-2 text-left"
         >
-          <p className="text-colors-primary-500 font-bold mb-1 mt-0 text-sm font- uppercase">
+          <p className="font- mb-1 mt-0 text-sm font-bold uppercase text-colors-primary-500">
             {plan.name}
           </p>
-          <p className="my-0 mb-6 text-sm text-colors-text-50">{plan.description}</p>
+          <p className="my-0 mb-6 text-sm text-colors-text-50">
+            {plan.description}
+          </p>
           <div className="mb-8 overflow-hidden">
             <AnimatePresence mode="wait">
               <motion.p
@@ -85,7 +87,7 @@ export const Pricing = () => {
             </AnimatePresence>
             <motion.button
               whileTap={{ scale: 0.985 }}
-              className="bg-colors-primary-500 hover:bg-colors-primary-500/90 mt-8 w-full rounded-lg py-2 text-sm font-medium text-white"
+              className="mt-8 w-full rounded-lg bg-colors-primary-500 py-2 text-sm font-medium text-white hover:bg-colors-primary-500/90"
             >
               Get Started
             </motion.button>
@@ -102,7 +104,7 @@ export const Pricing = () => {
   );
 
   return (
-    <section className="text-colors-text-50 relative w-full overflow-hidden bg-black py-12 lg:px-2 lg:py-12">
+    <section className="relative w-full overflow-hidden bg-black py-12 text-colors-text-50 lg:px-2 lg:py-12">
       <Heading />
       <PricingCards
         pricingPlans={[
@@ -148,7 +150,7 @@ const BackgroundShift = ({ shiftKey }: { shiftKey: string }) => (
   <motion.span
     key={shiftKey}
     layoutId="bg-shift"
-    className="bg-colors-secondary-500 absolute inset-0 -z-10 rounded-lg"
+    className="absolute inset-0 -z-10 rounded-lg bg-colors-secondary-500"
     initial={{ opacity: 0, scale: 0.8 }}
     animate={{ opacity: 1, scale: 1 }}
     exit={{ opacity: 0, scale: 0.8 }}
