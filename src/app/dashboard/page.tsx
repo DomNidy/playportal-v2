@@ -1,77 +1,55 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
-import { DownloadIcon } from "lucide-react";
-import { useEffect, useState } from "react";
-import { Button } from "~/components/ui/Button";
-import CreateVideoForm from "~/components/ui/CreateVideoForm/create-video-form";
-import OperationCard from "~/components/ui/OperationCard/OperationCard";
-import OperationLogDisplay from "~/components/ui/OperationLogDisplay/OperationLogDisplay";
-import useOperationData from "~/hooks/use-operation-data";
-import useUserData from "~/hooks/use-user-data";
+import Link from "next/link";
+import OperationCard, {
+  OperationCardSkeleton,
+} from "~/components/ui/OperationCard/OperationCard";
+import useAuth from "~/hooks/use-auth";
 import { createClient } from "~/utils/supabase/client";
 
 export default function Dashboard() {
   const supabase = createClient();
-  const userData = useUserData();
-
-  const [viewingOperation, setViewingOperation] = useState<string | null>(null);
+  const { user } = useAuth();
 
   // Whenever active operation id changes, automatically change the view to that one
-  useEffect(
-    () => setViewingOperation(userData.data?.activeOperationId ?? null),
-    [userData.data?.activeOperationId],
-  );
-
-  const { logs, status, video_title } = useOperationData(viewingOperation);
-
-  // Query for recent operations
   const recentOperations = useQuery({
     queryKey: ["recentOperations"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("operations")
+        .from("operations_filemetadata")
         .select("*")
         .order("created_at", { ascending: false })
+        .eq("file_origin", "PlayportalBackend")
+        .eq("user_id", user?.id ?? "")
         .limit(8);
       if (error) throw error;
       return data;
     },
   });
 
+  // Query for recent operations
+
   return (
     <div className="mt-10 flex flex-col items-center">
-      <CreateVideoForm />
-
-      <div className="mt-8">
-        <h2 className=" text-start text-2xl font-bold">Recent Operations</h2>
-        <div className="mb-2 grid grid-flow-col grid-rows-2 gap-2 md:grid-cols-3 lg:grid-cols-4 lg:grid-rows-1">
-          {recentOperations?.data?.map((operation) => (
-            <Button
-              onClick={() => setViewingOperation(operation.id)}
-              key={operation.id}
-              className="flex"
-            >
-              {operation.video_title}
-            </Button>
-          ))}
-        </div>
+      <div className="flex w-full flex-row-reverse">
+        <Link
+          href={"/dashboard/create-video"}
+          className="inline-flex items-center justify-center whitespace-nowrap rounded-md bg-primary p-2 text-sm font-medium text-black ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+        >
+          Create Video...
+        </Link>
       </div>
-
-      <div className="grid grid-cols-1  md:grid-cols-2 lg:grid-cols-3 gap-4 ">
-        <OperationCard />
-        <OperationCard />
-        <OperationCard />
-        <OperationCard />
-        <OperationCard />
+      <div className="mt-2 grid  grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {recentOperations?.data ? (
+          recentOperations?.data?.map((operation) => (
+            <OperationCard operation={operation} key={operation.operation_id} />
+          ))
+        ) : recentOperations.isLoading ? (
+          <OperationCardSkeleton />
+        ) : (
+          <p>No videos found</p>
+        )}
       </div>
-
-      {viewingOperation && (
-        <OperationLogDisplay
-          operationLogs={logs}
-          operationStatus={status}
-          videoTitle={video_title}
-        />
-      )}
     </div>
   );
 }

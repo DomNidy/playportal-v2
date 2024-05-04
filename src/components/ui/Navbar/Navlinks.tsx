@@ -5,7 +5,7 @@ import { DashboardButton } from "./DashboardButton";
 
 export default function Navlinks({ user }: { user: User | null }) {
   return (
-    <div className="w-full flex flex-row-reverse">
+    <div className="flex w-full ">
       <DashboardButton user={user} />
     </div>
   );
