@@ -9,7 +9,7 @@ export default async function Navbar() {
   } = await supabase.auth.getUser();
 
   return (
-    <div className="container sticky top-0 z-40 flex h-16 flex-row items-center justify-center px-4 py-8 backdrop-blur-lg">
+    <div className=" sticky top-0 z-40 flex h-16 w-full flex-row items-center justify-center px-4 py-8 backdrop-blur-lg">
       <h1 className="mr-auto gap-1 text-2xl font-bold tracking-tighter sm:text-[2rem]">
         Playportal
       </h1>

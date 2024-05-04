@@ -1,18 +1,19 @@
 import "~/styles/globals.css";
 
-import { Inter } from "next/font/google";
+import { IBM_Plex_Sans_Thai_Looped } from "next/font/google";
 import type { Metadata } from "next";
 import { getURL } from "~/utils/helpers";
 import Providers from "~/providers/providers";
 
-const inter = Inter({
+const ibmPlexSansThaiLooped = IBM_Plex_Sans_Thai_Looped({
   subsets: ["latin"],
-  variable: "--font-sans",
+  weight: ["400", "500", "600", "700"],
+  fallback: ["system-ui"],
 });
 
 export const meta = {
-  title: "SaaS Starter",
-  description: "This is the SaaS starter project",
+  title: "Playportal",
+  description: "The type-beat video creation tool.",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
   favicon: "../../public/favicon.ico",
   robots: "follow, index",
@@ -24,10 +25,18 @@ export async function generateMetadata(): Promise<Metadata> {
     title: meta.title,
     description: meta.description,
     referrer: "origin-when-cross-origin",
-    keywords: ["nextjs", "saas", "vercel"],
-    authors: [{ name: "My Name", url: "https://my-website.com" }],
-    creator: "SaaS Starter",
-    publisher: "SaaS Starter",
+    keywords: [
+      "playportal",
+      "type beat",
+      "beat stars",
+      "drum kits",
+      "loop kits",
+      "tunestotube",
+      "producer tools",
+    ],
+    authors: [{ name: "Dom Nidy", url: "https://my-website.com" }],
+    creator: "Playportal",
+    publisher: "Playportal",
     icons: { icon: meta.favicon },
     metadataBase: new URL(meta.url),
     openGraph: {
@@ -39,7 +48,7 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     twitter: {
       card: "summary_large_image",
-      site: "@my-twitter",
+      site: "@playportal",
       creator: "@my-twitter",
       title: meta.title,
       description: meta.description,
@@ -55,7 +64,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`font-sans dark ${inter.variable}`}>
+      <body className={` ${ibmPlexSansThaiLooped.className} bg-black`}>
         <Providers>{children}</Providers>
       </body>
     </html>

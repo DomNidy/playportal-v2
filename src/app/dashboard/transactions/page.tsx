@@ -4,7 +4,6 @@ import { DataTable } from "~/components/ui/TransactionsTable/data-table";
 import { api } from "~/trpc/react";
 
 export default function TransactionsPage() {
-  // TODO: This behavior where we navigate back and it refetches all pages that it has is likely due to caching
   // We maybe want to use separate query hashes for different pages
   const transactions = api.transactions.getTransactions.useInfiniteQuery(
     { limit: 20 },

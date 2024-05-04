@@ -64,6 +64,13 @@ export type Database = {
             referencedRelation: "operations"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "file_metadata_operation_id_fkey"
+            columns: ["operation_id"]
+            isOneToOne: false
+            referencedRelation: "operations_filemetadata"
+            referencedColumns: ["operation_id"]
+          },
         ]
       }
       operation_logs: {
@@ -93,12 +100,20 @@ export type Database = {
             referencedRelation: "operations"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "operation_logs_operation_id_fkey"
+            columns: ["operation_id"]
+            isOneToOne: false
+            referencedRelation: "operations_filemetadata"
+            referencedColumns: ["operation_id"]
+          },
         ]
       }
       operations: {
         Row: {
           created_at: string
           id: string
+          operation_duration: number | null
           status: Database["public"]["Enums"]["operation_status"] | null
           user_id: string | null
           video_title: string
@@ -106,6 +121,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          operation_duration?: number | null
           status?: Database["public"]["Enums"]["operation_status"] | null
           user_id?: string | null
           video_title?: string
@@ -113,6 +129,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          operation_duration?: number | null
           status?: Database["public"]["Enums"]["operation_status"] | null
           user_id?: string | null
           video_title?: string
@@ -167,16 +184,19 @@ export type Database = {
       }
       transaction_refunds: {
         Row: {
+          amount: number
           created_at: string
           id: string
           refund_for: string | null
         }
         Insert: {
+          amount?: number
           created_at?: string
           id?: string
           refund_for?: string | null
         }
         Update: {
+          amount?: number
           created_at?: string
           id?: string
           refund_for?: string | null
@@ -254,20 +274,49 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      operations_filemetadata: {
+        Row: {
+          created_at: string | null
+          file_origin: Database["public"]["Enums"]["file_origin"] | null
+          file_type: Database["public"]["Enums"]["file_type"] | null
+          operation_duration: number | null
+          operation_id: string | null
+          s3_key: string | null
+          status: Database["public"]["Enums"]["operation_status"] | null
+          user_id: string | null
+          video_title: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "operations_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       create_operation_and_transaction: {
         Args: {
-          cost: number
-          video_title: string
           user_id: string
+          video_title: string
+          cost: number
         }
-        Returns: undefined
+        Returns: Database["public"]["CompositeTypes"]["operation_and_transaction_ids"]
       }
       gen_id: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      handle_failed_operation_refund: {
+        Args: {
+          operation_id: string
+          transaction_id_to_refund: string
+          refund_amount: number
+        }
+        Returns: undefined
       }
     }
     Enums: {
@@ -277,7 +326,10 @@ export type Database = {
       transaction_type: "CreateVideo"
     }
     CompositeTypes: {
-      [_ in never]: never
+      operation_and_transaction_ids: {
+        operation_id: string | null
+        transaction_id: string | null
+      }
     }
   }
   storage: {

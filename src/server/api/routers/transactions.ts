@@ -2,6 +2,7 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const transactionsRouter = createTRPCRouter({
+  // Doing this from server to simplify pagination
   getTransactions: protectedProcedure
     .input(
       z.object({
@@ -21,8 +22,7 @@ export const transactionsRouter = createTRPCRouter({
         .range(offset, offset + limit);
 
       const nextCursor = (data?.length ?? 0) >= limit ? offset + limit : null;
-      console.log(nextCursor, data?.length, limit, offset);
-      
+
       return {
         data,
         nextCursor: nextCursor,

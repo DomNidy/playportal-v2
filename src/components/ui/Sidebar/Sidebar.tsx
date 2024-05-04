@@ -7,6 +7,7 @@ import { SidebarButton } from "./SidebarButton";
 import HomeIcon from "~/components/icons/HomeIcon";
 import PackageIcon from "~/components/icons/PackageIcon";
 import { TooltipProvider } from "../Tooltip";
+import FileVideoIcon from "~/components/icons/FileVideoIcon";
 
 export default function Sidebar({ children }: { children: React.ReactNode }) {
   const location = usePathname();
@@ -34,7 +35,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
             <SidebarButton
               currentPath={location}
               href="/dashboard/my-videos"
-              icon={PackageIcon}
+              icon={FileVideoIcon}
               label="My Videos"
             />
 

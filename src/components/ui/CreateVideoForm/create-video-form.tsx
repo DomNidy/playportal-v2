@@ -20,8 +20,6 @@ import { api } from "~/trpc/react";
 import { getFileExtension } from "~/utils/helpers";
 import { toast } from "../Toasts/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
-import { revalidatePath } from "next/cache";
-import { clearCacheByServerAction } from "~/utils/revalidate";
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
 const MAX_AUDIO_SIZE = 60 * 1024 * 1024; // 60MB
@@ -86,6 +84,32 @@ export default function CreateVideoForm() {
             queryKey: ["transactions", "getTransaction"],
           });
         },
+        async onSuccess(data) {
+          // Read file data into buffer
+          const audioFileBuffer = await audioFile.arrayBuffer();
+          const imageFileBuffer = await imageFile?.arrayBuffer();
+
+          // Read urls from the response
+          const presignedUrlAudio = data?.presignedUrlAudio;
+          const presignedUrlImage = data?.presignedUrlImage;
+
+          if (presignedUrlAudio && audioFileBuffer) {
+            void fetch(presignedUrlAudio, {
+              method: "PUT",
+              body: audioFileBuffer,
+              headers: {
+                "Content-Type": audioFile.type,
+              },
+            });
+          }
+
+          if (presignedUrlImage && imageFileBuffer) {
+            void fetch(presignedUrlImage, {
+              method: "PUT",
+              body: imageFileBuffer,
+            });
+          }
+        },
       },
     );
   }
@@ -136,7 +160,7 @@ export default function CreateVideoForm() {
   return (
     <Form {...form}>
       <form
-        className="w-96 rounded-lg border-2 border-border p-4"
+        className="w-96 rounded-lg border-2 border-border p-6"
         onSubmit={form.handleSubmit((data) => {
           void onSubmit({
             videoTitle: data.videoTitle,
@@ -149,7 +173,7 @@ export default function CreateVideoForm() {
           control={form.control}
           name="videoTitle"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="mb-10">
               <FormLabel>Video Title</FormLabel>
               <FormControl>
                 <Input placeholder="My video" {...field} />
@@ -168,10 +192,10 @@ export default function CreateVideoForm() {
           control={form.control}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Audio File</FormLabel>
+              {/* <FormLabel>Audio File</FormLabel> */}
               <FormControl>
                 {/** TODO: Abstract this into its own component (the styling & logic for onChange) */}
-                <div className="flex flex-col">
+                <div className="flex flex-col ">
                   <Input
                     {...field}
                     id="audioFile"
@@ -188,13 +212,13 @@ export default function CreateVideoForm() {
                   />
                   <Label
                     htmlFor="audioFile"
-                    className="inline-flex w-fit cursor-pointer items-center justify-center whitespace-nowrap rounded-md bg-primary p-2 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+                    className="inline-flex  w-fit cursor-pointer items-center  justify-center whitespace-nowrap rounded-md border-[1.5px] border-border bg-gradient-to-b p-2 text-sm  font-medium text-primary-foreground ring-offset-background transition-colors hover:from-colors-background-950 hover:to-black  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
                   >
                     {audioFile ? audioFile.name : "Upload Audio File"}
                   </Label>
                 </div>
               </FormControl>
-              <FormDescription>Upload the audio file</FormDescription>
+              {/* <FormDescription>Upload the audio file</FormDescription> */}
               <FormMessage>
                 {" "}
                 {form.formState.errors?.audioFile?.message?.toString()}{" "}
@@ -208,7 +232,7 @@ export default function CreateVideoForm() {
           control={form.control}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Image File</FormLabel>
+              {/* <FormLabel>Image File</FormLabel> */}
               <FormControl>
                 <div className="flex flex-col">
                   <Input
@@ -227,13 +251,13 @@ export default function CreateVideoForm() {
                   />
                   <Label
                     htmlFor="imageFile"
-                    className="inline-flex w-fit cursor-pointer items-center justify-center whitespace-nowrap rounded-md bg-primary p-2 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+                    className="inline-flex  w-fit cursor-pointer items-center  justify-center whitespace-nowrap rounded-md border-[1.5px] border-border bg-gradient-to-b p-2 text-sm  font-medium text-primary-foreground ring-offset-background transition-colors hover:from-colors-background-950 hover:to-black  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
                   >
                     {imageFile ? imageFile.name : "Upload Image File"}
                   </Label>
                 </div>
               </FormControl>
-              <FormDescription>Upload the image file</FormDescription>
+              {/* <FormDescription>Upload the image file</FormDescription> */}
               <FormMessage>
                 {" "}
                 {form.formState.errors?.imageFile?.message?.toString()}{" "}
@@ -242,8 +266,14 @@ export default function CreateVideoForm() {
           )}
         />
 
-        <Button type="submit" disabled={genUploadURL.isPending}>
-          Create Video
+        {/** Swapping the next/Link component for a default button makes the styling fixed, but as link, the background doesnt work? */}
+        <Button
+          className="flex mt-8 rounded-lg bg-gradient-to-b from-colors-accent-300 to-colors-secondary-300 p-[1px] font-semibold text-white"
+          type="submit"
+        >
+          <span className="flex h-full  text-sm w-full rounded-lg bg-black text-center justify-center items-center px-2 font-medium tracking-tight text-white transition-all hover:bg-gradient-to-b hover:from-colors-background-950 hover:to-black">
+            Create video
+          </span>
         </Button>
       </form>
     </Form>

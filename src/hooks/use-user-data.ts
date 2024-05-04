@@ -13,17 +13,29 @@ export default function useUserData() {
     queryFn: async () => {
       console.log("Fetching query", auth);
       if (!auth.user) {
-        return 0;
+        return null;
       }
 
-      const creds = supabase
+      const creds = await supabase
         .from("user_data")
         .select("credits")
         .eq("id", auth.user.id)
         .single()
         .then((res) => res.data?.credits);
 
-      return creds ?? 0;
+      const { data } = await supabase
+        .from("operations")
+        .select("*")
+        .eq("user_id", auth.user.id)
+        .eq("status", "Ongoing")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .single();
+
+      return {
+        credits: creds ?? 0,
+        activeOperationId: data?.id ?? null,
+      };
     },
     refetchOnWindowFocus: "always",
     retryOnMount: true,

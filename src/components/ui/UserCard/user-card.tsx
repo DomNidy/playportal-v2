@@ -4,15 +4,22 @@ import { Button } from "../Button";
 import { type User } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 import { getStatusRedirect } from "~/utils/helpers";
+import { Label } from "../Form";
 
 // This is a client component, but will be provided the props from a server components
-export default function UserCard({ user }: { user: User | null }) {
+export default function UserCard({
+  user,
+  userCredits,
+}: {
+  user: User | null;
+  userCredits: number;
+}) {
   const router = useRouter();
   const supabase = createClient();
 
   return (
     <div className="flex w-fit flex-col rounded-lg border-2 border-border  p-4">
-      <p className="text-lg font-bold">{user?.email ?? "Not logged in"}</p>
+      <p className="text-sm font-bold">{user?.email ?? "Not logged in"}</p>
       <p className="text-sm">{user?.id}</p>
       <Button
         onClick={() => {
@@ -32,6 +39,9 @@ export default function UserCard({ user }: { user: User | null }) {
       >
         Sign out
       </Button>
+      <Label className="mt-2">
+        Credits: <span>{userCredits}</span>
+      </Label>
     </div>
   );
 }

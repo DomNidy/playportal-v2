@@ -1,13 +1,13 @@
-import type { Config } from "tailwindcss"
+import type { Config } from "tailwindcss";
 
 const config = {
   darkMode: ["class"],
   content: [
-    './pages/**/*.{ts,tsx}',
-    './components/**/*.{ts,tsx}',
-    './app/**/*.{ts,tsx}',
-    './src/**/*.{ts,tsx}',
-	],
+    "./pages/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./app/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx}",
+  ],
   prefix: "",
   theme: {
     container: {
@@ -19,6 +19,78 @@ const config = {
     },
     extend: {
       colors: {
+        colors: {
+          text: {
+            50: "#f2f2f2",
+            100: "#e6e6e6",
+            200: "#cccccc",
+            300: "#b3b3b3",
+            400: "#999999",
+            500: "#808080",
+            600: "#666666",
+            700: "#4d4d4d",
+            800: "#333333",
+            900: "#1a1a1a",
+            950: "#0d0d0d",
+          },
+          background: {
+            50: "#f2f2f2",
+            100: "#e6e6e6",
+            200: "#cccccc",
+            300: "#b3b3b3",
+            400: "#999999",
+            500: "#808080",
+            600: "#666666",
+            700: "#4d4d4d",
+            800: "#333333",
+            900: "#1a1a1a",
+            950: "#0d0d0d",
+          },
+          primary: {
+            50: "#f4ecf9",
+            100: "#ead8f3",
+            200: "#d5b1e7",
+            300: "#c08bda",
+            400: "#ab64ce",
+            500: "#963dc2",
+            600: "#78319b",
+            700: "#5a2574",
+            800: "#3c184e",
+            900: "#1e0c27",
+            950: "#0f0613",
+          },
+          secondary: {
+            50: "#f3e9fb",
+            100: "#e7d3f8",
+            200: "#d0a7f1",
+            300: "#b87bea",
+            400: "#a050e2",
+            500: "#8924db",
+            600: "#6d1daf",
+            700: "#521584",
+            800: "#370e58",
+            900: "#1b072c",
+            950: "#0e0416",
+          },
+          accent: {
+            50: "#ebe8fc",
+            100: "#d7d1fa",
+            200: "#aea4f4",
+            300: "#8676ef",
+            400: "#5e48ea",
+            500: "#361be4",
+            600: "#2b15b7",
+            700: "#201089",
+            800: "#150b5b",
+            900: "#0b052e",
+            950: "#050317",
+          },
+        },
+
+        fontFamily: {
+          heading: "IBM Plex Sans Thai Looped",
+          body: "Inter",
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -75,6 +147,6 @@ const config = {
     },
   },
   plugins: [require("tailwindcss-animate")],
-} satisfies Config
+} satisfies Config;
 
-export default config
+export default config;
