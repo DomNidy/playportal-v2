@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import Sidebar from "~/components/ui/Sidebar";
+import DashboardNavbar from "~/components/ui/DashboardNavbar/DashboardNavbar";
 import AuthProvider from "~/providers/auth-provider";
 import { createClient } from "~/utils/supabase/server";
 
@@ -18,10 +18,27 @@ export default async function DashboardLayout({
   if (!user) redirect("/sign-in");
 
   return (
-    <>
-      <AuthProvider>
-        <Sidebar> {children}</Sidebar>
-      </AuthProvider>
-    </>
+    <AuthProvider>
+      <div>
+        <DashboardNavbar
+          links={[
+            {
+              href: "/dashboard",
+              text: "Dashboard",
+            },
+            {
+              href: "/dashboard/my-videos",
+              text: "Videos",
+            },
+            {
+              href: "/dashboard/transactions",
+              text: "Transactions",
+            },
+          ]}
+        />
+
+        <div className="flex flex-col items-center ">{children}</div>
+      </div>
+    </AuthProvider>
   );
 }

@@ -142,7 +142,9 @@ export const uploadRouter = createTRPCRouter({
 
         // 4. return the presigned urls
       } catch (error) {
-        console.error(error);
+        if (error instanceof TRPCClientError) {
+          throw error;
+        }
         throw new TRPCClientError("Something went wrong");
       }
     }),

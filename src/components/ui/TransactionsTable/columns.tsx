@@ -15,7 +15,7 @@ export const columns: ColumnDef<Transaction>[] = [
     header: "ID",
     cell: ({ row }) => {
       return (
-        <code className="relative w-min rounded bg-muted px-[0.3rem] py-[0.2rem] text-justify font-mono text-sm font-semibold">
+        <code className="relative w-min rounded px-[0.3rem] py-[0.2rem] text-justify font-mono text-sm font-semibold">
           {row.original.id}
         </code>
       );
