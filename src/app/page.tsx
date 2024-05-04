@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { BackgroundCellAnimation } from "~/components/ui/BackgroundRippleEffect";
+import { Button } from "~/components/ui/Button";
 import FeaturesGrid from "~/components/ui/FeaturesGrid/FeaturesGrid";
 import Navbar, { NavbarPlaceholder } from "~/components/ui/Navbar/Navbar";
 import PricingPage from "~/components/ui/Pricing/Pricing";
@@ -18,7 +19,6 @@ export default function Home() {
           The social media automation platform <br /> for producers
         </Typography>
       </div>
-
       <Suspense>
         <FeaturesGrid
           features={[
