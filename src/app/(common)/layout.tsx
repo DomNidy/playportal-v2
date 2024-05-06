@@ -1,18 +1,12 @@
 import "~/styles/globals.css";
 import { Analytics } from "@vercel/analytics/react";
-import { IBM_Plex_Sans_Thai_Looped } from "next/font/google";
+import { GeistSans } from "geist/font/sans";
 import type { Metadata } from "next";
 import { getURL } from "~/utils/helpers";
 import Providers from "~/providers/providers";
 import { Suspense } from "react";
 import Navbar from "~/components/ui/Navbar";
 import { NavbarPlaceholder } from "~/components/ui/Navbar/Navbar";
-
-export const ibmPlexSansThaiLooped = IBM_Plex_Sans_Thai_Looped({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  fallback: ["system-ui"],
-});
 
 export const meta = {
   title: "Playportal",
@@ -25,7 +19,6 @@ export const meta = {
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-
     title: meta.title,
     description: meta.description,
     referrer: "origin-when-cross-origin",
@@ -68,7 +61,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`dark ${ibmPlexSansThaiLooped.className} bg-black`}>
+      <body className={`dark ${GeistSans.className} bg-black`}>
         <Suspense fallback={<NavbarPlaceholder />}>
           <Navbar />
         </Suspense>

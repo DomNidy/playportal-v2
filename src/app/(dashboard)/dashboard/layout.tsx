@@ -1,6 +1,8 @@
+import "~/styles/globals.css";
+
 import { type Metadata } from "next";
 import { redirect } from "next/navigation";
-import { ibmPlexSansThaiLooped } from "~/app/(common)/layout";
+import { GeistSans } from "geist/font/sans";
 import DashboardNavbar from "~/components/ui/DashboardNavbar/DashboardNavbar";
 import AuthProvider from "~/providers/auth-provider";
 import Providers from "~/providers/providers";
@@ -69,7 +71,7 @@ export default async function DashboardLayout({
 
   return (
     <html lang="en">
-      <body className={` ${ibmPlexSansThaiLooped.className} bg-black`}>
+      <body className={` ${GeistSans.className} bg-black`}>
         <Providers>
           <AuthProvider>
             <div>
