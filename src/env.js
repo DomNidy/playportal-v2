@@ -18,7 +18,10 @@ export const env = createEnv({
     S3_REGION: z.string().min(1),
     SQS_QUEUE_URL: z.string().min(1),
     SQS_REGION: z.string().min(1),
-    SUPABASE_SERVICE_ROLE: z.string().min(1)
+    SUPABASE_SERVICE_ROLE: z.string().min(1),
+    // Stripe
+    STRIPE_SECRET_KEY: z.string().min(1),
+    STRIPE_WEBHOOK_SECRET: z.string().min(1),
   },
 
   /**
@@ -30,6 +33,7 @@ export const env = createEnv({
     NEXT_PUBLIC_SUPABASE_URL: z.string(),
     NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string(),
     NEXT_PUBLIC_SITE_URL: z.string(),
+    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string()
   },
 
   /**
@@ -49,7 +53,10 @@ export const env = createEnv({
     S3_REGION: process.env.S3_REGION,
     SQS_QUEUE_URL: process.env.SQS_QUEUE_URL,
     SQS_REGION: process.env.SQS_REGION,
-    SUPABASE_SERVICE_ROLE: process.env.SUPABASE_SERVICE_ROLE
+    SUPABASE_SERVICE_ROLE: process.env.SUPABASE_SERVICE_ROLE,
+    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
+    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
+    STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

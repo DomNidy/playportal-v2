@@ -4,8 +4,11 @@ import { IBM_Plex_Sans_Thai_Looped } from "next/font/google";
 import type { Metadata } from "next";
 import { getURL } from "~/utils/helpers";
 import Providers from "~/providers/providers";
+import { Suspense } from "react";
+import Navbar from "~/components/ui/Navbar";
+import { NavbarPlaceholder } from "~/components/ui/Navbar/Navbar";
 
-const ibmPlexSansThaiLooped = IBM_Plex_Sans_Thai_Looped({
+export const ibmPlexSansThaiLooped = IBM_Plex_Sans_Thai_Looped({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   fallback: ["system-ui"],
@@ -14,14 +17,15 @@ const ibmPlexSansThaiLooped = IBM_Plex_Sans_Thai_Looped({
 export const meta = {
   title: "Playportal",
   description: "The type-beat video creation tool.",
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
-  favicon: "../../public/favicon.ico",
+  icons: [{ rel: "icon", url: "/icon.png" }],
+  favicon: "/icon.png",
   robots: "follow, index",
   url: getURL(),
 };
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
+
     title: meta.title,
     description: meta.description,
     referrer: "origin-when-cross-origin",
@@ -64,7 +68,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={` ${ibmPlexSansThaiLooped.className} bg-black`}>
+      <body className={`dark ${ibmPlexSansThaiLooped.className} bg-black`}>
+        <Suspense fallback={<NavbarPlaceholder />}>
+          <Navbar />
+        </Suspense>
         <Providers>{children}</Providers>
         <Analytics />
       </body>

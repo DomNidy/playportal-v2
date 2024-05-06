@@ -6,6 +6,9 @@
   "scripts": {
     "build": "next build",
     "db:gen-types": "npx supabase gen types typescript --linked > types_db.ts",
+    "stripe:listen": "stripe listen --forward-to localhost:3000/api/webhooks",
+    "stripe:fixtures": "stripe fixtures fixtures/stripe-fixtures.json",
+    "stripe:login": "stripe login",
     "dev": "next dev",
     "lint": "next lint",
     "start": "next start"
@@ -15,6 +18,7 @@
     "@aws-sdk/client-sqs": "^3.564.0",
     "@aws-sdk/s3-request-presigner": "3.564.0",
     "@hookform/resolvers": "^3.3.4",
+    "@radix-ui/react-aspect-ratio": "^1.0.3",
     "@radix-ui/react-avatar": "^1.0.4",
     "@radix-ui/react-dropdown-menu": "^2.0.6",
     "@radix-ui/react-label": "^2.0.2",
@@ -43,6 +47,7 @@
     "react-dom": "18.2.0",
     "react-hook-form": "^7.51.3",
     "server-only": "^0.0.1",
+    "stripe": "^15.5.0",
     "superjson": "^2.2.1",
     "tailwind-merge": "^2.3.0",
     "tailwindcss-animate": "^1.0.7",

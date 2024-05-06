@@ -14,8 +14,8 @@ export default function DashboardNavbar({ links }: { links: NavbarLink[] }) {
   const { userData } = useAuth();
 
   return (
-    <div className="sticky top-0 z-50 m-auto mb-4 flex h-fit w-full shrink-0 flex-col border-b bg-colors-background-950 px-4 pb-0 md:px-6">
-      <div className="mt-4 flex h-8 w-full flex-row justify-between font-semibold tracking-tight">
+    <div className="sticky top-0 z-50 m-auto mb-4 flex h-fit w-full shrink-0 flex-col border-b bg-neutral-950 px-4 pb-0 md:px-6">
+      <div className="mt-4 flex h-12 w-full flex-row justify-between font-semibold tracking-tight">
         Playportal
         <div className="top-0 flex flex-row items-start justify-center gap-4">
           <p className="mt-1 text-center text-sm tracking-normal text-white/70">

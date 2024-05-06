@@ -211,8 +211,10 @@ export default function CreateVideoForm() {
                     }}
                   />
                   <Label
-                    htmlFor="audioFile"
-                    className="inline-flex  w-fit cursor-pointer items-center  justify-center whitespace-nowrap rounded-md border-[1.5px] border-border bg-gradient-to-b p-2 text-sm  font-medium text-primary-foreground ring-offset-background transition-colors hover:from-colors-background-950 hover:to-black  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+                    htmlFor="imageFile"
+                    className="inline-flex w-fit cursor-pointer items-center justify-center whitespace-nowrap rounded-md border-[1.5px] border-border bg-primary p-2 
+                    text-sm font-medium text-black ring-offset-background transition-colors hover:bg-primary/90
+                     focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
                   >
                     {audioFile ? audioFile.name : "Upload Audio File"}
                   </Label>
@@ -251,7 +253,9 @@ export default function CreateVideoForm() {
                   />
                   <Label
                     htmlFor="imageFile"
-                    className="inline-flex  w-fit cursor-pointer items-center  justify-center whitespace-nowrap rounded-md border-[1.5px] border-border bg-gradient-to-b p-2 text-sm  font-medium text-primary-foreground ring-offset-background transition-colors hover:from-colors-background-950 hover:to-black  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+                    className="inline-flex w-fit cursor-pointer items-center justify-center whitespace-nowrap rounded-md border-[1.5px] border-border bg-primary p-2 
+                    text-sm font-medium text-black ring-offset-background transition-colors hover:bg-primary/90
+                     focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
                   >
                     {imageFile ? imageFile.name : "Upload Image File"}
                   </Label>
@@ -267,14 +271,7 @@ export default function CreateVideoForm() {
         />
 
         {/** Swapping the next/Link component for a default button makes the styling fixed, but as link, the background doesnt work? */}
-        <Button
-          className="flex mt-8 rounded-lg bg-gradient-to-b from-colors-accent-300 to-colors-secondary-300 p-[1px] font-semibold text-white"
-          type="submit"
-        >
-          <span className="flex h-full  text-sm w-full rounded-lg bg-black text-center justify-center items-center px-2 font-medium tracking-tight text-white transition-all hover:bg-gradient-to-b hover:from-colors-background-950 hover:to-black">
-            Create video
-          </span>
-        </Button>
+        <Button type="submit">Create video</Button>
       </form>
     </Form>
   );
