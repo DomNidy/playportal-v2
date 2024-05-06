@@ -34,7 +34,7 @@ export const Pricing = () => {
           className={`rounded-lg px-4 py-2 text-sm font-medium ${
             billingCycle === "M"
               ? "relative bg-colors-primary-500 text-white"
-              : "text-colors-text-700 hover:bg-colors-primary-100"
+              : "text-colors-text-500 hover:bg-colors-primary-100"
           }`}
         >
           Monthly
@@ -45,7 +45,7 @@ export const Pricing = () => {
           className={`rounded-lg px-4 py-2 text-sm font-medium ${
             billingCycle === "A"
               ? "text relative bg-colors-primary-500 text-white"
-              : "text-colors-text-700 hover:bg-colors-primary-100"
+              : "text-colors-text-500 hover:bg-colors-primary-100"
           }`}
         >
           Annual
@@ -75,7 +75,7 @@ export const Pricing = () => {
                 initial={{ y: -50, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ type: "spring", stiffness: 100 }}
-                className="my-0 text-3xl font-semibold text-gray-900"
+                className="my-0 text-3xl font-semibold text-gray-100"
               >
                 <span>
                   {billingCycle === "M" ? plan.monthlyPrice : plan.annualPrice}

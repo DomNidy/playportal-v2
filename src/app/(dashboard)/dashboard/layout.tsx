@@ -9,7 +9,7 @@ import Providers from "~/providers/providers";
 import { getURL } from "~/utils/helpers";
 import { createClient } from "~/utils/supabase/server";
 
-export const meta = {
+const meta = {
   title: "Playportal",
   description: "The type-beat video creation tool.",
   icons: [{ rel: "icon", url: "/icon.png" }],

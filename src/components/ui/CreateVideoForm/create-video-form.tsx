@@ -173,7 +173,7 @@ export default function CreateVideoForm() {
           control={form.control}
           name="videoTitle"
           render={({ field }) => (
-            <FormItem className="mb-10">
+            <FormItem>
               <FormLabel>Video Title</FormLabel>
               <FormControl>
                 <Input placeholder="My video" {...field} />
@@ -191,8 +191,8 @@ export default function CreateVideoForm() {
           name={"audioFile"}
           control={form.control}
           render={({ field }) => (
-            <FormItem>
-              {/* <FormLabel>Audio File</FormLabel> */}
+            <FormItem className="mt-4">
+              <FormLabel>Audio File</FormLabel>
               <FormControl>
                 {/** TODO: Abstract this into its own component (the styling & logic for onChange) */}
                 <div className="flex flex-col ">
@@ -211,7 +211,7 @@ export default function CreateVideoForm() {
                     }}
                   />
                   <Label
-                    htmlFor="imageFile"
+                    htmlFor="audioFile"
                     className="inline-flex w-fit cursor-pointer items-center justify-center whitespace-nowrap rounded-md border-[1.5px] border-border bg-primary p-2 
                     text-sm font-medium text-black ring-offset-background transition-colors hover:bg-primary/90
                      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
@@ -220,7 +220,9 @@ export default function CreateVideoForm() {
                   </Label>
                 </div>
               </FormControl>
-              {/* <FormDescription>Upload the audio file</FormDescription> */}
+              <FormDescription>
+                The audio file to create the video with.
+              </FormDescription>
               <FormMessage>
                 {" "}
                 {form.formState.errors?.audioFile?.message?.toString()}{" "}
@@ -234,7 +236,7 @@ export default function CreateVideoForm() {
           control={form.control}
           render={({ field }) => (
             <FormItem>
-              {/* <FormLabel>Image File</FormLabel> */}
+              <FormLabel>Image File</FormLabel>
               <FormControl>
                 <div className="flex flex-col">
                   <Input
@@ -261,7 +263,7 @@ export default function CreateVideoForm() {
                   </Label>
                 </div>
               </FormControl>
-              {/* <FormDescription>Upload the image file</FormDescription> */}
+              <FormDescription>Image to render the video with.</FormDescription>
               <FormMessage>
                 {" "}
                 {form.formState.errors?.imageFile?.message?.toString()}{" "}

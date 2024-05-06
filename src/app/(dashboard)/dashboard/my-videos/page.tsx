@@ -1,6 +1,6 @@
 "use client";
 import { columns } from "~/components/ui/MyVideosTable/columns";
-import { DataTable } from "~/components/ui/TransactionsTable/data-table";
+import { DataTable } from "~/components/ui/data-table";
 import { api } from "~/trpc/react";
 
 export default function MyVideosPage() {
@@ -17,6 +17,7 @@ export default function MyVideosPage() {
   return (
     <>
       <DataTable
+        isLoading={myVideos.isLoading}
         columns={columns}
         data={
           myVideos.data?.pages

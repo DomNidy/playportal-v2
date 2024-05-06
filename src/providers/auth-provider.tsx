@@ -32,16 +32,18 @@ export default function AuthProvider({
     refetchOnWindowFocus: true,
     queryKey: ["userData"],
     queryFn: async () => {
+      if (!user?.id) return null;
+
       const { data } = await supabase
         .from("user_data")
         .select("*")
-        .eq("id", session?.user?.id ?? "")
+        .eq("id", user.id)
         .single();
 
       const activeOperationId = await supabase
         .from("operations")
         .select("*")
-        .eq("user_id", user?.id ?? "")
+        .eq("user_id", user.id)
         .eq("status", "Ongoing")
         .order("created_at", { ascending: false })
         .limit(1)
@@ -66,7 +68,7 @@ export default function AuthProvider({
   });
 
   return (
-    <authContext.Provider value={{ session, user, userData: userData ?? null }}>
+    <authContext.Provider value={{ session, user, userData: userData }}>
       {children}
     </authContext.Provider>
   );

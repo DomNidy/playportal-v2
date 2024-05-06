@@ -1,6 +1,6 @@
 "use client";
 import { columns } from "~/components/ui/TransactionsTable/columns";
-import { DataTable } from "~/components/ui/TransactionsTable/data-table";
+import { DataTable } from "~/components/ui/data-table";
 import { api } from "~/trpc/react";
 
 export default function TransactionsPage() {
@@ -15,7 +15,9 @@ export default function TransactionsPage() {
   );
 
   return (
+    
     <DataTable
+      isLoading={transactions.isLoading}
       columns={columns}
       data={
         transactions.data?.pages

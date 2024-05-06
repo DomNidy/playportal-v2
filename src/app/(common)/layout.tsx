@@ -8,7 +8,7 @@ import { Suspense } from "react";
 import Navbar from "~/components/ui/Navbar";
 import { NavbarPlaceholder } from "~/components/ui/Navbar/Navbar";
 
-export const meta = {
+const meta = {
   title: "Playportal",
   description: "The type-beat video creation tool.",
   icons: [{ rel: "icon", url: "/icon.png" }],

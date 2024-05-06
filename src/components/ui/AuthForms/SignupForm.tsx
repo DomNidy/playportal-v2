@@ -39,8 +39,6 @@ export function SignupForm() {
 
   // For displaying general-form errors (not simply validation errors, those are displayed by the individual form items)
   const [formError, setFormError] = useState<string>("");
-  // For display entire form status messages
-  const [formStatusMessage, setFormStatusMessage] = useState<string>("");
 
   // Whether or not the user should be shown the "Confirm your email" screen
   // We should set this to true when the user successfully signs up, and when only a
@@ -82,7 +80,7 @@ export function SignupForm() {
         Welcome to Playportal
       </h2>
       <p className="mt-2 max-w-sm text-sm text-neutral-600 dark:text-neutral-300">
-        Please enter your credentials, or sign in with one of our third party
+        Please enter your credentials, or sign up with one of our third party
         providers.
       </p>
 
