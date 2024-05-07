@@ -1,18 +1,32 @@
-"use client";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { redirect } from "next/navigation";
 import UserButton from "../UserButton/UserButton";
-import useAuth from "~/hooks/use-user-data";
-import useUserData from "~/hooks/use-user-data";
+import { createClient } from "~/utils/supabase/server";
+import { DashboardNavbarLinks } from "./DashboardNavlbarLinks";
 
-type NavbarLink = {
+export type DashNavLink = {
   href: string;
   text: string;
 };
 
-export default function DashboardNavbar({ links }: { links: NavbarLink[] }) {
-  const location = usePathname();
-  const { userData, auth } = useUserData();
+export default async function DashboardNavbar({
+  links,
+}: {
+  links: DashNavLink[];
+}) {
+  const supabase = createClient();
+
+  const userDataResponse = await supabase.auth.getUser().then(async (res) => {
+    if (res.data?.user) {
+      return await supabase
+        .from("user_data")
+        .select("*")
+        .eq("id", res.data.user.id)
+        .single();
+    }
+  });
+
+  // If we cant fetch user data, redirect to sign in
+  if (!userDataResponse?.data?.id) redirect("/sign-in");
 
   return (
     <div className="sticky top-0 z-50 m-auto mb-4 flex h-fit w-full shrink-0 flex-col border-b bg-neutral-950 px-4 pb-0 md:px-6">
@@ -20,37 +34,14 @@ export default function DashboardNavbar({ links }: { links: NavbarLink[] }) {
         Playportal
         <div className="top-0 flex flex-row items-start justify-center gap-4">
           <p className="mt-1 text-center text-sm tracking-normal text-white/70">
-            Credits: {userData?.data?.userData.credits}
+            Credits: {userDataResponse.data.credits}
           </p>
-          <UserButton user={userData.data?.userData ?? null} />
+          <UserButton user={userDataResponse.data ?? null} />
         </div>
       </div>
       <div className="mt-auto flex gap-8">
-        {links.map((link, index) => (
-          <NavbarLink key={index} link={link} currentPath={location} />
-        ))}
+        <DashboardNavbarLinks links={links} />
       </div>
-    </div>
-  );
-}
-
-function NavbarLink({
-  link,
-  currentPath,
-}: {
-  link: NavbarLink;
-  currentPath: string;
-}) {
-  return (
-    <div
-      className={`${currentPath === link.href ? "border-b-2 border-white text-white" : "text-white/70"} pb-2`}
-    >
-      <Link
-        className="rounded-lg p-2 text-sm  underline-offset-2 hover:bg-white/10"
-        href={link.href}
-      >
-        {link.text}
-      </Link>
     </div>
   );
 }
