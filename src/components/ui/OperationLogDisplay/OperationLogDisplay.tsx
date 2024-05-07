@@ -1,15 +1,11 @@
+"use client";
+
 import { type Database } from "types_db";
 import Typography from "../Typography";
+import { OperationLogMessage } from "./OperationLogMessage";
 
-type OperationLog = Database["public"]["Tables"]["operation_logs"]["Row"];
-
-function OperationLogMessage({ operationLog }: { operationLog: OperationLog }) {
-  return (
-    <div>
-      {operationLog.created_at} - {operationLog.message}
-    </div>
-  );
-}
+export type OperationLog =
+  Database["public"]["Tables"]["operation_logs"]["Row"];
 
 export default function OperationLogDisplay({
   operationStatus,

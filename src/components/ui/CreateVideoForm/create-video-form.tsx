@@ -20,6 +20,7 @@ import { api } from "~/trpc/react";
 import { getFileExtension } from "~/utils/helpers";
 import { toast } from "../Toasts/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
 const MAX_AUDIO_SIZE = 60 * 1024 * 1024; // 60MB
@@ -27,7 +28,10 @@ const MAX_AUDIO_SIZE = 60 * 1024 * 1024; // 60MB
 export default function CreateVideoForm() {
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
+  //* We only ever set this to true and never reset it back to false since the user is supposed to be redirected
+  const [isUploadingFiles, setIsUploadingFiles] = useState<boolean>(false);
 
+  const router = useRouter();
   const queryClient = useQueryClient();
   const genUploadURL = api.upload.generateUploadURL.useMutation();
 
@@ -88,27 +92,38 @@ export default function CreateVideoForm() {
           // Read file data into buffer
           const audioFileBuffer = await audioFile.arrayBuffer();
           const imageFileBuffer = await imageFile?.arrayBuffer();
+          // Array of the upload requests
+          const putRequests = [];
 
           // Read urls from the response
           const presignedUrlAudio = data?.presignedUrlAudio;
           const presignedUrlImage = data?.presignedUrlImage;
 
+          setIsUploadingFiles(true);
           if (presignedUrlAudio && audioFileBuffer) {
-            void fetch(presignedUrlAudio, {
-              method: "PUT",
-              body: audioFileBuffer,
-              headers: {
-                "Content-Type": audioFile.type,
-              },
-            });
+            putRequests.push(
+              fetch(presignedUrlAudio, {
+                method: "PUT",
+                body: audioFileBuffer,
+                headers: {
+                  "Content-Type": audioFile.type,
+                },
+              }),
+            );
           }
 
           if (presignedUrlImage && imageFileBuffer) {
-            void fetch(presignedUrlImage, {
-              method: "PUT",
-              body: imageFileBuffer,
-            });
+            putRequests.push(
+              fetch(presignedUrlImage, {
+                method: "PUT",
+                body: imageFileBuffer,
+              }),
+            );
           }
+
+          // After uploads are complete, redirect the user
+          await Promise.all(putRequests);
+          router.push(`/dashboard/operation/${data?.operationId}`);
         },
       },
     );
@@ -276,10 +291,11 @@ export default function CreateVideoForm() {
         <Button
           type="submit"
           className="text-black"
-          disabled={genUploadURL.isPending}
+          disabled={isUploadingFiles || genUploadURL.isPending}
         >
           Create video
         </Button>
+        {isUploadingFiles && <p className="mt-2">Uploading files...</p>}
       </form>
     </Form>
   );

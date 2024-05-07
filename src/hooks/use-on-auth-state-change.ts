@@ -1,13 +1,14 @@
 "use client";
 
 import { type GoTrueClient } from "@supabase/supabase-js";
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import { createClient } from "~/utils/supabase/client";
 
 export default function useOnAuthStateChange(
   callback: Parameters<GoTrueClient["onAuthStateChange"]>["0"],
 ) {
-  const supabase = useMemo(() => createClient(), []);
+  console.log("useOnAuthStateChange rendered")
+  const supabase = createClient();
 
   useEffect(() => {
     const {

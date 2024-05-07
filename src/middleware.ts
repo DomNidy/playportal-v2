@@ -1,10 +1,9 @@
-import { NextResponse, type NextRequest } from "next/server";
-// import { updateSession } from "~/utils/supabase/middleware";
+import { type NextRequest } from "next/server";
+import { updateSession } from "~/utils/supabase/middleware";
 
 const requestCounter: Record<string, number> = {};
 
-// TODO: Figure out if we need the updateSession middleware const req = await updateSession(request)
-export default function middlware(request: NextRequest) {
+export default async function middlware(request: NextRequest) {
   // TODO: Implement rate limiting here
   const ip = (request.headers.get("x-forwarded-for") ?? "127.0.0.1").split(
     ",",
@@ -14,8 +13,8 @@ export default function middlware(request: NextRequest) {
   requestCounter[clientIp] = (requestCounter[clientIp] ?? 0) + 1;
   console.log("Request counts", requestCounter);
 
-  const response = NextResponse.next();
-  return response;
+  const refreshedSession = await updateSession(request);
+  return refreshedSession;
 }
 
 export const config = {

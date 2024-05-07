@@ -72,30 +72,28 @@ export default async function DashboardLayout({
   return (
     <html lang="en">
       <body className={` ${GeistSans.className} bg-black`}>
-        <Providers>
-          <AuthProvider>
-            <div>
-              <DashboardNavbar
-                links={[
-                  {
-                    href: "/dashboard",
-                    text: "Dashboard",
-                  },
-                  {
-                    href: "/dashboard/my-videos",
-                    text: "Videos",
-                  },
-                  {
-                    href: "/dashboard/transactions",
-                    text: "Transactions",
-                  },
-                ]}
-              />
+        <AuthProvider initialUser={user}>
+          <Providers>
+            <DashboardNavbar
+              links={[
+                {
+                  href: "/dashboard",
+                  text: "Dashboard",
+                },
+                {
+                  href: "/dashboard/my-videos",
+                  text: "Videos",
+                },
+                {
+                  href: "/dashboard/transactions",
+                  text: "Transactions",
+                },
+              ]}
+            />
 
-              <div className="flex flex-col items-center ">{children}</div>
-            </div>
-          </AuthProvider>
-        </Providers>
+            <div className="flex flex-col items-center ">{children}</div>
+          </Providers>
+        </AuthProvider>
       </body>
     </html>
   );

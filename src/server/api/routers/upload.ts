@@ -130,6 +130,7 @@ export const uploadRouter = createTRPCRouter({
           return {
             presignedUrlAudio: presignedUrlAudio,
             presignedUrlImage: presignedUrlImage,
+            operationId: transactionData.operation_id,
           };
         } catch (err) {
           //* We should only call this when we know the operation_id and transaction_id exist

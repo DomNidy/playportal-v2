@@ -1,10 +1,10 @@
 "use client";
 import {
-  AuthChangeEvent,
+  type AuthChangeEvent,
   type Session,
   type User,
 } from "@supabase/supabase-js";
-import { createContext, useCallback, useMemo, useState } from "react";
+import { createContext, useCallback, useState } from "react";
 import useOnAuthStateChange from "~/hooks/use-on-auth-state-change";
 
 interface AuthContext {
@@ -19,11 +19,15 @@ export const authContext = createContext<AuthContext>({
 
 export default function AuthProvider({
   children,
+  initialUser,
 }: {
   children: React.ReactNode;
+  initialUser: User | null;
 }) {
-  const [user, setUser] = useState<User | null>(null);
+  console.log("AuthProvider Rendered");
+
   const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<User | null>(initialUser);
 
   const callback = useCallback(
     async (ev: AuthChangeEvent, session: Session | null) => {

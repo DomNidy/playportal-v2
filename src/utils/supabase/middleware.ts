@@ -67,7 +67,6 @@ export const createClient = (request: NextRequest) => {
 
 export const updateSession = async (request: NextRequest) => {
   try {
-    console.log("Middleware called");
     const { supabase, response } = createClient(request);
 
     // This will refresh session if expired - required for Server Components
