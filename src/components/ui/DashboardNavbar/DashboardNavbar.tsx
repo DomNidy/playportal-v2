@@ -2,7 +2,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import UserButton from "../UserButton/UserButton";
-import useAuth from "~/hooks/use-auth";
+import useAuth from "~/hooks/use-user-data";
+import useUserData from "~/hooks/use-user-data";
 
 type NavbarLink = {
   href: string;
@@ -11,7 +12,7 @@ type NavbarLink = {
 
 export default function DashboardNavbar({ links }: { links: NavbarLink[] }) {
   const location = usePathname();
-  const { userData } = useAuth();
+  const { userData, auth } = useUserData();
 
   return (
     <div className="sticky top-0 z-50 m-auto mb-4 flex h-fit w-full shrink-0 flex-col border-b bg-neutral-950 px-4 pb-0 md:px-6">
@@ -19,9 +20,9 @@ export default function DashboardNavbar({ links }: { links: NavbarLink[] }) {
         Playportal
         <div className="top-0 flex flex-row items-start justify-center gap-4">
           <p className="mt-1 text-center text-sm tracking-normal text-white/70">
-            Credits: {userData?.data?.userData?.credits}
+            Credits: {userData?.data?.userData.credits}
           </p>
-          <UserButton user={userData?.data?.userData ?? null} />
+          <UserButton user={userData.data?.userData ?? null} />
         </div>
       </div>
       <div className="mt-auto flex gap-8">

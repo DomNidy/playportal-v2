@@ -19,7 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/Table";
-import { Button } from "./Button";
+import { Button } from "./Button/button";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -54,7 +54,6 @@ export function DataTable<TData, TValue>({
 
   return (
     <div>
-      {" "}
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -82,13 +81,13 @@ export function DataTable<TData, TValue>({
                 <TableRow key={idx}>
                   <TableCell>
                     <div className="h-2 w-full animate-pulse rounded-xl bg-neutral-700"></div>
-                  </TableCell>{" "}
+                  </TableCell>
                   <TableCell>
                     <div className="h-2 w-full animate-pulse rounded-xl bg-neutral-700"></div>
-                  </TableCell>{" "}
+                  </TableCell>
                   <TableCell>
                     <div className="h-2 w-full animate-pulse rounded-xl bg-neutral-700"></div>
-                  </TableCell>{" "}
+                  </TableCell>
                   <TableCell>
                     <div className="h-2 w-full animate-pulse rounded-xl bg-neutral-700"></div>
                   </TableCell>
@@ -107,6 +106,7 @@ export function DataTable<TData, TValue>({
               </TableRow>
             )}
 
+            {/*  TODO: This might be what is causing the '0'*/}
             {/* If we have data*/}
             {!isLoading &&
               table.getRowModel().rows?.length &&

@@ -57,7 +57,7 @@ export default function CreateVideoForm() {
       : null;
 
     //* Send request to api to generate a presigned-url so that we can upload the files
-    const generatedURL = genUploadURL.mutate(
+    genUploadURL.mutate(
       {
         videoTitle: data.videoTitle,
         audioFileContentType: audioFile.type,
@@ -273,7 +273,13 @@ export default function CreateVideoForm() {
         />
 
         {/** Swapping the next/Link component for a default button makes the styling fixed, but as link, the background doesnt work? */}
-        <Button type="submit">Create video</Button>
+        <Button
+          type="submit"
+          className="text-black"
+          disabled={genUploadURL.isPending}
+        >
+          Create video
+        </Button>
       </form>
     </Form>
   );

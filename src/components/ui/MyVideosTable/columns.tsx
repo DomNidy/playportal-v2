@@ -3,12 +3,13 @@ import { type Database } from "types_db";
 import { type ColumnDef } from "@tanstack/react-table";
 import Typography from "../Typography";
 import { Button } from "../Button";
-import { ArrowUpDown } from "lucide-react";
+import { ArrowUpDown, DownloadIcon } from "lucide-react";
 import { api, getBaseUrl } from "~/trpc/react";
 import { loggerLink, unstable_httpBatchStreamLink } from "@trpc/client";
 import SuperJSON from "superjson";
 import Link from "next/link";
 import { toast } from "../Toasts/use-toast";
+import { DownloadFileButton } from "../DownloadFileButton";
 
 // TODO: We might want to make a composite type that includes the filemeta data here (or a view)
 type Transaction =
@@ -94,40 +95,25 @@ export const columns: ColumnDef<Transaction>[] = [
       );
     },
     cell: ({ row }) => {
-      return <DownloadFileButton s3Key={row.original.s3_key ?? ""} />;
+      return (
+        <DownloadFileButton
+          s3Key={row.original.s3_key ?? ""}
+          props={{
+            className:
+              "text-black  group-hover:bg-transparent gap-2 px-1 flex w-full justify-between",
+          }}
+        >
+          {" "}
+          <span className="text-sm   ">
+            Download Video
+          </span>
+          <DownloadIcon
+            className="mb-1 text-black"
+            width={20}
+            height={20}
+          />
+        </DownloadFileButton>
+      );
     },
   },
 ];
-
-function DownloadFileButton({ s3Key }: { s3Key: string }) {
-  const presignedUrlQuery = api.user.getPresignedUrlForFile.useQuery(
-    {
-      s3Key: s3Key,
-    },
-    {
-      enabled: false,
-      refetchOnMount: false,
-      refetchOnWindowFocus: false,
-      retry: false,
-    },
-  );
-
-  return (
-    <Button
-      onClick={async () => {
-        const downloadUrl = await presignedUrlQuery.refetch();
-        if (!downloadUrl.data) {
-          toast({
-            title: "Error",
-            description: "Failed to get download url, please try again.",
-            variant: "destructive",
-          });
-          return;
-        }
-        window.open(downloadUrl.data, "_blank");
-      }}
-    >
-      Download
-    </Button>
-  );
-}

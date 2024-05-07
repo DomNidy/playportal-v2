@@ -306,6 +306,12 @@ export type Database = {
         }
         Returns: Database["public"]["CompositeTypes"]["operation_and_transaction_ids"]
       }
+      delete_all_operation_data: {
+        Args: {
+          operation_to_delete_id: string
+        }
+        Returns: number
+      }
       gen_id: {
         Args: Record<PropertyKey, never>
         Returns: string

@@ -1,27 +1,27 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
+import { type Database } from "types_db";
+import { authContext } from "~/providers/auth-provider";
 import { createClient } from "~/utils/supabase/client";
-import useAuth from "./use-auth";
 
 export default function useUserData() {
-  const auth = useAuth();
+  const auth = useContext(authContext);
   const queryClient = useQueryClient();
   const supabase = createClient();
 
   const query = useQuery({
     queryKey: ["userData"],
     queryFn: async () => {
-      console.log("Fetching query", auth);
       if (!auth.user) {
         return null;
       }
 
-      const creds = await supabase
+      console.log("Fetching query", auth);
+      const userData = await supabase
         .from("user_data")
-        .select("credits")
+        .select("*")
         .eq("id", auth.user.id)
-        .single()
-        .then((res) => res.data?.credits);
+        .single();
 
       const { data } = await supabase
         .from("operations")
@@ -33,7 +33,12 @@ export default function useUserData() {
         .single();
 
       return {
-        credits: creds ?? 0,
+        userData: {
+          avatar_url: userData.data?.avatar_url,
+          id: userData.data?.id,
+          credits: userData.data?.credits,
+          full_name: userData.data?.full_name,
+        } as Database["public"]["Tables"]["user_data"]["Row"],
         activeOperationId: data?.id ?? null,
       };
     },
@@ -48,5 +53,8 @@ export default function useUserData() {
     });
   }, [auth.user?.id, queryClient]);
 
-  return query;
+  return {
+    userData: query,
+    auth: auth,
+  };
 }

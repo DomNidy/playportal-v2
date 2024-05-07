@@ -10,12 +10,14 @@ type OperationStatus = Database["public"]["Enums"]["operation_status"];
 type OperationLog = Database["public"]["Tables"]["operation_logs"]["Row"];
 type Operation = Database["public"]["Tables"]["operations"]["Row"];
 
+// If the operation is live, we will open up a socket connection
 export default function useOperationData(operationId: string | null): {
   video_title: string;
   started_at: string;
   s3FileKey?: string;
-  status: OperationStatus | "LoadingData"; // LoadingData is for when we are still loading data... (so we can show loading state)
+  status: OperationStatus | null; // LoadingData is for when we are still loading data... (so we can show loading state)
   logs: OperationLog[];
+  isOperationDataLoading: boolean;
 } {
   const supabase = createClient();
 
@@ -23,9 +25,12 @@ export default function useOperationData(operationId: string | null): {
   const [startedAt, setStartedAt] = useState<string>();
   const [s3FileKey, setS3FileKey] = useState<string>();
 
-  const [operationStatus, setOperationStatus] = useState<
-    OperationStatus | "LoadingData"
-  >("LoadingData");
+  // If our query for the operation data is loading (not the logs)
+  const [isOperationDataLoading, setIsOperationDataLoading] =
+    useState<boolean>(true);
+
+  const [operationStatus, setOperationStatus] =
+    useState<OperationStatus | null>(null);
   const [logs, setLogs] = useState<OperationLog[]>([]);
 
   // State to store the subscriptions we have to postgres so we can unsub when operation finishes
@@ -42,7 +47,7 @@ export default function useOperationData(operationId: string | null): {
     setVideoTitle(undefined);
     setStartedAt(undefined);
     setS3FileKey(undefined);
-    setOperationStatus("LoadingData");
+    setOperationStatus(null);
     setLogs([]);
   }, [operationId]);
 
@@ -82,6 +87,7 @@ export default function useOperationData(operationId: string | null): {
     }
 
     const fetchStatus = async () => {
+      setIsOperationDataLoading(true);
       const operationData = await supabase
         .from("operations")
         .select("*")
@@ -89,12 +95,19 @@ export default function useOperationData(operationId: string | null): {
         .order("created_at", { ascending: true })
         .single();
 
+      // If operation doesn't exist, return
+      if (!operationData.data) {
+        console.log("operation doesnt exist");
+        return;
+      }
+
       // If not ongoing, fetch all pre-existing data and return
       if (operationData.data?.status !== "Ongoing") {
         console.debug(
           "Operation is not ongoing, fetching all pre-existing data",
           operationData.data?.status,
         );
+
         const logs = await supabase
           .from("operation_logs")
           .select("*")
@@ -114,6 +127,7 @@ export default function useOperationData(operationId: string | null): {
           .single()
           .then((res) => res.data?.s3_key);
 
+        setIsOperationDataLoading(false);
         setS3FileKey(s3Key);
         return;
       }
@@ -182,5 +196,6 @@ export default function useOperationData(operationId: string | null): {
     s3FileKey,
     status: operationStatus,
     logs,
+    isOperationDataLoading,
   };
 }

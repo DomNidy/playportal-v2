@@ -43,12 +43,12 @@ export default function UserButton({
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        className="mr-6 bg-black"
+        className="mr-6 bg-colors-background-900"
         side="bottom"
         sideOffset={10}
         alignOffset={20}
       >
-        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+        <DropdownMenuLabel className="text-muted-foreground">My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem className="text-muted-foreground focus:cursor-pointer focus:bg-white/30 focus:text-white">
           Profile

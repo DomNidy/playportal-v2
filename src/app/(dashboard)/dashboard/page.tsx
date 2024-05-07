@@ -4,12 +4,12 @@ import Link from "next/link";
 import OperationCard, {
   OperationCardSkeleton,
 } from "~/components/ui/OperationCard/OperationCard";
-import useAuth from "~/hooks/use-auth";
+import useUserData from "~/hooks/use-user-data";
 import { createClient } from "~/utils/supabase/client";
 
 export default function Dashboard() {
   const supabase = createClient();
-  const { user } = useAuth();
+  const { auth } = useUserData();
 
   // Whenever active operation id changes, automatically change the view to that one
   const recentOperations = useQuery({
@@ -20,7 +20,7 @@ export default function Dashboard() {
         .select("*")
         .order("created_at", { ascending: false })
         .eq("file_origin", "PlayportalBackend")
-        .eq("user_id", user?.id ?? "")
+        .eq("user_id", auth.user?.id ?? "")
         .limit(8);
       if (error) throw error;
       return data;
