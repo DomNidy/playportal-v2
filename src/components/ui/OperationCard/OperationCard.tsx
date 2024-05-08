@@ -15,7 +15,7 @@ const OperationCard = forwardRef<HTMLDivElement, OperationCardProps>(
       <div
         ref={ref}
         className={cn(
-          "flex h-[6.5rem]  flex-row gap-2 rounded-2xl  border-[1px] bg-colors-background-950 px-5 py-2 pt-4",
+          "flex h-[6.5rem]   flex-row gap-2 rounded-2xl  border-[1px] bg-colors-background-950 px-5 py-2 pt-4",
           className,
         )}
       >

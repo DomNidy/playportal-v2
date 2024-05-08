@@ -24,6 +24,7 @@ export const uploadRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
+        console.log(input);
         const operationCost = 10;
         //* We could remove this query entirely and just rely on the rpc call, but this is more convenient for now
         const { data: userCredits, error } = await ctx.db
@@ -65,11 +66,20 @@ export const uploadRouter = createTRPCRouter({
           console.log(transactionData);
         }
 
+        // Parse file extensions
+        const audioFileExtension = input.audioFileExtension
+          ? `.${input.audioFileExtension}`
+          : "";
+
+        const imageFileExtension = input.imageFileExtension
+          ? `.${input.imageFileExtension}`
+          : "";
+
         try {
-          const audioFileS3Key = `${ctx.user.id}/inputs/${transactionData.operation_id}-input-audio`;
+          const audioFileS3Key = `${ctx.user.id}/inputs/${transactionData.operation_id}-input-audio${audioFileExtension}`;
           // Ternary here is used incase we did not receive an input image from user
           const imageFileS3Key = input.imageFileSize
-            ? `${ctx.user.id}/inputs/${transactionData.operation_id}-input-image`
+            ? `${ctx.user.id}/inputs/${transactionData.operation_id}-input-image${imageFileExtension}`
             : null;
 
           // Create the S3 presigned urls first, if we fail to create those, run handle refund logic
@@ -80,6 +90,7 @@ export const uploadRouter = createTRPCRouter({
               Key: audioFileS3Key,
               ContentLength: input.audioFileSize,
             }),
+            { expiresIn: env.S3_PRESIGNED_URL_UPLOAD_EXP_TIME_SECONDS },
           );
 
           const presignedUrlImage = imageFileS3Key
@@ -90,6 +101,7 @@ export const uploadRouter = createTRPCRouter({
                   Key: imageFileS3Key,
                   ContentLength: input.imageFileSize,
                 }),
+                { expiresIn: env.S3_PRESIGNED_URL_UPLOAD_EXP_TIME_SECONDS },
               )
             : null;
 

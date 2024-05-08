@@ -9,12 +9,15 @@ import { createClient } from "~/utils/supabase/client";
 type OperationStatus = Database["public"]["Enums"]["operation_status"];
 type OperationLog = Database["public"]["Tables"]["operation_logs"]["Row"];
 type Operation = Database["public"]["Tables"]["operations"]["Row"];
+// The files associated with this operation
+type AssociatedFileMetadata =
+  Database["public"]["Tables"]["file_metadata"]["Row"];
 
 // If the operation is live, we will open up a socket connection
 export default function useOperationData(operationId: string | null): {
   video_title: string;
   started_at: string;
-  s3FileKey?: string;
+  associatedFiles?: AssociatedFileMetadata[];
   status: OperationStatus | null; // LoadingData is for when we are still loading data... (so we can show loading state)
   logs: OperationLog[];
   isOperationDataLoading: boolean;
@@ -23,7 +26,9 @@ export default function useOperationData(operationId: string | null): {
 
   const [videoTitle, setVideoTitle] = useState<string>();
   const [startedAt, setStartedAt] = useState<string>();
-  const [s3FileKey, setS3FileKey] = useState<string>();
+  const [associatedFiles, setAssociatedFiles] = useState<
+    AssociatedFileMetadata[]
+  >([]);
 
   // If our query for the operation data is loading (not the logs)
   const [isOperationDataLoading, setIsOperationDataLoading] =
@@ -46,7 +51,7 @@ export default function useOperationData(operationId: string | null): {
   useEffect(() => {
     setVideoTitle(undefined);
     setStartedAt(undefined);
-    setS3FileKey(undefined);
+    setAssociatedFiles([]);
     setOperationStatus(null);
     setLogs([]);
   }, [operationId]);
@@ -92,7 +97,6 @@ export default function useOperationData(operationId: string | null): {
         .from("operations")
         .select("*")
         .eq("id", operationId)
-        .order("created_at", { ascending: true })
         .single();
 
       // If operation doesn't exist, return
@@ -122,13 +126,13 @@ export default function useOperationData(operationId: string | null): {
         // If status is completed, query for the s3 key
         const s3Key = await supabase
           .from("file_metadata")
-          .select("s3_key")
-          .eq("operation_id", operationId)
-          .single()
-          .then((res) => res.data?.s3_key);
+          .select("*")
+          .eq("operation_id", operationId);
+
+        console.log(s3Key, "s3");
 
         setIsOperationDataLoading(false);
-        setS3FileKey(s3Key);
+        setAssociatedFiles(s3Key.data ?? []);
         return;
       }
 
@@ -193,7 +197,7 @@ export default function useOperationData(operationId: string | null): {
   return {
     video_title: videoTitle ?? "",
     started_at: startedAt ?? "",
-    s3FileKey,
+    associatedFiles,
     status: operationStatus,
     logs,
     isOperationDataLoading,

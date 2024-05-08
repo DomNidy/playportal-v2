@@ -6,7 +6,7 @@ import { IconBrandGoogle } from "@tabler/icons-react";
 import { createClient } from "~/utils/supabase/client";
 import { Button } from "../Button";
 import { getURL } from "~/utils/helpers";
-import { set, z } from "zod";
+import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {

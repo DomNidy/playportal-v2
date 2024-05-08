@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import UserButton from "../UserButton/UserButton";
 import { createClient } from "~/utils/supabase/server";
 import { DashboardNavbarLinks } from "./DashboardNavlbarLinks";
+import CreditsDisplay from "./CreditsDisplay";
 
 export type DashNavLink = {
   href: string;
@@ -33,10 +34,12 @@ export default async function DashboardNavbar({
       <div className="mt-4 flex h-12 w-full flex-row justify-between font-semibold tracking-tight">
         Playportal
         <div className="top-0 flex flex-row items-start justify-center gap-4">
-          <p className="mt-1 text-center text-sm tracking-normal text-white/70">
-            Credits: {userDataResponse.data.credits}
-          </p>
-          <UserButton user={userDataResponse.data ?? null} />
+          <CreditsDisplay
+            initialCredits={userDataResponse.data.credits}
+            userId={userDataResponse.data.id}
+          />
+
+          <UserButton user={userDataResponse.data} />
         </div>
       </div>
       <div className="mt-auto flex gap-8">

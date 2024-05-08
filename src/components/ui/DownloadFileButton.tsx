@@ -9,8 +9,8 @@ export function DownloadFileButton({
   ...props
 }: {
   s3Key: string;
-  props: React.ButtonHTMLAttributes<HTMLButtonElement>;
-  children: React.ReactNode;
+  props?: React.ButtonHTMLAttributes<HTMLButtonElement>;
+  children?: React.ReactNode;
 }) {
   const presignedUrlQuery = api.user.getPresignedUrlForFile.useQuery(
     {
@@ -38,6 +38,8 @@ export function DownloadFileButton({
           });
           return;
         }
+
+        console.log(downloadUrl);
         window.open(downloadUrl.data, "_blank");
       }}
     >

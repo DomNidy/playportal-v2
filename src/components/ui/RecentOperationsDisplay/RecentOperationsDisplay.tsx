@@ -94,15 +94,6 @@ export default function RecentOperationsDisplay() {
       ) : (
         <OperationCardDummy />
       )}
-
-      {recentOperations.data?.pages && recentOperations.isFetching && (
-        <>
-          <OperationCardSkeleton />
-          <OperationCardSkeleton />
-          <OperationCardSkeleton />
-          <OperationCardSkeleton />
-        </>
-      )}
     </div>
   );
 }

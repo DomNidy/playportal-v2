@@ -123,6 +123,9 @@ export default function CreateVideoForm() {
 
           // After uploads are complete, redirect the user
           await Promise.all(putRequests);
+          void queryClient.refetchQueries({
+            queryKey: ["userCredits"],
+          });
           router.push(`/dashboard/operation/${data?.operationId}`);
         },
       },

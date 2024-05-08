@@ -1,4 +1,5 @@
 "use client";
+import { DownloadFileButton } from "~/components/ui/DownloadFileButton";
 import OperationLogDisplay from "~/components/ui/OperationLogDisplay/OperationLogDisplay";
 import useOperationData from "~/hooks/use-operation-data";
 
@@ -21,6 +22,13 @@ export default function OperationDataPage({
           videoTitle={operationData.video_title}
         />
       )}
+
+      {!!operationData.associatedFiles &&
+        operationData.associatedFiles.map((fileData) => (
+          <DownloadFileButton s3Key={fileData.s3_key} key={fileData.s3_key}>
+            Download {fileData.file_type}
+          </DownloadFileButton>
+        ))}
     </div>
   );
 }

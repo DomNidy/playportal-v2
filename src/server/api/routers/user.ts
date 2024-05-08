@@ -4,6 +4,10 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { s3Client } from "~/server/db";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { env } from "~/env";
+import {
+  determineBucketNameFromS3Key,
+  parseFileExtensionFromS3Key,
+} from "~/utils/utils";
 
 export const userRouter = createTRPCRouter({
   getUserData: protectedProcedure.query(async ({ ctx }) => {
@@ -45,6 +49,7 @@ export const userRouter = createTRPCRouter({
         nextCursor: nextCursor,
       };
     }),
+  // Allows a user to download files from the output or input bucket (if they own them)
   getPresignedUrlForFile: protectedProcedure
     .input(
       z.object({
@@ -53,30 +58,34 @@ export const userRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       // Query db to check user owns the file pointed to by s3 key
-      const userOwnsFile = await ctx.db
+      const fileData = await ctx.db
         .from("operations_filemetadata")
         .select("*")
         .eq("s3_key", input.s3Key)
         .eq("user_id", ctx.user.id)
-        .eq("file_origin", "PlayportalBackend")
-        .eq("file_type", "Video")
         .single();
 
-      console.log(userOwnsFile, input);
+      const bucket = determineBucketNameFromS3Key(input.s3Key);
 
-      // TODO: Perhaps we could cache this presigned url?
+      // Determine what type of file the user is trying to download
+      const requestedFileType = fileData.data?.file_type ?? "file";
+      // Parse out the extension from the s3 key
+      const fileExtension = parseFileExtensionFromS3Key(input.s3Key);
+
+      const fileName = `${fileData.data?.video_title?.concat(` ${requestedFileType}`) ?? "your-file"}.${fileExtension}`;
+
       if (
-        userOwnsFile.data?.s3_key === input.s3Key &&
-        userOwnsFile.data.user_id === ctx.user.id
+        fileData.data?.s3_key === input.s3Key &&
+        fileData.data.user_id === ctx.user.id
       ) {
         return getSignedUrl(
           s3Client,
           new GetObjectCommand({
-            Bucket: env.S3_OUTPUT_BUCKET_NAME,
+            Bucket: bucket,
             Key: input.s3Key,
-            ResponseContentDisposition: `attachment; filename=${userOwnsFile.data?.video_title ?? "your-video"}.mp4`,
+            ResponseContentDisposition: `attachment; filename=${fileName}`,
           }),
-          { expiresIn: 60 * 60 * 11 },
+          { expiresIn: env.S3_PRESIGNED_URL_DOWNLOAD_EXP_TIME_SECONDS },
         );
       }
 
