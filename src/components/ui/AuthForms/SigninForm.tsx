@@ -34,6 +34,10 @@ export default function SigninForm() {
 
   const form = useForm<z.infer<typeof SignInSchema>>({
     resolver: zodResolver(SignInSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
   });
 
   async function onSubmit(data: z.infer<typeof SignInSchema>) {
@@ -56,7 +60,7 @@ export default function SigninForm() {
         }
 
         if (res.error) {
-          form.setError("root", { message: res.error.message });
+          form.setError("password", { message: res.error.message });
         }
       });
     setIsSubmitting(false);
@@ -81,7 +85,11 @@ export default function SigninForm() {
                 <LabelInputContainer className="mb-4">
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter your email" {...field} />
+                    <Input
+                      placeholder="Enter your email"
+                      {...field}
+                      autoComplete="email"
+                    />
                   </FormControl>
                   <FormMessage />
                 </LabelInputContainer>
@@ -101,6 +109,7 @@ export default function SigninForm() {
                       type="password"
                       placeholder="Enter your password"
                       {...field}
+                      autoComplete="current-password"
                     />
                   </FormControl>
                   <FormMessage />
@@ -108,6 +117,7 @@ export default function SigninForm() {
               </FormItem>
             )}
           />
+
           <Button
             disabled={isSubmitting}
             className={` group/btn relative mt-4 block h-10 w-full rounded-md bg-gradient-to-br from-black to-neutral-600 font-medium text-white 
