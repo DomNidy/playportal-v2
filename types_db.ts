@@ -491,12 +491,16 @@ export type Database = {
           description: string | null
           image: string | null
           interval: Database["public"]["Enums"]["pricing_plan_interval"] | null
+          interval_count: number | null
           metadata: Json | null
           name: string | null
           price_active: boolean | null
           price_id: string | null
+          price_metadata: Json | null
+          price_type: Database["public"]["Enums"]["pricing_type"] | null
           product_active: boolean | null
           product_id: string | null
+          trial_period_days: number | null
           unit_amount: number | null
         }
         Relationships: []

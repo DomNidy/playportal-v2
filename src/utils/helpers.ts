@@ -97,3 +97,16 @@ export function getFileExtension(fileName: string): string | null {
   // Return the substring starting from the position of the last dot
   return fileName.substring(dotIndex + 1);
 }
+
+export const calculateTrialEndUnixTimestamp = (
+  trialPeriodDays: number | null | undefined,
+) => {
+  // Check if trialPeriodDays is null, undefined, or less than 2 days
+  if (
+    trialPeriodDays === null ||
+    trialPeriodDays === undefined ||
+    trialPeriodDays < 2
+  ) {
+    return undefined;
+  }
+};

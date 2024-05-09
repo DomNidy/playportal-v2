@@ -51,8 +51,6 @@ export default async function Home() {
         />
       </Suspense>
 
-
-
       <div className="mt-10"></div>
       <PricingPage products={products ?? []} />
     </main>
