@@ -34,6 +34,29 @@ export type Database = {
   }
   public: {
     Tables: {
+      customers: {
+        Row: {
+          id: string
+          stripe_customer_id: string
+        }
+        Insert: {
+          id: string
+          stripe_customer_id: string
+        }
+        Update: {
+          id?: string
+          stripe_customer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customers_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       file_metadata: {
         Row: {
           created_at: string
@@ -182,6 +205,166 @@ export type Database = {
           },
         ]
       }
+      prices: {
+        Row: {
+          active: boolean | null
+          currency: string | null
+          description: string | null
+          id: string
+          interval: Database["public"]["Enums"]["pricing_plan_interval"] | null
+          interval_count: number | null
+          metadata: Json | null
+          product_id: string | null
+          trial_period_days: number | null
+          type: Database["public"]["Enums"]["pricing_type"] | null
+          unit_amount: number | null
+        }
+        Insert: {
+          active?: boolean | null
+          currency?: string | null
+          description?: string | null
+          id: string
+          interval?: Database["public"]["Enums"]["pricing_plan_interval"] | null
+          interval_count?: number | null
+          metadata?: Json | null
+          product_id?: string | null
+          trial_period_days?: number | null
+          type?: Database["public"]["Enums"]["pricing_type"] | null
+          unit_amount?: number | null
+        }
+        Update: {
+          active?: boolean | null
+          currency?: string | null
+          description?: string | null
+          id?: string
+          interval?: Database["public"]["Enums"]["pricing_plan_interval"] | null
+          interval_count?: number | null
+          metadata?: Json | null
+          product_id?: string | null
+          trial_period_days?: number | null
+          type?: Database["public"]["Enums"]["pricing_type"] | null
+          unit_amount?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prices_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prices_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products_prices"
+            referencedColumns: ["product_id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          active: boolean | null
+          description: string | null
+          id: string
+          image: string | null
+          metadata: Json | null
+          name: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          description?: string | null
+          id: string
+          image?: string | null
+          metadata?: Json | null
+          name?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          description?: string | null
+          id?: string
+          image?: string | null
+          metadata?: Json | null
+          name?: string | null
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          cancel_at: string | null
+          cancel_at_period_end: boolean | null
+          canceled_at: string | null
+          created: string
+          current_period_end: string
+          current_period_start: string
+          ended_at: string | null
+          id: string
+          metadata: Json | null
+          price_id: string | null
+          quantity: number | null
+          status: Database["public"]["Enums"]["subscription_status"] | null
+          trial_end: string | null
+          trial_start: string | null
+          user_id: string
+        }
+        Insert: {
+          cancel_at?: string | null
+          cancel_at_period_end?: boolean | null
+          canceled_at?: string | null
+          created?: string
+          current_period_end?: string
+          current_period_start?: string
+          ended_at?: string | null
+          id: string
+          metadata?: Json | null
+          price_id?: string | null
+          quantity?: number | null
+          status?: Database["public"]["Enums"]["subscription_status"] | null
+          trial_end?: string | null
+          trial_start?: string | null
+          user_id: string
+        }
+        Update: {
+          cancel_at?: string | null
+          cancel_at_period_end?: boolean | null
+          canceled_at?: string | null
+          created?: string
+          current_period_end?: string
+          current_period_start?: string
+          ended_at?: string | null
+          id?: string
+          metadata?: Json | null
+          price_id?: string | null
+          quantity?: number | null
+          status?: Database["public"]["Enums"]["subscription_status"] | null
+          trial_end?: string | null
+          trial_start?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_price_id_fkey"
+            columns: ["price_id"]
+            isOneToOne: false
+            referencedRelation: "prices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscriptions_price_id_fkey"
+            columns: ["price_id"]
+            isOneToOne: false
+            referencedRelation: "products_prices"
+            referencedColumns: ["price_id"]
+          },
+          {
+            foreignKeyName: "subscriptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       transaction_refunds: {
         Row: {
           amount: number
@@ -246,21 +429,27 @@ export type Database = {
       user_data: {
         Row: {
           avatar_url: string | null
+          billing_address: Json | null
           credits: number
           full_name: string | null
           id: string
+          payment_method: Json | null
         }
         Insert: {
           avatar_url?: string | null
+          billing_address?: Json | null
           credits?: number
           full_name?: string | null
           id: string
+          payment_method?: Json | null
         }
         Update: {
           avatar_url?: string | null
+          billing_address?: Json | null
           credits?: number
           full_name?: string | null
           id?: string
+          payment_method?: Json | null
         }
         Relationships: [
           {
@@ -296,6 +485,22 @@ export type Database = {
           },
         ]
       }
+      products_prices: {
+        Row: {
+          currency: string | null
+          description: string | null
+          image: string | null
+          interval: Database["public"]["Enums"]["pricing_plan_interval"] | null
+          metadata: Json | null
+          name: string | null
+          price_active: boolean | null
+          price_id: string | null
+          product_active: boolean | null
+          product_id: string | null
+          unit_amount: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       create_operation_and_transaction: {
@@ -329,6 +534,17 @@ export type Database = {
       file_origin: "PlayportalBackend" | "UserProvided"
       file_type: "Video" | "Audio" | "Image"
       operation_status: "Ongoing" | "Failed" | "Completed"
+      pricing_plan_interval: "day" | "week" | "month" | "year"
+      pricing_type: "one_time" | "recurring"
+      subscription_status:
+        | "trialing"
+        | "active"
+        | "canceled"
+        | "incomplete"
+        | "incomplete_expired"
+        | "past_due"
+        | "unpaid"
+        | "paused"
       transaction_type: "CreateVideo"
     }
     CompositeTypes: {

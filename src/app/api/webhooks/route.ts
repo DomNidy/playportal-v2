@@ -1,6 +1,13 @@
-import { Stripe } from "stripe";
+import { type Stripe } from "stripe";
 import { env } from "~/env";
 import { stripe } from "~/utils/stripe/config";
+import {
+  deletePriceRecord,
+  deleteProductRecord,
+  manageSubscriptionStatusChange,
+  upsertPriceRecord,
+  upsertProductRecord,
+} from "~/utils/supabase/admin";
 
 // All events we receive from stripe will be sent here
 // Things such as customer payments, us updating our prices, etc.
@@ -23,7 +30,6 @@ export async function POST(req: Request) {
   const sig = req.headers.get("stripe-signature");
   const webhookSecret = env.STRIPE_WEBHOOK_SECRET;
   let event: Stripe.Event;
-
   try {
     if (!sig || !webhookSecret)
       return new Response("Webhook Error: Missing secret", { status: 400 });
@@ -43,21 +49,41 @@ export async function POST(req: Request) {
       switch (event.type) {
         case "product.created":
         case "product.updated":
-        // TODO: Handle this here
+          console.log("Prod up")
+          await upsertProductRecord(event.data.object);
+          break;
         case "price.created":
         case "price.updated":
-        // TODO: Handle this here
+          await upsertPriceRecord(event.data.object);
+          break;
         case "price.deleted":
-        // TODO: Handle this here
+          await deletePriceRecord(event.data.object);
+          break;
         case "product.deleted":
-        // TODO: Handle this here
+          await deleteProductRecord(event.data.object);
+          break;
         case "customer.subscription.created":
-            console.log("Received")
         case "customer.subscription.updated":
         case "customer.subscription.deleted":
-        // TODO: Handle this here
+          await manageSubscriptionStatusChange(
+            event.data.object.id,
+            event.data.object.customer as string,
+            event.type === "customer.subscription.created", // TODO: Why do we pass this here? Wouldn't this always be false?
+          );
+          break;
         case "checkout.session.completed":
-        // TODO: Handle this here
+          const checkoutSession = event.data.object;
+          if (checkoutSession.mode === "subscription") {
+            const subscriptionId = checkoutSession.subscription;
+            await manageSubscriptionStatusChange(
+              subscriptionId as string,
+              checkoutSession.customer as string,
+              true,
+            );
+          }
+          break;
+        default:
+          throw new Error("Unhandled relevant event type.");
       }
     } catch (err) {
       console.log(err);

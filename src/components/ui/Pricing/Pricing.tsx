@@ -2,6 +2,10 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Check } from "lucide-react";
 import { useState } from "react";
+import { Tables } from "types_db";
+import PricingProduct from "./PricingProduct";
+import { StripeProductMetadataSchema } from "~/definitions/product-metadata-schemas";
+import { z } from "zod";
 
 type PricingPlan = {
   name: string;
@@ -158,6 +162,38 @@ const BackgroundShift = ({ shiftKey }: { shiftKey: string }) => (
   />
 );
 
-export default function PricingPage() {
-  return <Pricing />;
+export type ProductWithParsedMetadata = Omit<Tables<"products">, "metadata"> & {
+  parsedMetadata: z.infer<typeof StripeProductMetadataSchema>;
+};
+
+export default function PricingPage({
+  products,
+}: {
+  products: Tables<"products_prices">[];
+}) {
+  const productsWithMetadata: ProductWithParsedMetadata[] = [];
+  products.forEach((product) => {
+    if (StripeProductMetadataSchema.safeParse(product.metadata).success) {
+      productsWithMetadata.push({
+        parsedMetadata: product.metadata as z.infer<
+          typeof StripeProductMetadataSchema
+        >,
+        active: product.product_active,
+        description: product.description,
+        id: product.product_id ?? "",
+        image: product.image,
+        name: product.name,
+      });
+    }
+  });
+
+  return (
+    <div className=" z-10 flex w-full max-w-6xl flex-col gap-8 md:w-[700px] md:flex-row lg:gap-4">
+      {productsWithMetadata
+        .sort((a, b) => a.parsedMetadata.tier - b.parsedMetadata.tier)
+        .map((product, idx) => (
+          <PricingProduct product={product} key={idx} />
+        ))}
+    </div>
+  );
 }

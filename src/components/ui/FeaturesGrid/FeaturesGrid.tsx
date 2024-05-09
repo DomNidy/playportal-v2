@@ -22,7 +22,7 @@ function FeatureCard({ feature }: { feature: Feature }) {
         bounce: 0.7,
       }}
       key={feature.id}
-      className=" h-full w-64 rounded-3xl  bg-gradient-to-b from-colors-accent-300 to-colors-secondary-300 p-[1px] text-left shadow-lg"
+      className=" h-full w-full lg:w-64 rounded-3xl  bg-gradient-to-b from-colors-accent-300 to-colors-secondary-300 p-[1px] text-left shadow-lg"
     >
       <div className="flex h-full flex-col justify-between gap-2 rounded-3xl bg-black px-4 py-2 ">
         <a
@@ -52,7 +52,7 @@ function FeatureCard({ feature }: { feature: Feature }) {
 
 export default function FeaturesGrid({ features }: { features: Feature[] }) {
   return (
-    <div className="mx-5">
+    <div className="mx-4">
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         {features.map((feature) => (
           <FeatureCard feature={feature} key={feature.id} />

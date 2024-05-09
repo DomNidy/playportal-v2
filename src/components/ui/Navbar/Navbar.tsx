@@ -12,7 +12,7 @@ export default async function Navbar() {
   return (
     <div className=" sticky top-0 z-40 flex h-16 w-full flex-row items-center justify-center border-b-[1px] border-colors-background-900 bg-black px-24 py-8">
       <Link
-        className="mr-auto gap-1 text-[1rem] font-medium tracking-tighter sm:text-[1.5rem]"
+        className="mr-auto gap-1 text-[1rem] font-medium tracking-tighter sm:text-[1.5rem] hover:text-white"
         href={"/"}
       >
         Playportal
