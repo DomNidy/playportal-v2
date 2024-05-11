@@ -117,6 +117,8 @@ export async function checkoutWithStripe(
 }
 
 export async function createStripePortal(currentPath: string) {
+  console.log("Got current path", currentPath);
+
   try {
     const supabase = createClient();
     const {
@@ -149,7 +151,7 @@ export async function createStripePortal(currentPath: string) {
     try {
       const { url } = await stripe.billingPortal.sessions.create({
         customer,
-        return_url: getURL("/account"),
+        return_url: getURL(currentPath),
       });
 
       if (!url) {

@@ -1,6 +1,5 @@
 "use client";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import useUserData from "~/hooks/use-user-data";
 import { createClient } from "~/utils/supabase/client";
 import {
   OperationCard,
@@ -8,12 +7,14 @@ import {
   OperationCardSkeleton,
 } from "../OperationCard";
 import { useEffect, useRef } from "react";
+import useAuth from "~/hooks/use-auth";
 
 const itemsPerPage = 20;
 
 export default function RecentOperationsDisplay() {
   const supabase = createClient();
-  const { auth } = useUserData();
+  const auth = useAuth();
+
   const lastOperationCardRef = useRef<HTMLDivElement>(null);
 
   const recentOperations = useInfiniteQuery({

@@ -4,6 +4,7 @@ import type { Tables, Database, TablesInsert } from "types_db";
 import { env } from "~/env";
 import { stripe } from "../stripe/config";
 import { toDateTime } from "../utils";
+import { TRPCError } from "@trpc/server";
 
 export const supabaseAdmin = createClient<Database>(
   env.NEXT_PUBLIC_SUPABASE_URL,
@@ -12,6 +13,8 @@ export const supabaseAdmin = createClient<Database>(
 
 // Call this with stripe product data to update the data in our database
 export async function upsertProductRecord(product: Stripe.Product) {
+  // TODO: Parse the `product.metadata`, use that to relate this product to a `product_roles` record
+
   const productData: Tables<"products"> = {
     id: product.id,
     active: product.active,
@@ -244,7 +247,7 @@ export async function copyBillingDetailsToCustomer(
 // We call this with a stripe customer id, then use that to look up the user in supabase via the customers table
 // Then we sync that users' subscription status with the status on supabase
 export async function manageSubscriptionStatusChange(
-  subscriptionId: string, // Id of a subscription (these are associated with individual users)
+  subscriptionId: string, // Id of a subscription (these are associated with individual users) and are stored on stripe
   customerId: string, // Stripe customer ID
   createAction = false,
 ) {
@@ -256,13 +259,15 @@ export async function manageSubscriptionStatusChange(
     .single();
 
   if (noCustomerError)
-    throw new Error(`Customer lookup failed: ${noCustomerError.message}`);
+    throw new Error(
+      `Customer lookup failed: ${noCustomerError.message} for stripe customer id ${customerId}`,
+    );
 
   const { id: uuid } = customerData;
 
   // Get the subscription from Stripe
   const subscription = await stripe.subscriptions.retrieve(subscriptionId, {
-    expand: ["default_payment_method"],
+    expand: ["default_payment_method", "plan.product"],
   });
 
   // Upsert the latest status of the subscription object into Supabase.
@@ -271,6 +276,7 @@ export async function manageSubscriptionStatusChange(
     user_id: uuid,
     metadata: subscription.metadata,
     status: subscription.status,
+    //* This is how we link the user to the product they purchased
     price_id: subscription.items.data[0]?.price.id,
     // TODO: Check quantity on subscription
     // @ts-expect-error Review that the subscription object retrieved from stripe actually has a quantity
@@ -312,6 +318,80 @@ export async function manageSubscriptionStatusChange(
   console.log(
     `Inserted/updated subscription: [${subscription.id}] for user [${uuid}]`,
   );
+
+  console.log(
+    `Subscription status [${subscription.status}] for subscription [${subscription.id}]`,
+  );
+
+  // Grant the users the role associated with their sub
+
+  console.log(await supabaseAdmin.from("user_roles").select("*"));
+
+  // Extract the from the subscription object
+  // @ts-expect-error We are using expand in the subscription query above, but we don't know that our response actually includes it
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  const subscriptionProductData = subscription?.plan?.product as Stripe.Product;
+
+  if (!subscriptionProductData) {
+    throw new Error(
+      `Subscription object retrieved from stripe does not include product data, subscription id: ${subscription.id}. Need to manually add the users' role now.`,
+    );
+  }
+
+  // With the product_id, query the roles table to find the role related to that product, select the role id
+  const { data: roleId } = await supabaseAdmin
+    .from("roles")
+    .select("id")
+    .eq("for_plan", subscriptionProductData.id)
+    .single();
+
+  if (!roleId?.id) {
+    throw new Error(
+      `Unable to find role related to the product id: ${subscriptionProductData.id}`,
+    );
+  }
+  console.log(roleId.id, " role id", uuid, "uuid");
+  // If the status of the subscription is NOT active, then we'll remove the users' role
+  // If the status is active, then we'll grant them the associated role
+  // TODO: Test this by using the stripe test clock
+  if (subscription.status === "active") {
+    console.log(
+      "Status is active, upserting userRole to grant user the role",
+      roleId.id,
+    );
+
+    const { error: upsertUserRoleError } = await supabaseAdmin
+      .from("user_roles")
+      .upsert({
+        granted_role: roleId.id,
+        user_id: uuid,
+      });
+
+    if (upsertUserRoleError)
+      throw new Error(
+        `Error granting the user [${uuid}] their role, role id [${roleId.id}]. We need to manually give them their role.`,
+      );
+  } else {
+    console.log(
+      "Status is cancelled, upserting userRole to delete the user role",
+      roleId.id,
+      "for user",
+      uuid,
+    );
+
+    const deleteUserRole = await supabaseAdmin
+      .from("user_roles")
+      .delete()
+      .eq("user_id", uuid)
+      .eq("granted_role", roleId.id);
+
+    console.log(deleteUserRole);
+
+    if (deleteUserRole?.error)
+      throw new Error(
+        `Error removing users role, their subscription status is no longer active, but we couldnt't remove their role in the DB. Subscription id: ${subscription.id}, User id: ${uuid}`,
+      );
+  }
 
   // For a new subscription, copy the billing details to the customer object.
   //* NOTE: This is a costly operation and should happen at the very end.

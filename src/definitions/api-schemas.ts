@@ -5,7 +5,6 @@ export const CreateVideoOptionsSchema = z.object({
   associated_transaction_id: z.string(),
   operation: z.object({
     id: z.string(),
-    cost: z.number(),
   }),
   video_output_options: z.object({
     quality_level: z.enum(["low", "medium", "high"]),

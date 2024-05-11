@@ -1,3 +1,4 @@
+"use client";
 import { api } from "~/trpc/react";
 import { Button } from "./Button";
 import { toast } from "./Toasts/use-toast";

@@ -8,7 +8,6 @@
  */
 import { type User } from "@supabase/supabase-js";
 import { TRPCError, initTRPC } from "@trpc/server";
-import { headers } from "next/headers";
 import superjson from "superjson";
 import { ZodError } from "zod";
 

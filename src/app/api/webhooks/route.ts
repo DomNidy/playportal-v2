@@ -49,7 +49,6 @@ export async function POST(req: Request) {
       switch (event.type) {
         case "product.created":
         case "product.updated":
-          console.log("Prod up")
           await upsertProductRecord(event.data.object);
           break;
         case "price.created":
@@ -68,10 +67,11 @@ export async function POST(req: Request) {
           await manageSubscriptionStatusChange(
             event.data.object.id,
             event.data.object.customer as string,
-            event.type === "customer.subscription.created", // TODO: Why do we pass this here? Wouldn't this always be false?
+            event.type === "customer.subscription.created", // TODO: Why do we pass this here? Wouldn't this always be false? (since customer.subscription.created is different from the enumerated value)
           );
           break;
         case "checkout.session.completed":
+          console.log("Checkout session completed");
           const checkoutSession = event.data.object;
           if (checkoutSession.mode === "subscription") {
             const subscriptionId = checkoutSession.subscription;

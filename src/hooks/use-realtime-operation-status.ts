@@ -1,8 +1,7 @@
 "use client";
-
-import { RealtimePostgresChangesPayload } from "@supabase/supabase-js";
+import { type RealtimePostgresChangesPayload } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
-import { Database } from "types_db";
+import { type Database } from "types_db";
 import { createClient } from "~/utils/supabase/client";
 
 // Returns realtime data about operation
@@ -41,8 +40,6 @@ export default function useRealtimeOperationStatus(operationId: string | null) {
         },
       )
       .subscribe();
-
-    console.log(channel);
 
     return () => {
       void supabase.removeChannel(channel);

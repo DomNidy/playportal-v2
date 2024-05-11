@@ -1,7 +1,6 @@
 "use client";
 import { Check } from "lucide-react";
 import React from "react";
-import { type ProductWithPriceAndParsedMetadata } from "./Pricing";
 import { Button } from "../Button";
 import { type Tables } from "types_db";
 import { type User } from "@supabase/supabase-js";
@@ -15,7 +14,7 @@ export default function PricingProduct({
   product,
   user,
 }: {
-  product: ProductWithPriceAndParsedMetadata;
+  product: Tables<"products_prices">;
   user: User | null | undefined;
 }) {
   const router = useRouter();
@@ -59,20 +58,20 @@ export default function PricingProduct({
       <p className="my-0 mb-6 text-sm text-colors-text-50">
         {product.description}
       </p>
+
       <div className="mb-3 flex flex-col items-start gap-2">
         <div className="flex flex-row gap-2">
           <Check className="text-violet-500" size={18} />
           <span className="text-sm text-colors-text-50">
-            Create {product.parsedMetadata.videos_per_day} Videos per day.
+            Create {product.create_video_daily_quota} Videos per day.
           </span>
         </div>
 
-        {product.parsedMetadata.thumbnails_per_day && (
+        {product.file_size_limit_mb && (
           <div className="flex flex-row gap-2">
             <Check className="text-violet-500" size={18} />
             <span className="text-sm text-colors-text-50">
-              Create {product.parsedMetadata.thumbnails_per_day} Thumbnails per
-              day.
+              {product.file_size_limit_mb} MB File upload limit.
             </span>
           </div>
         )}

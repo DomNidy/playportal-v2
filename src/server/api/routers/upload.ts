@@ -24,29 +24,66 @@ export const uploadRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        console.log(input);
-        const operationCost = 10;
-        //* We could remove this query entirely and just rely on the rpc call, but this is more convenient for now
-        const { data: userCredits, error } = await ctx.db
-          .from("user_data")
-          .select("credits")
-          .eq("id", ctx.user.id)
+        //* Check the quota that the users' plan grants them
+        // TODO: Does single work on sql function calls like this?
+        const { data: userQuotas, error: quotaLimitQueryError } = await ctx.db
+          .rpc("get_user_quota_limits", {
+            user_id: ctx.user.id,
+          })
           .single();
 
-        if (error) {
+        // Handle case where we are unable to retrieve the quota limits for a user
+        // This can occur if a user has no `user_role`, if a user tries to create a video and they are not subscribed, they will be stopped here
+        if (!userQuotas) {
+          console.warn(
+            `Failed to retrieve quota limits for user [${ctx.user.id}], if the user does not have an active subscription, this is expected behavior.`,
+          );
           throw new TRPCClientError(
-            "Error occured while trying to start the operation",
+            "An active subscription is required to perform this action, if you think this is a mistake; please contact support or try again later.",
+          );
+        } else if (quotaLimitQueryError) {
+          console.error(
+            `Error occured while trying to get the quota limits for user ${ctx.user.id}`,
+          );
+          throw new TRPCClientError(
+            `An error occured, please try again later or contact support`,
           );
         }
 
-        if (userCredits.credits < operationCost) {
-          throw new TRPCClientError("Insufficient credits.");
+        //* Check the users current daily quota usage
+        const { data: dailyQuotaUsed, error: quoatedUsedQueryError } =
+          await ctx.db.rpc("get_user_quota_usage_daily_create_video", {
+            user_id: ctx.user.id,
+          });
+
+        // Handle the case where we are unable to check the quota usage for a user
+        // If an error happens here, it may be network related, or an issue relating to the `transactions` or `transactions_refund` tables
+        if (quoatedUsedQueryError ?? dailyQuotaUsed === null) {
+          console.error(
+            `Failed to check the daily quota usage for user [${ctx.user.id}]`,
+          );
+          console.error(
+            `Query error: ${quoatedUsedQueryError?.message ?? "no query error"}`,
+          );
+          throw new TRPCClientError(
+            `An error occured, please try again later or contact support`,
+          );
+        }
+
+        //* Check that the user has not exceeded their daily quota usage
+        // If the user has exceeded their quota for the day, deny them
+        if (dailyQuotaUsed >= userQuotas.create_video_daily_quota) {
+          console.warn(
+            `User [${ctx.user.id}] attempted to create a video, but they've exceeded their daily quota usage.`,
+          );
+          throw new TRPCClientError(
+            `You have exceeded your daily quota usage, please wait until tomorrow, or upgrade your plan.`,
+          );
         }
 
         // This rpc is a transaction which creates the operation record, creates transaaction record, and decrements the user balaance
         const { data: transactionData, error: createOperationError } =
           await supabaseAdmin.rpc("create_operation_and_transaction", {
-            cost: 10,
             user_id: ctx.user.id,
             video_title: input.videoTitle,
           });
@@ -57,11 +94,17 @@ export const uploadRouter = createTRPCRouter({
           !transactionData?.operation_id
         ) {
           console.error(
+            `An error occured while trying to create the operation and transaction documents`,
+          );
+          console.error(
+            "Operation error:",
             createOperationError,
-            "returned transaction data",
+            "Transaction data:",
             transactionData,
           );
-          throw new TRPCClientError("Something went wrong");
+          throw new TRPCClientError(
+            "Something went wrong, please try again later or contct support",
+          );
         } else {
           console.log(transactionData);
         }
@@ -109,7 +152,6 @@ export const uploadRouter = createTRPCRouter({
           const createVideoMessage: z.infer<typeof CreateVideoOptionsSchema> = {
             associated_transaction_id: transactionData.transaction_id,
             operation: {
-              cost: operationCost,
               id: transactionData.operation_id,
             },
             audio_file: {
@@ -148,8 +190,7 @@ export const uploadRouter = createTRPCRouter({
           //* We should only call this when we know the operation_id and transaction_id exist
           await supabaseAdmin.rpc("handle_failed_operation_refund", {
             operation_id: transactionData.operation_id,
-            transaction_id_to_refund: transactionData.transaction_id,
-            refund_amount: operationCost,
+            transaction_to_refund_id: transactionData.transaction_id,
           });
         }
 

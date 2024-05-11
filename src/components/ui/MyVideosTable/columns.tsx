@@ -4,11 +4,6 @@ import { type ColumnDef } from "@tanstack/react-table";
 import Typography from "../Typography";
 import { Button } from "../Button";
 import { ArrowUpDown, DownloadIcon } from "lucide-react";
-import { api, getBaseUrl } from "~/trpc/react";
-import { loggerLink, unstable_httpBatchStreamLink } from "@trpc/client";
-import SuperJSON from "superjson";
-import Link from "next/link";
-import { toast } from "../Toasts/use-toast";
 import { DownloadFileButton } from "../DownloadFileButton";
 
 // TODO: We might want to make a composite type that includes the filemeta data here (or a view)
@@ -104,14 +99,8 @@ export const columns: ColumnDef<Transaction>[] = [
           }}
         >
           {" "}
-          <span className="text-sm   ">
-            Download Video
-          </span>
-          <DownloadIcon
-            className="mb-1 text-black"
-            width={20}
-            height={20}
-          />
+          <span className="text-sm   ">Download Video</span>
+          <DownloadIcon className="mb-1 text-black" width={20} height={20} />
         </DownloadFileButton>
       );
     },

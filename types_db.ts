@@ -167,44 +167,6 @@ export type Database = {
           },
         ]
       }
-      posts: {
-        Row: {
-          author_id: string | null
-          content: string | null
-          created_at: string | null
-          id: string
-          published: boolean | null
-          title: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          author_id?: string | null
-          content?: string | null
-          created_at?: string | null
-          id: string
-          published?: boolean | null
-          title?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          author_id?: string | null
-          content?: string | null
-          created_at?: string | null
-          id?: string
-          published?: boolean | null
-          title?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "posts_author_id_users_id_fk"
-            columns: ["author_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       prices: {
         Row: {
           active: boolean | null
@@ -260,6 +222,13 @@ export type Database = {
             referencedRelation: "products_prices"
             referencedColumns: ["product_id"]
           },
+          {
+            foreignKeyName: "prices_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "user_products"
+            referencedColumns: ["product_id"]
+          },
         ]
       }
       products: {
@@ -288,6 +257,49 @@ export type Database = {
           name?: string | null
         }
         Relationships: []
+      }
+      roles: {
+        Row: {
+          create_video_daily_quota: number
+          file_size_limit_mb: number
+          for_plan: string | null
+          id: string
+        }
+        Insert: {
+          create_video_daily_quota: number
+          file_size_limit_mb: number
+          for_plan?: string | null
+          id: string
+        }
+        Update: {
+          create_video_daily_quota?: number
+          file_size_limit_mb?: number
+          for_plan?: string | null
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "roles_for_plan_fkey"
+            columns: ["for_plan"]
+            isOneToOne: true
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "roles_for_plan_fkey"
+            columns: ["for_plan"]
+            isOneToOne: true
+            referencedRelation: "products_prices"
+            referencedColumns: ["product_id"]
+          },
+          {
+            foreignKeyName: "roles_for_plan_fkey"
+            columns: ["for_plan"]
+            isOneToOne: true
+            referencedRelation: "user_products"
+            referencedColumns: ["product_id"]
+          },
+        ]
       }
       subscriptions: {
         Row: {
@@ -367,19 +379,16 @@ export type Database = {
       }
       transaction_refunds: {
         Row: {
-          amount: number
           created_at: string
           id: string
           refund_for: string | null
         }
         Insert: {
-          amount?: number
           created_at?: string
           id?: string
           refund_for?: string | null
         }
         Update: {
-          amount?: number
           created_at?: string
           id?: string
           refund_for?: string | null
@@ -396,21 +405,18 @@ export type Database = {
       }
       transactions: {
         Row: {
-          amount: number | null
           created_at: string | null
           id: string
           type: Database["public"]["Enums"]["transaction_type"]
           user_id: string | null
         }
         Insert: {
-          amount?: number | null
           created_at?: string | null
           id?: string
           type?: Database["public"]["Enums"]["transaction_type"]
           user_id?: string | null
         }
         Update: {
-          amount?: number | null
           created_at?: string | null
           id?: string
           type?: Database["public"]["Enums"]["transaction_type"]
@@ -430,7 +436,6 @@ export type Database = {
         Row: {
           avatar_url: string | null
           billing_address: Json | null
-          credits: number
           full_name: string | null
           id: string
           payment_method: Json | null
@@ -438,7 +443,6 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           billing_address?: Json | null
-          credits?: number
           full_name?: string | null
           id: string
           payment_method?: Json | null
@@ -446,7 +450,6 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           billing_address?: Json | null
-          credits?: number
           full_name?: string | null
           id?: string
           payment_method?: Json | null
@@ -455,6 +458,36 @@ export type Database = {
           {
             foreignKeyName: "user_data_id_users_id_fk"
             columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          granted_role: string | null
+          user_id: string
+        }
+        Insert: {
+          granted_role?: string | null
+          user_id?: string
+        }
+        Update: {
+          granted_role?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_granted_role_fkey"
+            columns: ["granted_role"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_roles_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: true
             referencedRelation: "users"
             referencedColumns: ["id"]
@@ -487,8 +520,10 @@ export type Database = {
       }
       products_prices: {
         Row: {
+          create_video_daily_quota: number | null
           currency: string | null
           description: string | null
+          file_size_limit_mb: number | null
           image: string | null
           interval: Database["public"]["Enums"]["pricing_plan_interval"] | null
           interval_count: number | null
@@ -505,13 +540,44 @@ export type Database = {
         }
         Relationships: []
       }
+      user_products: {
+        Row: {
+          product_description: string | null
+          product_id: string | null
+          product_image: string | null
+          product_metadata: Json | null
+          product_name: string | null
+          sub_cancel_at: string | null
+          sub_cancel_at_period_end: boolean | null
+          sub_canceled_at: string | null
+          sub_created: string | null
+          sub_current_period_end: string | null
+          sub_current_period_start: string | null
+          sub_ended_at: string | null
+          sub_id: string | null
+          sub_meta: Json | null
+          sub_quantity: number | null
+          sub_status: Database["public"]["Enums"]["subscription_status"] | null
+          sub_trial_end: string | null
+          sub_trial_start: string | null
+          user_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       create_operation_and_transaction: {
         Args: {
           user_id: string
           video_title: string
-          cost: number
         }
         Returns: Database["public"]["CompositeTypes"]["operation_and_transaction_ids"]
       }
@@ -525,11 +591,26 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_user_quota_limits: {
+        Args: {
+          user_id: string
+        }
+        Returns: {
+          role_id: string
+          create_video_daily_quota: number
+          file_size_limit_mb: number
+        }[]
+      }
+      get_user_quota_usage_daily_create_video: {
+        Args: {
+          user_id: string
+        }
+        Returns: number
+      }
       handle_failed_operation_refund: {
         Args: {
           operation_id: string
-          transaction_id_to_refund: string
-          refund_amount: number
+          transaction_to_refund_id: string
         }
         Returns: undefined
       }
