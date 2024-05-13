@@ -19,9 +19,8 @@ export const CreateVideoFormSchema = z.object({
   imageFile: z
     .any()
     .refine(
-      (file) => {
-        console.log("Refining image file", file);
-        const filePath = file as string;
+      (file: File) => {
+        const filePath = file.name;
         return (
           filePath.endsWith(".png") ||
           filePath.endsWith(".jpg") ||
