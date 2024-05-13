@@ -8,10 +8,9 @@ export const CreateVideoFormSchema = z.object({
     .min(1, "Title must be at least 1 character long")
     .max(100, "Title must be at most 100 characters long"),
   audioFile: z.any().refine(
-    (file) => {
+    (file: File) => {
       // TODO: Problem, we are receiving the file as a string instead of a File
-      const filePath = file as string;
-      return filePath.endsWith(".mp3") || filePath.endsWith(".wav");
+      return file.name.endsWith(".mp3") || file.name.endsWith(".wav");
     },
     {
       message: "Audio file must be a .mp3 or .wav file",
