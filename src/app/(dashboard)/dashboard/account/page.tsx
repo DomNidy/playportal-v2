@@ -35,8 +35,6 @@ export default async function AccountPage() {
     .eq("sub_status", "active")
     .maybeSingle();
 
-  console.log(quotaUsage, "usage");
-
   // TODO: Rewrite this code to be more clear, it is unintuitive that `quotaLimits` and or `userWithProduct` being null means that the user has no sub
   if (!userWithProduct) {
     return (

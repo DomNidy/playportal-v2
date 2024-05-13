@@ -8,6 +8,15 @@ import { supabaseAdmin } from "~/utils/supabase/admin";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { s3Client, sqsClient } from "~/server/db";
 import { type CreateVideoOptionsSchema } from "~/definitions/api-schemas";
+import redis from "~/utils/redis";
+import { Ratelimit } from "@upstash/ratelimit";
+import { headers } from "next/headers";
+
+const ratelimit = new Ratelimit({
+  redis: redis,
+  analytics: true,
+  limiter: Ratelimit.fixedWindow(3, "3 m"),
+});
 
 export const uploadRouter = createTRPCRouter({
   generateUploadURL: protectedProcedure
@@ -24,8 +33,17 @@ export const uploadRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
+        const headersList = headers();
+        const ipIdentifier = headersList.get("x-real-ip");
+        const result = await ratelimit.limit(ipIdentifier ?? "");
+
+        if (!result.success) {
+          throw new TRPCClientError(
+            `Please wait a few minutes before sending another request.`,
+          );
+        }
+
         //* Check the quota that the users' plan grants them
-        // TODO: Does single work on sql function calls like this?
         const { data: userQuotas, error: quotaLimitQueryError } = await ctx.db
           .rpc("get_user_quota_limits", {
             user_id: ctx.user.id,

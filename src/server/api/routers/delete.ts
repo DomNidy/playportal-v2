@@ -8,6 +8,15 @@ import {
 import { env } from "~/env";
 import { s3Client } from "~/server/db";
 import { supabaseAdmin } from "~/utils/supabase/admin";
+import redis from "~/utils/redis";
+import { Ratelimit } from "@upstash/ratelimit";
+import { headers } from "next/headers";
+
+const ratelimit = new Ratelimit({
+  redis: redis,
+  analytics: true,
+  limiter: Ratelimit.fixedWindow(25, "3 m"),
+});
 
 export const deleteRouter = createTRPCRouter({
   // This endpoint deletes all files associated with an operation ID
@@ -19,8 +28,17 @@ export const deleteRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        // Check db for filemetadata
+        const headersList = headers();
+        const ipIdentifier = headersList.get("x-real-ip");
+        const result = await ratelimit.limit(ipIdentifier ?? "");
 
+        if (!result.success) {
+          throw new TRPCClientError(
+            `Please wait a few minutes before sending another request.`,
+          );
+        }
+
+        // Check db for filemetadata
         const { data } = await ctx.db
           .from("operations_filemetadata")
           .select("*")

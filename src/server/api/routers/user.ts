@@ -8,6 +8,16 @@ import {
   determineBucketNameFromS3Key,
   parseFileExtensionFromS3Key,
 } from "~/utils/utils";
+import { Ratelimit } from "@upstash/ratelimit";
+import redis from "~/utils/redis";
+import { headers } from "next/headers";
+import { TRPCClientError } from "@trpc/client";
+
+const ratelimit = new Ratelimit({
+  redis: redis,
+  analytics: true,
+  limiter: Ratelimit.fixedWindow(25, "3 m"),
+});
 
 export const userRouter = createTRPCRouter({
   getUserVideos: protectedProcedure
@@ -45,6 +55,16 @@ export const userRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
+      const headersList = headers();
+      const ipIdentifier = headersList.get("x-real-ip");
+      const result = await ratelimit.limit(ipIdentifier ?? "");
+
+      if (!result.success) {
+        throw new TRPCClientError(
+          `Please wait a few minutes before sending another request.`,
+        );
+      }
+
       // Query db to check user owns the file pointed to by s3 key
       const fileData = await ctx.db
         .from("operations_filemetadata")
