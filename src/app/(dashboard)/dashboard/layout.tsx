@@ -6,7 +6,7 @@ import { GeistSans } from "geist/font/sans";
 import DashboardNavbar from "~/components/ui/DashboardNavbar/DashboardNavbar";
 import AuthProvider from "~/providers/auth-provider";
 import Providers from "~/providers/providers";
-import { getURL } from "~/utils/helpers";
+import { getURL } from "~/utils/utils";
 import { createClient } from "~/utils/supabase/server";
 
 const meta = {

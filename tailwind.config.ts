@@ -19,6 +19,7 @@ const config = {
     },
     extend: {
       colors: {
+        ptl_accent: { def: "#BC38FA", hover: "#D074FB" },
         colors: {
           text: {
             50: "#f2f2f2",

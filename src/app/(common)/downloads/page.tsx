@@ -11,35 +11,7 @@ export default function DownloadsPage() {
             downloadLink: "downloadLink",
             imageSrc: "/placeholder.jpg",
           }}
-        /> <Product
-        product={{
-          title: "Aurora",
-          description: "A collection of 20 unique melodies.",
-          downloadLink: "downloadLink",
-          imageSrc: "/placeholder.jpg",
-        }}
-      /> <Product
-      product={{
-        title: "Aurora",
-        description: "A collection of 20 unique melodies.",
-        downloadLink: "downloadLink",
-        imageSrc: "/placeholder.jpg",
-      }}
-    /> <Product
-    product={{
-      title: "Aurora",
-      description: "A collection of 20 unique melodies.",
-      downloadLink: "downloadLink",
-      imageSrc: "/placeholder.jpg",
-    }}
-  /> <Product
-  product={{
-    title: "Aurora",
-    description: "A collection of 20 unique melodies.",
-    downloadLink: "downloadLink",
-    imageSrc: "/placeholder.jpg",
-  }}
-/>{" "}
+        />
       </div>
     </div>
   );

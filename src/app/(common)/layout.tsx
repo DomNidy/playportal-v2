@@ -2,11 +2,12 @@ import "~/styles/globals.css";
 import { Analytics } from "@vercel/analytics/react";
 import { GeistSans } from "geist/font/sans";
 import type { Metadata } from "next";
-import { getURL } from "~/utils/helpers";
+import { getURL } from "~/utils/utils";
 import Providers from "~/providers/providers";
 import { Suspense } from "react";
-import Navbar from "~/components/ui/Navbar";
-import { NavbarPlaceholder } from "~/components/ui/Navbar/Navbar";
+import LandingPageNavbar, {
+  LandingPageNavbarFallback,
+} from "~/components/ui/LandingPage/LandingPageNavbar";
 
 const meta = {
   title: "Playportal",
@@ -61,9 +62,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`dark ${GeistSans.className} bg-black`}>
-        <Suspense fallback={<NavbarPlaceholder />}>
-          <Navbar />
+      <body className={` ${GeistSans.className} bg-black`}>
+        <Suspense fallback={<LandingPageNavbarFallback />}>
+          <LandingPageNavbar />
         </Suspense>
         <Providers>{children}</Providers>
         <Analytics />

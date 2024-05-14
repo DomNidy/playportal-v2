@@ -8,7 +8,7 @@ import {
   getURL,
   getErrorRedirect,
   calculateTrialEndUnixTimestamp,
-} from "~/utils/helpers";
+} from "~/utils/utils";
 import type { Tables } from "types_db";
 
 type Price = Tables<"prices">;

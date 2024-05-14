@@ -3,7 +3,7 @@ import type Stripe from "stripe";
 import type { Tables, Database, TablesInsert } from "types_db";
 import { env } from "~/env";
 import { stripe } from "../stripe/config";
-import { toDateTime } from "../utils";
+import { toDateTime, toIsoStringOrNull } from "../utils";
 import { TRPCError } from "@trpc/server";
 
 export const supabaseAdmin = createClient<Database>(
@@ -270,6 +270,8 @@ export async function manageSubscriptionStatusChange(
     expand: ["default_payment_method", "plan.product"],
   });
 
+  // TODO: If the subscription.status is not active, we should remove the users' role
+
   // Upsert the latest status of the subscription object into Supabase.
   const subscriptionData: TablesInsert<"subscriptions"> = {
     id: subscription.id,
@@ -283,28 +285,16 @@ export async function manageSubscriptionStatusChange(
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     quantity: subscription.quantity,
     cancel_at_period_end: subscription.cancel_at_period_end,
-    cancel_at: subscription.cancel_at
-      ? toDateTime(subscription.cancel_at).toISOString()
-      : null,
-    canceled_at: subscription.canceled_at
-      ? toDateTime(subscription.canceled_at).toISOString()
-      : null,
-    current_period_start: toDateTime(
-      subscription.current_period_start,
-    ).toISOString(),
-    current_period_end: toDateTime(
-      subscription.current_period_end,
-    ).toISOString(),
-    created: toDateTime(subscription.created).toISOString(),
-    ended_at: subscription.ended_at
-      ? toDateTime(subscription.ended_at).toISOString()
-      : null,
-    trial_start: subscription.trial_start
-      ? toDateTime(subscription.trial_start).toISOString()
-      : null,
-    trial_end: subscription.trial_end
-      ? toDateTime(subscription.trial_end).toISOString()
-      : null,
+    cancel_at: toIsoStringOrNull(subscription.cancel_at),
+    canceled_at: toIsoStringOrNull(subscription.canceled_at),
+    current_period_start:
+      toIsoStringOrNull(subscription.current_period_start) ?? undefined,
+    current_period_end:
+      toIsoStringOrNull(subscription.current_period_end) ?? undefined,
+    created: toIsoStringOrNull(subscription.created) ?? undefined,
+    ended_at: toIsoStringOrNull(subscription.ended_at),
+    trial_start: toIsoStringOrNull(subscription.trial_start),
+    trial_end: toIsoStringOrNull(subscription.trial_end),
   };
 
   const { error: upsertError } = await supabaseAdmin
@@ -322,10 +312,6 @@ export async function manageSubscriptionStatusChange(
   console.log(
     `Subscription status [${subscription.status}] for subscription [${subscription.id}]`,
   );
-
-  // Grant the users the role associated with their sub
-
-  console.log(await supabaseAdmin.from("user_roles").select("*"));
 
   // Extract the from the subscription object
   // @ts-expect-error We are using expand in the subscription query above, but we don't know that our response actually includes it
@@ -350,10 +336,9 @@ export async function manageSubscriptionStatusChange(
       `Unable to find role related to the product id: ${subscriptionProductData.id}`,
     );
   }
-  console.log(roleId.id, " role id", uuid, "uuid");
+
   // If the status of the subscription is NOT active, then we'll remove the users' role
   // If the status is active, then we'll grant them the associated role
-  // TODO: Test this by using the stripe test clock
   if (subscription.status === "active") {
     console.log(
       "Status is active, upserting userRole to grant user the role",

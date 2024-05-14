@@ -16,7 +16,7 @@ import { Input } from "~/components/ui/Input";
 import { useCallback, useState } from "react";
 import { CreateVideoFormSchema } from "~/definitions/form-schemas";
 import { api } from "~/trpc/react";
-import { getFileExtension } from "~/utils/helpers";
+import { getFileExtension } from "~/utils/utils";
 import { toast } from "../Toasts/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";

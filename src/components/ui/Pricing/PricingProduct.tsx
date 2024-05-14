@@ -6,7 +6,7 @@ import { type Tables } from "types_db";
 import { type User } from "@supabase/supabase-js";
 import { usePathname, useRouter } from "next/navigation";
 import { checkoutWithStripe } from "~/utils/stripe/server";
-import { getErrorRedirect } from "~/utils/helpers";
+import { getErrorRedirect } from "~/utils/utils";
 import { getStripe } from "~/utils/stripe/client";
 import { toast } from "../Toasts/use-toast";
 

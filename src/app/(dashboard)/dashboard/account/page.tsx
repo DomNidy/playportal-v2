@@ -8,8 +8,6 @@ export default async function AccountPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  console.log(user);
-
   const startToday = new Date();
   startToday.setUTCHours(0, 0, 0, 0);
   const endToday = new Date();
@@ -28,12 +26,19 @@ export default async function AccountPage() {
     },
   );
 
-  const { data: userWithProduct } = await supabase
+  const {
+    data: userWithProduct,
+    status,
+    error,
+  } = await supabase
     .from("user_products")
     .select("*")
     .eq("user_id", user?.id ?? "")
     .eq("sub_status", "active")
+    .limit(1)
     .maybeSingle();
+
+  console.log(userWithProduct, status, error);
 
   // TODO: Rewrite this code to be more clear, it is unintuitive that `quotaLimits` and or `userWithProduct` being null means that the user has no sub
   if (!userWithProduct) {

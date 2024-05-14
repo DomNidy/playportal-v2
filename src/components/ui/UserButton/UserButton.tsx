@@ -11,7 +11,7 @@ import {
 } from "../dropdown-menu";
 import { useState } from "react";
 import { createClient } from "~/utils/supabase/client";
-import { getStatusRedirect } from "~/utils/helpers";
+import { getStatusRedirect } from "~/utils/utils";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 

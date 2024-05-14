@@ -15,7 +15,7 @@ import { Input } from "../Input";
 import { Button } from "../Button";
 import { useState } from "react";
 import { createClient } from "~/utils/supabase/client";
-import { getStatusRedirect, getURL } from "~/utils/helpers";
+import { getStatusRedirect, getURL } from "~/utils/utils";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { IconBrandGoogle } from "@tabler/icons-react";

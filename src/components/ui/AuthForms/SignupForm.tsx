@@ -5,7 +5,7 @@ import { cn } from "~/utils/utils";
 import { IconBrandGoogle } from "@tabler/icons-react";
 import { createClient } from "~/utils/supabase/client";
 import { Button } from "../Button";
-import { getURL } from "~/utils/helpers";
+import { getURL } from "~/utils/utils";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
