@@ -35,19 +35,9 @@ export default async function AccountPage() {
     .limit(1)
     .maybeSingle();
 
-  // TODO: Rewrite this code to be more clear, it is unintuitive that `quotaLimits` and or `userWithProduct` being null means that the user has no sub
-  if (!userWithProduct) {
-    return (
-      <div className="mb-4 flex flex-col">
-        <p className="text-center">You have no active subscription.</p>
-        <PricingSection displayMode="account" />
-      </div>
-    );
-  }
-
   return (
     <div>
-      <ManageAccount userWithProduct={userWithProduct} />
+      <ManageAccount userWithProduct={userWithProduct ?? undefined} />
     </div>
   );
 }
