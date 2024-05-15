@@ -151,7 +151,11 @@ export default function SigninForm() {
           </span>
           <BottomGradient />
         </Button>
-        <Link href={"/sign-up"}>Sign up instead</Link>
+        <div className="flex justify-between">
+          <Link href={"/sign-up"}>Sign up instead</Link>
+
+          <Link href={"/reset-password"}>Forgot your password?</Link>
+        </div>
       </div>
     </div>
   );

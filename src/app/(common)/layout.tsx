@@ -12,8 +12,8 @@ import LandingPageNavbar, {
 const meta = {
   title: "Playportal",
   description: "The type-beat video creation tool.",
-  icons: [{ rel: "icon", url: "/icon.png" }],
-  favicon: "/icon.png",
+  icons: [{ rel: "icon", url: "/playportal.svg" }],
+  favicon: "/playportal.svg",
   robots: "follow, index",
   url: getURL(),
 };
@@ -28,11 +28,15 @@ export async function generateMetadata(): Promise<Metadata> {
       "type beat",
       "beat stars",
       "drum kits",
+      "midi kits",
+      "free drum kits",
+      "free vsts",
       "loop kits",
       "tunestotube",
       "producer tools",
+      "tunestotube alternative",
     ],
-    authors: [{ name: "Dom Nidy", url: "https://my-website.com" }],
+    authors: [{ name: "Playportal", url: "https://playportal.app" }],
     creator: "Playportal",
     publisher: "Playportal",
     icons: { icon: meta.favicon },
@@ -47,7 +51,7 @@ export async function generateMetadata(): Promise<Metadata> {
     twitter: {
       card: "summary_large_image",
       site: "@playportal",
-      creator: "@my-twitter",
+      creator: "@playportal",
       title: meta.title,
       description: meta.description,
       images: [meta.favicon],
@@ -62,7 +66,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={` ${GeistSans.className} bg-black`}>
+      <body className={` ${GeistSans.className} bg-black `}>
+        <div className="landing-bg-gradient pointer-events-none absolute top-0 h-[1450px] w-full" />
+
         <Suspense fallback={<LandingPageNavbarFallback />}>
           <LandingPageNavbar />
         </Suspense>

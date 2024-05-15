@@ -20,14 +20,25 @@ import { getFileExtension } from "~/utils/utils";
 import { toast } from "../Toasts/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import AudioFileDropzone from "./AudioFileDropzone";
+import ImageFileDropzone from "./ImageFileDropzone";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../select";
+import { type VideoPreset } from "~/definitions/api-schemas";
 
-import AudioFileDropzone from "./AudioFIleDropzone";
-import ImageFileDropzone from "./ImageFIleDropzone";
+// Hardcoded at 15MB
+const MAX_IMAGE_SIZE = 15 * 1024 * 1024;
 
-const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
-const MAX_AUDIO_SIZE = 60 * 1024 * 1024; // 60MB
-
-export default function CreateVideoForm() {
+export default function CreateVideoForm({
+  fileSizeQuotaLimitBytes,
+}: {
+  fileSizeQuotaLimitBytes: number;
+}) {
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   //* We only ever set this to true and never reset it back to false since the user is supposed to be redirected
@@ -47,6 +58,7 @@ export default function CreateVideoForm() {
       videoTitle: "My video",
       audioFile: audioFile ?? "",
       imageFile: imageFile ?? "",
+      videoPreset: "YouTube" as keyof typeof VideoPreset,
     } as z.infer<typeof CreateVideoFormSchema>,
   });
 
@@ -76,6 +88,7 @@ export default function CreateVideoForm() {
         imageFileContentType: imageFile?.type,
         imageFileExtension: imageFileExtension,
         imageFileSize: imageFile?.size,
+        videoPreset: data.videoPreset,
       },
       {
         onError(error) {
@@ -141,7 +154,7 @@ export default function CreateVideoForm() {
         return;
       }
 
-      if (file.size > MAX_AUDIO_SIZE) {
+      if (file.size > fileSizeQuotaLimitBytes) {
         form.setError("audioFile", {
           type: "fileSize",
           message: `Passed audio file is too large (${(
@@ -150,14 +163,14 @@ export default function CreateVideoForm() {
             1024
           ).toFixed(
             2,
-          )} MB), must be less than ${MAX_AUDIO_SIZE / 1024 / 1024}MB`,
+          )} MB), must be less than ${fileSizeQuotaLimitBytes / 1024 / 1024}MB`,
         });
         return;
       }
 
       setAudioFile(file);
     },
-    [form],
+    [fileSizeQuotaLimitBytes, form],
   );
 
   const onImageFileChange = useCallback(
@@ -166,7 +179,7 @@ export default function CreateVideoForm() {
         return;
       }
 
-      if (file.size > MAX_IMAGE_SIZE) {
+      if (file.size > fileSizeQuotaLimitBytes) {
         form.setError("imageFile", {
           type: "fileSize",
           message: `Passed image file is too large (${(
@@ -175,13 +188,13 @@ export default function CreateVideoForm() {
             1024
           ).toFixed(
             2,
-          )} MB), must be less than ${MAX_IMAGE_SIZE / 1024 / 1024}MB`,
+          )} MB), must be less than ${fileSizeQuotaLimitBytes / 1024 / 1024}MB`,
         });
         return;
       }
       setImageFile(file);
     },
-    [form],
+    [fileSizeQuotaLimitBytes, form],
   );
 
   return (
@@ -192,85 +205,163 @@ export default function CreateVideoForm() {
             videoTitle: data.videoTitle,
             audioFile: audioFile!,
             imageFile: imageFile!,
+            videoPreset: data.videoPreset,
           });
         })}
       >
         {formStage === "UploadAudio" && (
-          <FormField
-            name={"audioFile"}
-            control={form.control}
-            render={({ field }) => (
-              <FormItem className="mt-4">
-                <FormLabel>Audio File</FormLabel>
-                <AudioFileDropzone
-                  audioFileName={audioFile?.name}
-                  allowedAudioFileSizeBytes={MAX_AUDIO_SIZE}
-                  onDrop={(acceptedFiles) => {
-                    field.onChange(acceptedFiles[0]);
-                    onAudioFileChange(acceptedFiles[0]);
+          <>
+            {/* Only display the continue button when we have an audio file */}
+            {form.getValues().audioFile && (
+              <div className="flex-end flex">
+                <Button
+                  className="ml-auto"
+                  onClick={() => {
+                    if (!form.getValues().audioFile) {
+                      toast({
+                        title: "Error",
+                        description: "No audio file was entered.",
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+                    setFormStage("UploadImage");
                   }}
-                  onDropAccepted={() => setFormStage("UploadImage")}
-                />
-                <FormDescription>
-                  The audio file to create the video with.
-                </FormDescription>
-                <FormMessage>
-                  {" "}
-                  {form.formState.errors?.audioFile?.message?.toString()}{" "}
-                </FormMessage>
-              </FormItem>
+                >
+                  Next
+                </Button>
+              </div>
             )}
-          />
+
+            <FormField
+              name={"audioFile"}
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Audio File</FormLabel>
+                  <AudioFileDropzone
+                    audioFileName={audioFile?.name}
+                    allowedAudioFileSizeBytes={fileSizeQuotaLimitBytes}
+                    onDrop={(acceptedFiles) => {
+                      field.onChange(acceptedFiles[0]);
+                      onAudioFileChange(acceptedFiles[0]);
+                    }}
+                    onDropAccepted={() => setFormStage("UploadImage")}
+                  />
+                  <FormDescription>
+                    The audio file to create the video with.
+                  </FormDescription>
+                  <FormMessage>
+                    {" "}
+                    {form.formState.errors?.audioFile?.message?.toString()}{" "}
+                  </FormMessage>
+                </FormItem>
+              )}
+            />
+          </>
         )}
 
         {formStage === "UploadImage" && (
-          <FormField
-            name={"imageFile"}
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Image File</FormLabel>
-                <FormControl>
-                  <ImageFileDropzone
-                    allowedImageFileSizeBytes={MAX_IMAGE_SIZE}
-                    imageFileName={imageFile?.name}
-                    onDrop={(acceptedFiles) => {
-                      field.onChange(acceptedFiles[0]);
-                      onImageFileChange(acceptedFiles[0]);
-                    }}
-                    onDropAccepted={() => setFormStage("VideoOptions")}
-                  />
-                </FormControl>
-                <FormDescription>
-                  Image to render the video with.
-                </FormDescription>
-                <FormMessage>
-                  {" "}
-                  {form.formState.errors?.imageFile?.message?.toString()}{" "}
-                </FormMessage>
-              </FormItem>
-            )}
-          />
+          <>
+            <div className="flex justify-between">
+              <Button onClick={() => setFormStage("UploadAudio")}>
+                Go back
+              </Button>
+
+              {/* Only display the continue button when we have an image file */}
+              {form.getValues().imageFile && (
+                <Button
+                  onClick={() => {
+                    if (!form.getValues().imageFile) {
+                      toast({
+                        title: "Error",
+                        description: "No image file was entered.",
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+                    setFormStage("VideoOptions");
+                  }}
+                >
+                  Next
+                </Button>
+              )}
+            </div>
+
+            <FormField
+              name={"imageFile"}
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Image File</FormLabel>
+                  <FormControl>
+                    <ImageFileDropzone
+                      allowedImageFileSizeBytes={MAX_IMAGE_SIZE}
+                      imageFileName={imageFile?.name}
+                      onDrop={(acceptedFiles) => {
+                        field.onChange(acceptedFiles[0]);
+                        onImageFileChange(acceptedFiles[0]);
+                      }}
+                      onDropAccepted={() => setFormStage("VideoOptions")}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Image to render the video with.
+                  </FormDescription>
+                  <FormMessage>
+                    {" "}
+                    {form.formState.errors?.imageFile?.message?.toString()}{" "}
+                  </FormMessage>
+                </FormItem>
+              )}
+            />
+          </>
         )}
 
         {formStage === "VideoOptions" && (
-          <FormField
-            control={form.control}
-            name="videoTitle"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Video Title</FormLabel>
-                <FormControl>
-                  <Input placeholder="My video" {...field} />
-                </FormControl>
-                <FormDescription>
-                  Name of the video, this will not be the final title on
-                  youtube, it is just used for internal organization
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <>
+            <Button onClick={() => setFormStage("UploadImage")}>Go back</Button>
+            <FormField
+              control={form.control}
+              name="videoTitle"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Video Title</FormLabel>
+                  <FormControl>
+                    <Input placeholder="My video" {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    Name of the video, this will not be the final title on
+                    youtube, it is just used for internal organization
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Select
+              defaultValue="YouTube"
+              onValueChange={(value) => {
+                // Check if the value is a valid preset
+                if (value in CreateVideoFormSchema.shape.videoPreset.enum) {
+                  form.setValue("videoPreset", value as VideoPreset);
+                }
+              }}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Theme" />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.values(
+                  CreateVideoFormSchema.shape.videoPreset.enum,
+                ).map((preset) => (
+                  <SelectItem key={preset} value={preset}>
+                    {preset}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </>
         )}
 
         {/** Swapping the next/Link component for a default button makes the styling fixed, but as link, the background doesnt work? */}

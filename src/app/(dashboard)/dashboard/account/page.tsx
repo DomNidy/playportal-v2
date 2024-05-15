@@ -1,4 +1,5 @@
-import StripeBillingPortalButton from "~/components/ui/StripeBillingPortalButton/StripeBillingPortalButton";
+import PricingSection from "~/components/ui/LandingPage/PricingSection";
+import ManageAccount from "~/components/ui/ManageAccount/ManageAccount";
 import { createClient } from "~/utils/supabase/server";
 
 // TODO: Implement error handling here
@@ -26,11 +27,7 @@ export default async function AccountPage() {
     },
   );
 
-  const {
-    data: userWithProduct,
-    status,
-    error,
-  } = await supabase
+  const { data: userWithProduct } = await supabase
     .from("user_products")
     .select("*")
     .eq("user_id", user?.id ?? "")
@@ -38,35 +35,19 @@ export default async function AccountPage() {
     .limit(1)
     .maybeSingle();
 
-  console.log(userWithProduct, status, error);
-
   // TODO: Rewrite this code to be more clear, it is unintuitive that `quotaLimits` and or `userWithProduct` being null means that the user has no sub
   if (!userWithProduct) {
     return (
-      <div className="flex flex-col">
-        <p>You have no active subscription.</p>
-        <StripeBillingPortalButton labelText="View your Billing Info" />
+      <div className="mb-4 flex flex-col">
+        <p className="text-center">You have no active subscription.</p>
+        <PricingSection displayMode="account" />
       </div>
     );
   }
 
   return (
     <div>
-      <div>
-        <StripeBillingPortalButton />
-        <ul>
-          <li>
-            <label>Subscription Plan: </label>
-            {userWithProduct.product_name}
-          </li>
-          <li>
-            <label>Video(s) created Today: </label>
-            {quotaUsage} / {quotaLimits?.create_video_daily_quota ?? 0}
-          </li>
-        </ul>
-      </div>
-
-      <div>Quota resets at {endToday.toString()}</div>
+      <ManageAccount userWithProduct={userWithProduct} />
     </div>
   );
 }

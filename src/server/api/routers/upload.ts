@@ -11,7 +11,7 @@ import { type CreateVideoOptionsSchema } from "~/definitions/api-schemas";
 import redis from "~/utils/redis";
 import { Ratelimit } from "@upstash/ratelimit";
 import { headers } from "next/headers";
-
+import { VideoPreset } from "~/definitions/api-schemas";
 const ratelimit = new Ratelimit({
   redis: redis,
   analytics: true,
@@ -29,6 +29,7 @@ export const uploadRouter = createTRPCRouter({
         imageFileSize: z.number().optional(),
         audioFileExtension: z.string().nullable(),
         imageFileExtension: z.string().nullable(),
+        videoPreset: z.nativeEnum(VideoPreset),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -96,6 +97,12 @@ export const uploadRouter = createTRPCRouter({
           );
           throw new TRPCClientError(
             `You have exceeded your daily quota usage, please wait until tomorrow, or upgrade your plan.`,
+          );
+        }
+
+        if (input.audioFileSize > userQuotas.file_size_limit_mb * 1024 * 1024) {
+          throw new TRPCClientError(
+            `The audio file you have uploaded exceeds your plans maximum limit.`,
           );
         }
 
@@ -188,6 +195,7 @@ export const uploadRouter = createTRPCRouter({
             user_id: ctx.user.id,
             video_output_options: {
               quality_level: "high",
+              preset: input.videoPreset,
             },
           };
 

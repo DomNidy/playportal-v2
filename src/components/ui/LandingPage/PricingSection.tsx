@@ -14,7 +14,11 @@ export type PricingPlan = {
   planData: Tables<"products_prices">;
 };
 
-export default async function PricingSection() {
+export default async function PricingSection({
+  displayMode,
+}: {
+  displayMode: "landing" | "account";
+}) {
   // Fetch the data for each pricing option here
 
   const supabase = createClient();
@@ -40,7 +44,9 @@ export default async function PricingSection() {
   );
 
   return (
-    <div className="mt-[400px] flex max-w-[800px] flex-col items-center md:mt-[440px] lg:mt-[600px] ">
+    <div
+      className={`${displayMode === "landing" ? "mt-[400px] md:mt-[440px] lg:mt-[600px]" : ""} flex max-w-[800px] flex-col items-center`}
+    >
       <h2 className="text-center text-3xl font-semibold tracking-tighter text-white md:text-4xl">
         Our Plans
       </h2>

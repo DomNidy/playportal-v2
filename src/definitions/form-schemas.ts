@@ -1,4 +1,18 @@
 import { z } from "zod";
+import { VideoPreset } from "./api-schemas";
+
+export const ResetPasswordFormSchema = z.object({
+  email: z.string().email(),
+});
+
+export const UpdatePasswordFormSchema = z
+  .object({
+    password: z.string().min(8),
+    passwordConfirmation: z.string().min(8),
+  })
+  .refine((data) => data.password === data.passwordConfirmation, {
+    message: "Passwords must match.",
+  });
 
 // We will validate the files on our aws backend anyway
 export const CreateVideoFormSchema = z.object({
@@ -9,6 +23,10 @@ export const CreateVideoFormSchema = z.object({
     .max(100, "Title must be at most 100 characters long"),
   audioFile: z.any().refine(
     (file: File) => {
+      if (!file) {
+        return false;
+      }
+
       // TODO: Problem, we are receiving the file as a string instead of a File
       return file.name.endsWith(".mp3") || file.name.endsWith(".wav");
     },
@@ -21,6 +39,11 @@ export const CreateVideoFormSchema = z.object({
     .refine(
       (file: File) => {
         const filePath = file.name;
+
+        if (!filePath) {
+          return false;
+        }
+
         return (
           filePath.endsWith(".png") ||
           filePath.endsWith(".jpg") ||
@@ -36,4 +59,5 @@ export const CreateVideoFormSchema = z.object({
     )
     .optional()
     .nullish(),
+  videoPreset: z.nativeEnum(VideoPreset),
 });

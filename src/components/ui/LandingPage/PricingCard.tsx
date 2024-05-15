@@ -6,10 +6,9 @@ import { Button } from "../Button";
 import { type PricingPlan } from "./PricingSection";
 import { type Tables } from "types_db";
 import { createClient } from "~/utils/supabase/client";
-import { toast } from "../Toasts/use-toast";
 import { usePathname, useRouter } from "next/navigation";
 import { checkoutWithStripe } from "~/utils/stripe/server";
-import { getErrorRedirect } from "~/utils/utils";
+import { getErrorRedirect, getStatusRedirect } from "~/utils/utils";
 import { getStripe } from "~/utils/stripe/client";
 
 export function PricingCard({
@@ -26,19 +25,19 @@ export function PricingCard({
   const handleStripeCheckout = async (
     productData: Tables<"products_prices">,
   ) => {
-    console.log("Ran");
-    const { data: user } = await supabase.auth.getUser();
+    // Need a session
+    const { data: userData, error } = await supabase.auth.getUser();
+    const { user } = userData;
 
     // TODO: Redirect to sign up flow
-    if (!user) {
-      toast({
-        title: "Error",
-        description:
+    if (!user ?? error) {
+      return router.push(
+        getStatusRedirect(
+          "/sign-up",
+          "Please sign up ",
           "You must be signed in to purchase a plan. Redirecting to sign up page.",
-        variant: "default",
-      });
-
-      return router.push("/signup");
+        ),
+      );
     }
 
     const { errorRedirect, sessionId } = await checkoutWithStripe({

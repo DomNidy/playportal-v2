@@ -12,8 +12,8 @@ import { createClient } from "~/utils/supabase/server";
 const meta = {
   title: "Playportal",
   description: "The type-beat video creation tool.",
-  icons: [{ rel: "icon", url: "/icon.png" }],
-  favicon: "/icon.png",
+  icons: [{ rel: "icon", url: "/playportal.svg" }],
+  favicon: "/playportal.svg",
   robots: "follow, index",
   url: getURL(),
 };

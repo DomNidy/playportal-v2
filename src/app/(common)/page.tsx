@@ -140,21 +140,10 @@ export default function Home() {
         />
       </div>
 
+      <PricingSection displayMode="landing" />
       <div id="pricing" />
-      <PricingSection />
 
       <div className=" mt-32 h-32 w-full"></div>
     </main>
   );
-}
-
-// const supabase = createClient();
-
-//   const { data: products } = await supabase
-//     .from("products_prices")
-//     .select("*")
-//     .eq("product_active", true)
-//     .eq("price_active", true);
-{
-  /* <PricingPage products={products ?? []} /> */
 }

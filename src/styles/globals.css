@@ -74,3 +74,29 @@
     @apply bg-background text-foreground;
   }
 }
+
+.landing-bg-gradient {
+  background: rgb(211, 152, 239, 0.05);
+  background: -moz-linear-gradient(
+    180deg,
+    rgba(211, 152, 239, 1, 0.05) 0%,
+    rgba(114, 106, 115, 0.05) 50%,
+    rgba(114, 106, 115, 0.0032) 75%,
+    rgba(163, 151, 243, 0) 73%
+  );
+  background: -webkit-linear-gradient(
+    180deg,
+    rgba(211, 152, 239, 0.05) 0%,
+    rgba(114, 106, 115, 0.05) 50%,
+    rgba(114, 106, 115, 0.0032) 75%,
+    rgba(163, 151, 243, 0) 73%
+  );
+  background: linear-gradient(
+    180deg,
+    rgba(211, 152, 239, 0.05) 0%,
+    rgba(114, 106, 115, 0.05) 50%,
+    rgba(114, 106, 115, 0.0032) 75%,
+    rgba(163, 151, 243, 0) 73%
+  );
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#d398ef",endColorstr="#a397f3",GradientType=1);
+}
