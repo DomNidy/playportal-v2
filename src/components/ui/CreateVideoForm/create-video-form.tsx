@@ -20,8 +20,8 @@ import { getFileExtension } from "~/utils/utils";
 import { toast } from "../Toasts/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import AudioFileDropzone from "~/components/ui/CreateVideoForm/AudioFileDropzone";
-import ImageFileDropzone from "~/components/ui/CreateVideoForm/ImageFileDropzone";
+import AudioFileDropzone from "./AudioFileDropzone";
+import ImageFileDropzone from "./ImageFileDropzone";
 import {
   Select,
   SelectContent,
