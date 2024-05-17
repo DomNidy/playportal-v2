@@ -1,5 +1,4 @@
 import Image from "next/image";
-import { AspectRatio } from "../aspect-ratio";
 import { getURL } from "~/utils/utils";
 import Link from "next/link";
 

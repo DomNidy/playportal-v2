@@ -80,7 +80,7 @@ export function PricingCard({
       </h2>
 
       <h1 className="mb-2 text-[32px] font-bold tracking-tighter text-white">
-        {planPrice}
+        ${planPrice}
       </h1>
 
       {planDescription}

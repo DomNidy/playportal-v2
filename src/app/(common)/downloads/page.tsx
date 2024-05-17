@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+import { type Metadata } from "next";
 import Product from "~/components/ui/Product/Product";
 import { createClient } from "~/utils/supabase/server";
 import { getURL } from "~/utils/utils";
@@ -57,7 +57,7 @@ export default async function DownloadsPage() {
   const supabase = createClient();
 
   // TODO: Implement pagination eventually
-  const { data: kits, error } = await supabase.from("kits").select("*");
+  const { data: kits } = await supabase.from("kits").select("*");
 
   return (
     <div className="flex flex-col items-center px-24">

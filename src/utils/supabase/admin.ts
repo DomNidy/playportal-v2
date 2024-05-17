@@ -3,8 +3,7 @@ import type Stripe from "stripe";
 import type { Tables, Database, TablesInsert } from "types_db";
 import { env } from "~/env";
 import { stripe } from "../stripe/config";
-import { toDateTime, toIsoStringOrNull } from "../utils";
-import { TRPCError } from "@trpc/server";
+import { toIsoStringOrNull } from "../utils";
 
 export const supabaseAdmin = createClient<Database>(
   env.NEXT_PUBLIC_SUPABASE_URL,

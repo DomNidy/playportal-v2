@@ -1,5 +1,5 @@
 import React from "react";
-import { Tables } from "types_db";
+import { type Tables } from "types_db";
 import { env } from "~/env";
 import { createClient } from "~/utils/supabase/server";
 import { PricingCard } from "./PricingCard";
@@ -69,7 +69,7 @@ export default async function PricingSection({
               </p>,
             ]}
             planName="BASIC"
-            planPrice={basicPlan.unit_amount ?? 495 / 100}
+            planPrice={(basicPlan.unit_amount ?? 495) / 100}
           />
         )}
 
@@ -90,7 +90,7 @@ export default async function PricingSection({
               </p>,
             ]}
             planName="STANDARD"
-            planPrice={standardPlan.unit_amount ?? 995 / 100}
+            planPrice={(standardPlan.unit_amount ?? 995) / 100}
           />
         )}
 
@@ -111,7 +111,7 @@ export default async function PricingSection({
               </p>,
             ]}
             planName="PRO"
-            planPrice={proPlan.unit_amount ?? 1495 / 100}
+            planPrice={(proPlan.unit_amount ?? 1495) / 100}
           />
         )}
       </div>

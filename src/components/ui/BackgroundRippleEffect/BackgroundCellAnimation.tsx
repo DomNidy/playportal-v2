@@ -8,7 +8,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { motion, useAnimation } from "framer-motion";
 import { cn } from "~/utils/utils";
-import Typography from "../Typography";
 
 export const BackgroundCellAnimation = () => {
   return (

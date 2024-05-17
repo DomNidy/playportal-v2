@@ -2,18 +2,14 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Label } from "../Label";
-import { Input } from "../Input";
-import { Button } from "../Button";
-import { createClient } from "~/utils/supabase/client";
 import Link from "next/link";
 import StripeBillingPortalButton from "../StripeBillingPortalButton/StripeBillingPortalButton";
-import { Tables } from "types_db";
+import { type Tables } from "types_db";
 
 export default function ManageAccount({
   userWithProduct,
@@ -43,7 +39,9 @@ export default function ManageAccount({
                 <p>
                   No active subscription,{" "}
                   <span>
-                    <Link href={"/#pricing"} className="text-blue-400">click here to upgrade.</Link>
+                    <Link href={"/#pricing"} className="text-blue-400">
+                      click here to upgrade.
+                    </Link>
                   </span>
                 </p>
               )}
