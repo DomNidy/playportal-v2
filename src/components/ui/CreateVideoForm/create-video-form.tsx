@@ -320,7 +320,13 @@ export default function CreateVideoForm({
 
         {formStage === "VideoOptions" && (
           <>
-            <Button onClick={() => setFormStage("UploadImage")}>Go back</Button>
+            <Button
+              type="button"
+              tabIndex={0}
+              onClick={() => setFormStage("UploadImage")}
+            >
+              Go back
+            </Button>
             <FormField
               control={form.control}
               name="videoTitle"
@@ -338,7 +344,6 @@ export default function CreateVideoForm({
                 </FormItem>
               )}
             />
-
             <Select
               defaultValue="YouTube"
               onValueChange={(value) => {
@@ -361,18 +366,15 @@ export default function CreateVideoForm({
                 ))}
               </SelectContent>
             </Select>
+            <Button
+              tabIndex={1}
+              type="submit"
+              className="text-black"
+              disabled={isUploadingFiles || genUploadURL.isPending}
+            >
+              Create video
+            </Button>
           </>
-        )}
-
-        {/** Swapping the next/Link component for a default button makes the styling fixed, but as link, the background doesnt work? */}
-        {formStage === "VideoOptions" && (
-          <Button
-            type="submit"
-            className="text-black"
-            disabled={isUploadingFiles || genUploadURL.isPending}
-          >
-            Create video
-          </Button>
         )}
 
         {isUploadingFiles && <p className="mt-2">Uploading files...</p>}

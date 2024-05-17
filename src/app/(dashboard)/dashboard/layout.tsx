@@ -1,5 +1,4 @@
 import "~/styles/globals.css";
-
 import { type Metadata } from "next";
 import { redirect } from "next/navigation";
 import { GeistSans } from "geist/font/sans";

@@ -129,8 +129,6 @@ export default function useOperationData(operationId: string | null): {
           .select("*")
           .eq("operation_id", operationId);
 
-        console.log(s3Key, "s3");
-
         setIsOperationDataLoading(false);
         setAssociatedFiles(s3Key.data ?? []);
         return;
@@ -193,6 +191,27 @@ export default function useOperationData(operationId: string | null): {
 
     void fetchStatus();
   }, [operationId, supabase]);
+
+  useEffect(() => {
+    console.log(
+      "Operation Status changed to: ",
+      operationStatus,
+      "fetching associated files",
+    );
+    // Query for associated files when the status changes to completed
+    if (operationStatus !== "Completed" ?? !operationId) return;
+
+    const fetchAssociatedFiles = async () => {
+      const s3Key = await supabase
+        .from("file_metadata")
+        .select("*")
+        .eq("operation_id", operationId);
+
+      setAssociatedFiles(s3Key.data ?? []);
+    };
+
+    void fetchAssociatedFiles();
+  }, [operationId, operationStatus, supabase]);
 
   return {
     video_title: videoTitle ?? "",

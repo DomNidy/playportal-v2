@@ -36,7 +36,10 @@
     "**/*.tsx",
     "**/*.cjs",
     "**/*.js",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    "next.config.mjs",
+    "content/support/test.mdx]"
   ],
+
   "exclude": ["node_modules"]
 }

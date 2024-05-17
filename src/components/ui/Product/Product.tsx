@@ -19,7 +19,7 @@ export default function Product({ product }: { product: ProductData }) {
 
   return (
     <div
-      className={`flex   ${product.variant === "default" ? "w-64 flex-col" : "w-auto sm:flex-row flex-col"} rounded-lg`}
+      className={`flex   ${product.variant === "default" ? "w-64 flex-col" : "w-auto sm:flex-row flex-col gap-2"} rounded-lg`}
     >
       <Image
         src={productImageURL}

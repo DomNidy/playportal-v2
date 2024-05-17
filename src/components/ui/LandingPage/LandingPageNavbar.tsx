@@ -75,6 +75,14 @@ export default function LandingPageNavbar() {
                 Pricing
               </Link>
             </NavigationMenuLink>
+            <NavigationMenuLink asChild>
+              <Link
+                className="cursor-pointer text-[0.8rem] font-medium text-muted/80 hover:text-white"
+                href="/support"
+              >
+                Support
+              </Link>
+            </NavigationMenuLink>
           </NavigationMenuList>
         </NavigationMenu>
       </div>
@@ -115,6 +123,36 @@ export default function LandingPageNavbar() {
             >
               Pricing
             </Link>
+            <Link
+              className="flex w-full items-center py-2 text-lg font-semibold"
+              href="/support"
+            >
+              Support
+            </Link>
+            {!user ? (
+              <>
+                <Link
+                  className="flex w-full items-center py-2 text-lg font-semibold"
+                  href="/sign-in"
+                >
+                  Log in
+                </Link>
+
+                <Link
+                  className="flex w-full items-center py-2 text-lg font-semibold"
+                  href="/sign-up"
+                >
+                  Sign up
+                </Link>
+              </>
+            ) : (
+              <Link
+                className="flex w-full items-center py-2 text-lg font-semibold"
+                href="/dashboard"
+              >
+                Dashboard
+              </Link>
+            )}
           </div>
         </SheetContent>
       </Sheet>

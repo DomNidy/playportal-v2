@@ -2,10 +2,16 @@
  * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially useful
  * for Docker builds.
  */
+
+import createMDX from "fumadocs-mdx/config";
 await import("./src/env.js");
+
+
+const withMDX = createMDX();
 
 /** @type {import("next").NextConfig} */
 const config = {
+    pageExtensions: ["js", "jsx", "ts", "tsx", "md", "mdx"],
     images:
     {
         remotePatterns: [
@@ -20,10 +26,7 @@ const config = {
                 hostname: "localhost",
             }
         ]
-
     }
-
-
 };
 
-export default config;
+export default withMDX(config);
