@@ -69,7 +69,7 @@ export default async function PricingSection({
               </p>,
             ]}
             planName="BASIC"
-            planPrice={4.99}
+            planPrice={basicPlan.unit_amount ?? 495 / 100}
           />
         )}
 
@@ -90,7 +90,7 @@ export default async function PricingSection({
               </p>,
             ]}
             planName="STANDARD"
-            planPrice={9.99}
+            planPrice={standardPlan.unit_amount ?? 995 / 100}
           />
         )}
 
@@ -111,7 +111,7 @@ export default async function PricingSection({
               </p>,
             ]}
             planName="PRO"
-            planPrice={19.99}
+            planPrice={proPlan.unit_amount ?? 1495 / 100}
           />
         )}
       </div>
