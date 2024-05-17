@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import Link from "next/link";
 import styledGridlines from "../../../public/styled-gridlines.svg";
-import dashboardPreview from "../../../public/dashboard-preview.webp";
+import dashboardPreview from "../../../public/dashboard-preview.png";
+import dashboardPresetPreview from "../../../public/dashboard-preview-preset.png";
 import clockIcon from "../../../public/clock-icon.svg";
 import Image from "next/image";
 import { TextGenerateEffect } from "~/components/ui/LandingPage/TextGenerateEffect";
@@ -48,6 +49,8 @@ export default function Home() {
           src={dashboardPreview}
           alt=""
           className="mt-12 w-[600px] md:mt-28 lg:w-[700px]"
+          quality={100}
+          priority
         />
       </ContainerScroll>
 
@@ -112,26 +115,10 @@ export default function Home() {
                     with the optimal aspect ratio for short-form video content.
                   </p>
                   <Image
-                    src={dashboardPreview}
+                    src={dashboardPresetPreview}
                     alt=""
                     className="w-[600px] lg:w-[700px] "
-                  />
-                </div>
-              ),
-            },
-            {
-              title: "Video Tags",
-              value: "videoTags",
-              content: (
-                <div className="flex flex-col items-center">
-                  <p className="max-w-[600px] text-center leading-7 text-[#F3F3F3] lg:text-justify ">
-                    Quickly generate high quality tags for your appropriate for
-                    your video.
-                  </p>
-                  <Image
-                    src={dashboardPreview}
-                    alt=""
-                    className="w-[600px] lg:w-[700px] "
+                    quality={100}
                   />
                 </div>
               ),
