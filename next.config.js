@@ -5,6 +5,25 @@
 await import("./src/env.js");
 
 /** @type {import("next").NextConfig} */
-const config = {};
+const config = {
+    images:
+    {
+        remotePatterns: [
+            {
+                protocol: "https",
+                port: '',
+                hostname: "playportal.app",
+            },
+            {
+                protocol: "http",
+                port: '3000',
+                hostname: "localhost",
+            }
+        ]
+
+    }
+
+
+};
 
 export default config;

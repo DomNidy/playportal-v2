@@ -96,6 +96,33 @@ export type Database = {
           },
         ]
       }
+      kits: {
+        Row: {
+          created_at: string
+          description: string | null
+          download_url: string
+          image_url: string | null
+          name: string
+          type: Database["public"]["Enums"]["kit_type"]
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          download_url: string
+          image_url?: string | null
+          name: string
+          type: Database["public"]["Enums"]["kit_type"]
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          download_url?: string
+          image_url?: string | null
+          name?: string
+          type?: Database["public"]["Enums"]["kit_type"]
+        }
+        Relationships: []
+      }
       operation_logs: {
         Row: {
           created_at: string
@@ -618,6 +645,7 @@ export type Database = {
     Enums: {
       file_origin: "PlayportalBackend" | "UserProvided"
       file_type: "Video" | "Audio" | "Image"
+      kit_type: "drum-kit" | "midi-kit" | "loop-kit" | "preset-kit" | "other"
       operation_status: "Ongoing" | "Failed" | "Completed"
       pricing_plan_interval: "day" | "week" | "month" | "year"
       pricing_type: "one_time" | "recurring"

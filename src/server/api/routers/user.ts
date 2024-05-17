@@ -13,10 +13,18 @@ import redis from "~/utils/redis";
 import { headers } from "next/headers";
 import { TRPCClientError } from "@trpc/client";
 
-const ratelimit = new Ratelimit({
+// Used for rate limit getPresignedUrlForFile
+const downloadRatelimit = new Ratelimit({
   redis: redis,
   analytics: true,
   limiter: Ratelimit.fixedWindow(25, "3 m"),
+});
+
+// Used for rate limiting getUserVideos
+const getUserVideosRatelimit = new Ratelimit({
+  redis: redis,
+  analytics: true,
+  limiter: Ratelimit.slidingWindow(50, "2 m"),
 });
 
 export const userRouter = createTRPCRouter({
@@ -28,6 +36,16 @@ export const userRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
+      const headersList = headers();
+      const ipIdentifier = headersList.get("x-real-ip");
+      const result = await getUserVideosRatelimit.limit(ipIdentifier ?? "");
+
+      if (!result.success) {
+        throw new TRPCClientError(
+          `Please wait a few minutes before sending another request.`,
+        );
+      }
+
       const offset = input.cursor ?? 0;
       const limit = input.limit ?? 10;
 
@@ -57,7 +75,7 @@ export const userRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const headersList = headers();
       const ipIdentifier = headersList.get("x-real-ip");
-      const result = await ratelimit.limit(ipIdentifier ?? "");
+      const result = await downloadRatelimit.limit(ipIdentifier ?? "");
 
       if (!result.success) {
         throw new TRPCClientError(
@@ -95,8 +113,18 @@ export const userRouter = createTRPCRouter({
           }),
           { expiresIn: env.S3_PRESIGNED_URL_DOWNLOAD_EXP_TIME_SECONDS },
         );
+      } else if (fileData.data?.user_id !== ctx.user.id) {
+        console.warn(
+          `User ${ctx.user.id} attempted to download file that they do not own ${input.s3Key}`,
+        );
+        // Don't reveal that the user attempted to download a file they don't own (for security reasons)
+        throw new TRPCClientError("File not found");
       }
 
-      throw new Error("User does not own the file");
+      // If we're here, the file wasn't found
+      console.warn(
+        `User ${ctx.user.id} attempted to download file that does not exist ${input.s3Key}`,
+      );
+      throw new TRPCClientError("File not found");
     }),
 });

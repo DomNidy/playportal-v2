@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import Product from "~/components/ui/Product/Product";
+import { createClient } from "~/utils/supabase/server";
 import { getURL } from "~/utils/utils";
 
 const meta = {
@@ -52,18 +53,27 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function DownloadsPage() {
+export default async function DownloadsPage() {
+  const supabase = createClient();
+
+  // TODO: Implement pagination eventually
+  const { data: kits, error } = await supabase.from("kits").select("*");
+
   return (
     <div className="flex flex-col items-center px-24">
       <div className="mt-24 grid justify-items-center gap-10 lg:grid-cols-2 xl:grid-cols-3">
-        <Product
-          product={{
-            title: "Aurora",
-            description: "A collection of 20 unique melodies.",
-            downloadLink: "downloadLink",
-            imageSrc: "/placeholder.jpg",
-          }}
-        />
+        {kits?.map((kit) => (
+          <Product
+            key={kit.name}
+            product={{
+              description: kit.description ?? "",
+              downloadLink: kit.download_url,
+              imageSrc: kit.image_url ?? "",
+              title: kit.name,
+              variant: "default",
+            }}
+          />
+        ))}
       </div>
     </div>
   );
