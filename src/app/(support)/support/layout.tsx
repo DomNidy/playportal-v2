@@ -9,7 +9,7 @@ import "~/styles/globals.css";
 
 const meta = {
   title: "Playportal | Support",
-  description: "The type-beat video creation tool.",
+  description: "Documentatio and support for Playportal, the type-beat video creation tool.",
   icons: [{ rel: "icon", url: "/playportal.svg" }],
   favicon: "/playportal.svg",
   robots: "follow, index",

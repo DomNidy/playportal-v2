@@ -10,8 +10,9 @@ import LandingPageNavbar, {
 } from "~/components/ui/LandingPage/LandingPageNavbar";
 
 const meta = {
-  title: "Playportal",
-  description: "The type-beat video creation tool.",
+  title: "Playportal | Type-Beat Video Creation Tool",
+  description:
+    "The type-beat video creation tool for music producers. Upload your beats, an optional image, and we'll render it into a video on our servers. Stay consistent with your uploads and grow your audience on YouTube, Instagram, and TikTok.",
   icons: [{ rel: "icon", url: "/playportal.svg" }],
   favicon: "/playportal.svg",
   robots: "follow, index",
@@ -35,6 +36,9 @@ export async function generateMetadata(): Promise<Metadata> {
       "tunestotube",
       "producer tools",
       "tunestotube alternative",
+      "upload audio to youtube",
+      "upload mp3 to youtube",
+      "upload wav to youtube",
     ],
     authors: [{ name: "Playportal", url: "https://playportal.app" }],
     creator: "Playportal",
