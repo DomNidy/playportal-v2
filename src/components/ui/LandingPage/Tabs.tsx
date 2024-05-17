@@ -43,7 +43,7 @@ export const Tabs = ({
     <>
       <div
         className={cn(
-          "no-visible-scrollbar relative flex h-28 w-full max-w-full flex-row items-center justify-center overflow-auto overflow-y-clip [perspective:1000px] sm:h-auto sm:overflow-visible",
+          "no-visible-scrollbar relative flex h-28 w-full max-w-full flex-row items-center justify-center gap-4 overflow-auto overflow-y-clip [perspective:1000px] sm:h-auto sm:overflow-visible",
           containerClassName,
         )}
       >
@@ -65,16 +65,19 @@ export const Tabs = ({
                 layoutId="clickedbutton"
                 transition={{ type: "spring", bounce: 0.3, duration: 0.6 }}
                 className={cn(
-                  "bg-ptl_accent-def absolute inset-0 rounded-full text-black  ",
+                  "border-1 absolute inset-0  rounded-full bg-ptl_accent-def text-black  ",
                   activeTabClassName,
                 )}
               />
             )}
 
-            <span className={`relative  flex text-white `}>{tab.title}</span>
+            <span className={`relative  flex font-semibold text-white `}>
+              {tab.title}
+            </span>
           </button>
         ))}
       </div>
+      <div className="h-[2px] w-[250px] bg-white/5" />
       <FadeInDiv
         tabs={tabs}
         active={active}

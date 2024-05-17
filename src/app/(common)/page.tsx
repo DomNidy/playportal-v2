@@ -84,11 +84,11 @@ export default function Home() {
         </h2>
 
         <Tabs
-          containerClassName="mt-8 "
+          containerClassName="mt-8"
           activeTabClassName="text-black"
           tabs={[
             {
-              title: "Create videos",
+              title: "Create Videos",
               value: "videos",
               content: (
                 <div className="flex flex-col items-center">
