@@ -14,6 +14,7 @@ import redis from "~/utils/redis";
 import { cookies, headers } from "next/headers";
 import { TRPCClientError } from "@trpc/client";
 import {
+  YoutubeChannelSummary,
   decryptYoutubeCredentials,
   getYoutubeChannelSummary,
   oAuth2Client,
@@ -173,6 +174,8 @@ export const userRouter = createTRPCRouter({
       .eq("service_name", "YouTube")
       .eq("user_id", ctx.user.id);
 
+    console.log(connectedAccounts);
+
     if (error) {
       console.error("Error while trying to get connected accounts: ", error);
       throw new TRPCClientError(
@@ -194,56 +197,84 @@ export const userRouter = createTRPCRouter({
       );
     }
 
-    // Create an array of all decrypted credentials owned by the user
-    const youtubeCredentialsArray: Credentials[] = encryptedYoutubeTokens
-      .map((token) => {
-        try {
-          const decryptedCredentials = decryptYoutubeCredentials(token);
+    type CredentialsWithChannelId = {
+      credentials: Credentials;
+      channelId?: string;
+    };
 
-          return decryptedCredentials;
-        } catch (error) {
-          // TODO: If this happens, we failed to decrypt one of the credentials, we might want to notify the user here as well
-          return null;
-        }
-      })
-      .filter((credentials) => credentials !== null) as Credentials[];
+    // Create an array of all decrypted credentials owned by the user
+    // We'll also store the channelId for each account, so we can identify them later
+    const youtubeCredentialsArray: CredentialsWithChannelId[] =
+      connectedAccounts
+        .map((account) => {
+          try {
+            if (!account.token) throw new Error("No token found");
+
+            const decryptedCredentials = decryptYoutubeCredentials(
+              account?.token as string,
+            );
+
+            return {
+              credentials: decryptedCredentials,
+              channelId: account?.service_account_id as string | undefined,
+            };
+          } catch (error) {
+            // TODO: If this happens, we failed to decrypt one of the credentials, we might want to notify the user here as well
+            return null;
+          }
+        })
+        .filter(
+          (credentials) => credentials !== null,
+        ) as CredentialsWithChannelId[];
 
     // For all retrieved credentials, we will refresh them, if any fail, we will remove them from the list
     // In case one of them fails, the user will need to re-authenticate that account
-    const refreshedYoutubeCredentials = (await Promise.all(
-      youtubeCredentialsArray.map(async (credentials) => {
+    // Then we'll return channel summaries for all the accounts
+    const youtubeChannelSummaries = (await Promise.all(
+      youtubeCredentialsArray.map(async (channelCreds) => {
         try {
           // Refresh the credentials if they expire soon or have already expired
-          const refreshedCredentials =
-            await refreshYoutubeCredentials(credentials);
+          const refreshedCredentials = await refreshYoutubeCredentials(
+            channelCreds.credentials,
+          );
 
           // If the token was refreshed, we need to update the database
-          if (refreshedCredentials.expiry_date !== credentials.expiry_date) {
+          if (
+            refreshedCredentials.expiry_date !==
+            channelCreds.credentials.expiry_date
+          ) {
             console.log("Token was refreshed");
 
-            const { channelAvatar, channelId, channelTitle } =
-              await getYoutubeChannelSummary(credentials);
+            const channelSummary = await getYoutubeChannelSummary(
+              channelCreds.credentials,
+            );
 
             await persistYoutubeCredentialsToDB(
               refreshedCredentials,
               ctx.user.id,
-              channelId,
-              channelAvatar ?? null,
-              channelTitle,
+              channelSummary.channelId,
+              channelSummary.channelAvatar ?? null,
+              channelSummary.channelTitle,
+            );
+
+            return channelSummary;
+          } else {
+            // If the token was not refreshed, we can just return the channel summary
+            return await getYoutubeChannelSummary(
+              channelCreds.credentials,
+              channelCreds.channelId,
             );
           }
-
-          return refreshedCredentials;
         } catch (err) {
           // User will need to re-authenticate this account
           console.error("Error refreshing token", err);
           return null;
         }
       }),
-    ).then((credentials) =>
-      credentials.filter((cred) => cred !== null),
-    )) as Credentials[];
+    ).then((channels) =>
+      channels.filter((channel) => channel !== null),
+    )) as YoutubeChannelSummary[];
 
-    return null;
+    return youtubeChannelSummaries;
   }),
 });

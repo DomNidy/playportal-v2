@@ -116,11 +116,19 @@ export function validateYoutubeCredentialsSchema(credentials: Credentials) {
 export async function refreshYoutubeCredentials(credentials: Credentials) {
   try {
     // We'll refresh the token if it will expire in this many seconds
-    const expiryThresholdMS = 1000 * 60 * 3333; // 3 minutes
+    const expiryThresholdMS = 1000 * 60 * 3; // 3 minutes
 
     // Check that the credentials contain a refresh token
     if (!credentials.refresh_token) {
       throw new Error("No refresh token found in credentials");
+    }
+
+    // If expiry time will not be soon, return the same credentials
+    if (
+      credentials.expiry_date &&
+      credentials.expiry_date - Date.now() > expiryThresholdMS
+    ) {
+      return credentials;
     }
 
     // We need to create a new OAuth2Client object to refresh the token
@@ -134,21 +142,12 @@ export async function refreshYoutubeCredentials(credentials: Credentials) {
     youtubeOAuthClient.setCredentials(credentials);
 
     // If token will expire soon or is already expired, retrieve a new one
-    if (
-      credentials.expiry_date &&
-      credentials.expiry_date - Date.now() < expiryThresholdMS
-    ) {
-      console.log("Refreshing token");
+    console.log("Refreshing token");
+    const { credentials: newCredentials } =
+      await youtubeOAuthClient.refreshAccessToken();
 
-      const { credentials: newCredentials } =
-        await youtubeOAuthClient.refreshAccessToken();
-
-      validateYoutubeCredentialsSchema(newCredentials);
-      return newCredentials;
-    }
-
-    // If the token is still valid, return the same credentials
-    return credentials;
+    validateYoutubeCredentialsSchema(newCredentials);
+    return newCredentials;
   } catch (error) {
     // User will need to re-authenticate
     console.error("Error refreshing token", error);
@@ -209,13 +208,61 @@ export async function persistYoutubeCredentialsToDB(
 }
 
 // TODO: This might not be a good practice, i dont know if the youtube api will always return the channel id ? read the docs
+
+export type YoutubeChannelSummary = {
+  channelId: string;
+  channelTitle: string;
+  channelAvatar: string | null;
+};
+
+// TODO: Review this, probably want to periodically refresh the channel summary
 // Returns summary of youtube channel associated with the provided credentials
 // We might also want to cache this with redis to prevent unnecessary requests and api quota usage
-export async function getYoutubeChannelSummary(credentials: Credentials) {
+// Pass in the channel ID if you already have it, otherwise it will be retrieved from the youtube API
+// Make sure the channel ID corresponds to the correct user before returning the summary
+export async function getYoutubeChannelSummary(
+  credentials: Credentials,
+  channelID?: string,
+): Promise<YoutubeChannelSummary> {
   try {
     if (!credentials.access_token) {
       throw new Error("No credentials provided");
     }
+
+    // Try to read the summary from the database first if the channel ID is provided
+    if (channelID) {
+      console.log(
+        "Trying to get channel summary from database",
+        "received channel ID: ",
+        channelID,
+      );
+
+      const {
+        data: channelData,
+      }: {
+        data: {
+          service_account_id: string;
+          service_account_name: string;
+          service_account_image_url: string | null;
+        } | null;
+      } = await supabaseAdmin
+        .from("oauth_creds")
+        .select(
+          "service_account_id, service_account_name, service_account_image_url",
+        )
+        .eq("service_account_id", channelID)
+        .single();
+
+      if (channelData?.service_account_name) {
+        return {
+          channelTitle: channelData.service_account_name,
+          channelAvatar: channelData.service_account_image_url,
+          channelId: channelData.service_account_id,
+        };
+      }
+    }
+
+    console.log("Trying to get channel ID from YouTube API");
 
     // Use the credentials to make a request to the YouTube API to get the user's channel ID
     const { data: channelData } = await youtube.channels.list({
@@ -238,7 +285,8 @@ export async function getYoutubeChannelSummary(credentials: Credentials) {
     return {
       channelId: channelData.items[0].id,
       channelTitle: channelData.items[0]?.snippet?.title ?? "Unknown Channel",
-      channelAvatar: channelData.items[0]?.snippet?.thumbnails?.default?.url,
+      channelAvatar:
+        channelData.items[0]?.snippet?.thumbnails?.default?.url ?? null,
     };
   } catch (err) {
     console.error("Error while trying to get channel ID: ", err);
