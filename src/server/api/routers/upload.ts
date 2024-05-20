@@ -6,7 +6,7 @@ import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { env } from "~/env";
 import { supabaseAdmin } from "~/utils/supabase/admin";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { s3Client, sqsClient } from "~/server/db";
+import { s3Client, sqsClient } from "~/server/aws-clients";
 import { type CreateVideoOptionsSchema } from "~/definitions/api-schemas";
 import redis from "~/utils/redis";
 import { Ratelimit } from "@upstash/ratelimit";
@@ -106,7 +106,7 @@ export const uploadRouter = createTRPCRouter({
           );
         }
 
-        // This rpc is a transaction which creates the operation record, creates transaaction record, and decrements the user balaance
+        // This rpc is a transaction which creates the operation record, creates transaction recor
         const { data: transactionData, error: createOperationError } =
           await supabaseAdmin.rpc("create_operation_and_transaction", {
             user_id: ctx.user.id,
@@ -175,6 +175,9 @@ export const uploadRouter = createTRPCRouter({
 
           // Create message that we will post to sqs queue
           const createVideoMessage: z.infer<typeof CreateVideoOptionsSchema> = {
+            kind: "CreateVideoOptions",
+            // TODO: Read if we should upload to youtube after creation from the submitted form data
+            upload_video_to_youtube_after_creation: false,
             associated_transaction_id: transactionData.transaction_id,
             operation: {
               id: transactionData.operation_id,
@@ -200,12 +203,14 @@ export const uploadRouter = createTRPCRouter({
           };
 
           // Post the message to sqs queue
-          await sqsClient.send(
+          const sendMsgResult = await sqsClient.send(
             new SendMessageCommand({
-              QueueUrl: env.SQS_QUEUE_URL,
+              QueueUrl: env.SQS_CREATE_VIDEO_QUEUE_URL,
               MessageBody: JSON.stringify(createVideoMessage),
             }),
           );
+
+          console.log("Message sent to SQS queue", sendMsgResult);
 
           return {
             presignedUrlAudio: presignedUrlAudio,

@@ -20,7 +20,7 @@ export default async function AccountPage() {
     })
     .maybeSingle();
 
-  const { data: quotaUsage } = await supabase.rpc(
+  const { data: createVideoDailyQuotaUsage } = await supabase.rpc(
     "get_user_quota_usage_daily_create_video",
     {
       user_id: user?.id ?? "",
@@ -37,7 +37,15 @@ export default async function AccountPage() {
 
   return (
     <div>
-      <ManageAccount userWithProduct={userWithProduct ?? undefined} />
+      <ManageAccount
+        userWithProduct={userWithProduct ?? undefined}
+        quotas={{
+          createVideo: {
+            dailyQuotaLimit: quotaLimits?.create_video_daily_quota ?? 0,
+            dailyQuotaUsage: createVideoDailyQuotaUsage ?? 0,
+          },
+        }}
+      />
     </div>
   );
 }

@@ -6,7 +6,7 @@ import {
   type ObjectIdentifier,
 } from "@aws-sdk/client-s3";
 import { env } from "~/env";
-import { s3Client } from "~/server/db";
+import { s3Client } from "~/server/aws-clients";
 import { supabaseAdmin } from "~/utils/supabase/admin";
 import redis from "~/utils/redis";
 import { Ratelimit } from "@upstash/ratelimit";

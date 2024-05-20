@@ -1,17 +1,20 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { s3Client } from "~/server/db";
+import { s3Client } from "~/server/aws-clients";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { env } from "~/env";
 import {
   determineBucketNameFromS3Key,
+  getURL,
   parseFileExtensionFromS3Key,
 } from "~/utils/utils";
 import { Ratelimit } from "@upstash/ratelimit";
 import redis from "~/utils/redis";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { TRPCClientError } from "@trpc/client";
+import { oAuth2Client } from "~/utils/oauth/youtube";
+import { CodeChallengeMethod } from "google-auth-library";
 
 // Used for rate limit getPresignedUrlForFile
 const downloadRatelimit = new Ratelimit({
@@ -65,6 +68,32 @@ export const userRouter = createTRPCRouter({
         nextCursor: nextCursor,
       };
     }),
+
+  // Generates an authorization url for the user to authenticate youtube access
+  getYouTubeAuthorizationURL: protectedProcedure.query(async ({ ctx }) => {
+    // We need to generate a code verifier and code challenge, then store the code verifier in a secure cookie
+    const { codeChallenge, codeVerifier } =
+      await oAuth2Client.generateCodeVerifierAsync();
+
+    cookies().set("codeVerifier", codeVerifier);
+
+    const authUrl = oAuth2Client.generateAuthUrl({
+      access_type: "offline",
+      scope: ["https://www.googleapis.com/auth/youtube.upload"],
+      // The state param is encoded into the url and sent back to the callback
+      // This will make it easy to identify the user that the token is associated with, and persist it to the db
+      state: ctx.user.id,
+      code_challenge_method: CodeChallengeMethod.S256,
+      code_challenge: codeChallenge,
+      redirect_uri: `${getURL()}/api/oauth/youtube/callback`,
+    });
+
+    return {
+      authUrl,
+      codeVerifier,
+    };
+  }),
+
   // Allows a user to download files from the output or input bucket (if they own them)
   getPresignedUrlForFile: protectedProcedure
     .input(

@@ -18,7 +18,7 @@ export const env = createEnv({
     S3_REGION: z.string().min(1),
     S3_PRESIGNED_URL_UPLOAD_EXP_TIME_SECONDS: z.number(),
     S3_PRESIGNED_URL_DOWNLOAD_EXP_TIME_SECONDS: z.number(),
-    SQS_QUEUE_URL: z.string().min(1),
+    SQS_CREATE_VIDEO_QUEUE_URL: z.string().min(1),
     SQS_REGION: z.string().min(1),
     SUPABASE_SERVICE_ROLE: z.string().min(1),
     // Stripe
@@ -27,7 +27,12 @@ export const env = createEnv({
     STRIPE_TRIAL_PERIOD_DAYS: z.number(),
     // Upstash
     UPSTASH_REDIS_REST_URL: z.string(),
-    UPSTASH_REDIS_REST_TOKEN: z.string()
+    UPSTASH_REDIS_REST_TOKEN: z.string(),
+    // OAuth
+    // We use this to encrypt & decrypt the OAuth token stored in the database
+    OAUTH_TOKEN_ENCRYPTION_KEY: z.string().min(1),
+    YOUTUBE_OAUTH_CLIENT_ID: z.string().min(1),
+    YOUTUBE_OAUTH_CLIENT_SECRET: z.string().min(1),
   },
 
   /**
@@ -62,7 +67,7 @@ export const env = createEnv({
     S3_REGION: process.env.S3_REGION,
     S3_PRESIGNED_URL_DOWNLOAD_EXP_TIME_SECONDS: parseInt(process.env.S3_PRESIGNED_URL_DOWNLOAD_EXP_TIME_SECONDS ?? "60"),
     S3_PRESIGNED_URL_UPLOAD_EXP_TIME_SECONDS: parseInt(process.env.S3_PRESIGNED_URL_UPLOAD_EXP_TIME_SECONDS ?? "180"),
-    SQS_QUEUE_URL: process.env.SQS_QUEUE_URL,
+    SQS_CREATE_VIDEO_QUEUE_URL: process.env.SQS_CREATE_VIDEO_QUEUE_URL,
     SQS_REGION: process.env.SQS_REGION,
     SUPABASE_SERVICE_ROLE: process.env.SUPABASE_SERVICE_ROLE,
     NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
@@ -71,6 +76,9 @@ export const env = createEnv({
     STRIPE_TRIAL_PERIOD_DAYS: parseInt(process.env.STRIPE_TRIAL_PERIOD_DAYS ?? "14"),
     UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
     UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
+    OAUTH_TOKEN_ENCRYPTION_KEY: process.env.OAUTH_TOKEN_ENCRYPTION_KEY,
+    YOUTUBE_OAUTH_CLIENT_ID: process.env.YOUTUBE_OAUTH_CLIENT_ID,
+    YOUTUBE_OAUTH_CLIENT_SECRET: process.env.YOUTUBE_OAUTH_CLIENT_SECRET,
     NEXT_PUBLIC_STRIPE_PRODUCT_ID_BASIC_PLAN: process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ID_BASIC_PLAN,
     NEXT_PUBLIC_STRIPE_PRODUCT_ID_STANDARD_PLAN: process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ID_STANDARD_PLAN,
     NEXT_PUBLIC_STRIPE_PRODUCT_ID_PRO_PLAN: process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ID_PRO_PLAN,

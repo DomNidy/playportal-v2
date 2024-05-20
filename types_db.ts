@@ -459,6 +459,45 @@ export type Database = {
           },
         ]
       }
+      upload_video_operations: {
+        Row: {
+          create_operation_id: string
+          created_at: string | null
+          id: string
+          status: Database["public"]["Enums"]["upload_video_status"]
+          upload_platform: Database["public"]["Enums"]["upload_platform"]
+        }
+        Insert: {
+          create_operation_id?: string
+          created_at?: string | null
+          id?: string
+          status?: Database["public"]["Enums"]["upload_video_status"]
+          upload_platform: Database["public"]["Enums"]["upload_platform"]
+        }
+        Update: {
+          create_operation_id?: string
+          created_at?: string | null
+          id?: string
+          status?: Database["public"]["Enums"]["upload_video_status"]
+          upload_platform?: Database["public"]["Enums"]["upload_platform"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "upload_video_operations_create_operation_id_fkey"
+            columns: ["create_operation_id"]
+            isOneToOne: false
+            referencedRelation: "operations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "upload_video_operations_create_operation_id_fkey"
+            columns: ["create_operation_id"]
+            isOneToOne: false
+            referencedRelation: "operations_filemetadata"
+            referencedColumns: ["operation_id"]
+          },
+        ]
+      }
       user_data: {
         Row: {
           avatar_url: string | null
@@ -659,6 +698,8 @@ export type Database = {
         | "unpaid"
         | "paused"
       transaction_type: "CreateVideo"
+      upload_platform: "YouTube"
+      upload_video_status: "Pending" | "Uploading" | "Completed" | "Failed"
     }
     CompositeTypes: {
       operation_and_transaction_ids: {

@@ -10,11 +10,19 @@ import { Label } from "../Label";
 import Link from "next/link";
 import StripeBillingPortalButton from "../StripeBillingPortalButton/StripeBillingPortalButton";
 import { type Tables } from "types_db";
+import ConnectYoutubeAccountButton from "../ConnectYoutubeAccountButton/ConnectYoutubeAccountButton";
 
 export default function ManageAccount({
   userWithProduct,
+  quotas,
 }: {
   userWithProduct?: Tables<"user_products">;
+  quotas?: {
+    createVideo: {
+      dailyQuotaLimit: number;
+      dailyQuotaUsage: number;
+    };
+  };
 }) {
   return (
     <Tabs defaultValue="account" className="dark w-[400px]">
@@ -48,6 +56,15 @@ export default function ManageAccount({
             </div>
 
             <div className="flex flex-col space-y-1">
+              <Label>Videos created Today</Label>
+              <p>
+                {userWithProduct && quotas
+                  ? `${quotas.createVideo.dailyQuotaUsage} / ${quotas.createVideo.dailyQuotaLimit}`
+                  : "You are not subscribed to any plan."}
+              </p>
+            </div>
+
+            <div className="flex flex-col space-y-1">
               <Label>Reset password</Label>
               <Link
                 id="update-password"
@@ -61,6 +78,11 @@ export default function ManageAccount({
             <div className="flex flex-col space-y-1">
               <Label>Manage Billing/Subscription</Label>
               <StripeBillingPortalButton />
+            </div>
+
+            <div className="flex flex-col space-y-1">
+              <Label>Connect YouTube Account</Label>
+              <ConnectYoutubeAccountButton />
             </div>
           </CardContent>
         </Card>
