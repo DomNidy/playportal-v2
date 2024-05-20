@@ -6,7 +6,6 @@ import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { env } from "~/env";
 import {
   determineBucketNameFromS3Key,
-  getURL,
   parseFileExtensionFromS3Key,
 } from "~/utils/utils";
 import { Ratelimit } from "@upstash/ratelimit";
@@ -14,14 +13,14 @@ import redis from "~/utils/redis";
 import { cookies, headers } from "next/headers";
 import { TRPCClientError } from "@trpc/client";
 import {
-  YoutubeChannelSummary,
+  type YoutubeChannelSummary,
   decryptYoutubeCredentials,
   getYoutubeChannelSummary,
   oAuth2Client,
   persistYoutubeCredentialsToDB,
   refreshYoutubeCredentials,
 } from "~/utils/oauth/youtube";
-import { CodeChallengeMethod, Credentials } from "google-auth-library";
+import { CodeChallengeMethod, type Credentials } from "google-auth-library";
 import { supabaseAdmin } from "~/utils/supabase/admin";
 
 // Used for rate limit getPresignedUrlForFile
@@ -166,6 +165,28 @@ export const userRouter = createTRPCRouter({
       );
       throw new TRPCClientError("File not found");
     }),
+
+  // Unlinks a youtube account from the user's account
+  unlinkYoutubeAccount: protectedProcedure
+    .input(z.object({ channelId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const { data: connectedAccounts, error } = await supabaseAdmin
+        .from("oauth_creds")
+        .delete()
+        .eq("service_account_id", input.channelId)
+        .eq("service_name", "YouTube")
+        .eq("user_id", ctx.user.id);
+
+      if (error) {
+        console.error("Error while trying to unlink account: ", error);
+        throw new TRPCClientError(
+          "Error occurred while trying to unlink the YouTube account, please try again or contact support.",
+        );
+      }
+
+      return connectedAccounts;
+    }),
+
   // Get connected accounts
   getConnectedYoutubeAccounts: protectedProcedure.query(async ({ ctx }) => {
     const { data: connectedAccounts, error } = await supabaseAdmin
@@ -186,7 +207,7 @@ export const userRouter = createTRPCRouter({
     // From all the connected accounts, we only want the encrypted tokens
     const encryptedYoutubeTokens = connectedAccounts
       ?.filter((account) => account?.token)
-      .map((account) => account.token as string);
+      .map((account) => account.token);
 
     // TODO: If this occurs, we might want to notify the user
     if (encryptedYoutubeTokens.length !== connectedAccounts.length) {
@@ -211,7 +232,7 @@ export const userRouter = createTRPCRouter({
             if (!account.token) throw new Error("No token found");
 
             const decryptedCredentials = decryptYoutubeCredentials(
-              account?.token as string,
+              account?.token,
             );
 
             return {
@@ -247,6 +268,7 @@ export const userRouter = createTRPCRouter({
 
             const channelSummary = await getYoutubeChannelSummary(
               channelCreds.credentials,
+              channelCreds.channelId,
             );
 
             await persistYoutubeCredentialsToDB(

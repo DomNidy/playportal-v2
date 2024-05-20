@@ -25,7 +25,12 @@ export default function ManageAccount({
   };
 }) {
   return (
-    <Tabs defaultValue="account" className="dark w-[400px]">
+    <Tabs
+      defaultValue="account"
+      className="dark mx-auto
+    mt-8 w-fit min-w-[400px]
+    "
+    >
       {/* Change grid-cols to grid-cols-2 if we want another tab */}
       <TabsList className="grid w-full grid-cols-1">
         <TabsTrigger value="account">Account</TabsTrigger>

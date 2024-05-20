@@ -137,12 +137,19 @@ export async function refreshYoutubeCredentials(credentials: Credentials) {
       clientId: env.YOUTUBE_OAUTH_CLIENT_ID,
       clientSecret: env.YOUTUBE_OAUTH_CLIENT_SECRET,
       redirectUri: `${getURL()}/api/oauth/youtube/callback`,
+      credentials: {
+        refresh_token: credentials.refresh_token,
+        access_token: credentials.access_token,
+        expiry_date: credentials.expiry_date,
+        token_type: credentials.token_type,
+        scope: credentials.scope,
+        id_token: credentials.id_token,
+      },
     });
 
     youtubeOAuthClient.setCredentials(credentials);
 
     // If token will expire soon or is already expired, retrieve a new one
-    console.log("Refreshing token");
     const { credentials: newCredentials } =
       await youtubeOAuthClient.refreshAccessToken();
 
