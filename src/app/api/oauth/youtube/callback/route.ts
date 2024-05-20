@@ -6,6 +6,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import {
   decryptYoutubeCredentials,
   encryptYoutubeCredentials,
+  getYoutubeChannelID,
   oAuth2Client,
   youtube,
 } from "~/utils/oauth/youtube";
@@ -15,7 +16,7 @@ import { getErrorRedirect, getStatusRedirect, getURL } from "~/utils/utils";
 
 export const dynamic = "force-dynamic";
 
-export async function GET(req: NextRequest, res: NextResponse) {
+export async function GET(req: NextRequest) {
   // A generic redirect url that we'll use if something goes wrong
   const redirectErrorURL = getErrorRedirect(
     `${getURL()}/dashboard/account`,
@@ -34,10 +35,6 @@ export async function GET(req: NextRequest, res: NextResponse) {
     const {
       data: { user: user },
     } = await supabaseClient.auth.getUser();
-
-    console.log(req);
-    console.log(req.cookies);
-    console.log(user);
 
     if (!code) {
       console.error("No code provided in query params");
@@ -61,51 +58,42 @@ export async function GET(req: NextRequest, res: NextResponse) {
 
     // Exchange the code for an access token and refresh token
     // We need to use the code verifier that we stored in a cookie
-    const { res, tokens } = await oAuth2Client.getToken({
+    const { tokens } = await oAuth2Client.getToken({
       code,
       codeVerifier,
     });
 
+    // We will persist the credentials to the database
     const encryptedCredentials = encryptYoutubeCredentials(tokens);
     // Try to decrypt the credentials to make sure they were encrypted correctly (throws an error if not)
     const decryptedCredentials =
       decryptYoutubeCredentials(encryptedCredentials);
 
-    // Use the credentials to make a test request to the YouTube API to get the user's channel ID
-    const { data: channelData } = await youtube.channels.list({
-      part: ["snippet"],
-      mine: true,
-      access_token: decryptedCredentials.access_token!,
-    });
+    // TODO: This might not be a good practice, i dont know if the youtube api will always return the channel id ? read the docs
+    const associatedYoutubeChannelID =
+      await getYoutubeChannelID(decryptedCredentials);
 
-    // Ensure that we received the channel data
-    // We will use the channel id to differentiate between different accounts associated with the same service and user on playportal
-    // Since one user can connect multiple accounts from the same service
-    if (
-      !channelData ??
-      !channelData.items ??
-      !channelData.items[0] ??
-      !channelData.items[0].id
-    ) {
-      console.error("No channel data found");
-      return NextResponse.redirect(redirectErrorURL);
-    }
-
-    const associatedYoutubeChannelData = channelData.items[0];
-
-    if (!associatedYoutubeChannelData.id) {
+    if (!associatedYoutubeChannelID) {
       console.error("No channel data found");
       return NextResponse.redirect(redirectErrorURL);
     }
 
     // Write the encrypted credentials to the database (this table is only accessible by the admin client)
     try {
-      const { data, error } = await supabaseAdmin.from("oauth_creds").upsert({
+      const { error } = await supabaseAdmin.from("oauth_creds").upsert({
         user_id: user.id,
         service_name: "YouTube",
         token: encryptedCredentials,
-        service_account_id: associatedYoutubeChannelData.id,
+        service_account_id: associatedYoutubeChannelID,
       });
+
+      if (error) {
+        console.error(
+          "Error while trying to connect write credentials to db: ",
+          error,
+        );
+        throw new Error("Error occurred while trying to persist credentials");
+      }
     } catch (error) {
       console.error(
         "Error while trying to connect write credentials to db: ",
@@ -114,17 +102,11 @@ export async function GET(req: NextRequest, res: NextResponse) {
       return NextResponse.redirect(redirectErrorURL);
     }
 
-    // Include the channel title in the success message if it exists
-    const successRedirectMessage = associatedYoutubeChannelData.brandingSettings
-      ?.channel?.title
-      ? `Your YouTube channel ${associatedYoutubeChannelData.brandingSettings?.channel?.title} has been successfully connected.`
-      : "Your YouTube channel has been successfully connected.";
-
     return NextResponse.redirect(
       getStatusRedirect(
         `${getURL()}/dashboard/account`,
         "Success",
-        successRedirectMessage,
+        "Your YouTube channel has been successfully connected.",
       ),
     );
   } catch (error) {

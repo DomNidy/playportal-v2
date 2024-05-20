@@ -8,6 +8,7 @@ import {
   createHash,
   randomBytes,
 } from "crypto";
+import { supabaseAdmin } from "../supabase/admin";
 
 export const youtube = google.youtube("v3");
 
@@ -92,4 +93,144 @@ export function decryptYoutubeCredentials(encrypted: string): Credentials {
   }
 
   return decryptedCredentials as Credentials;
+}
+
+export function validateYoutubeCredentialsSchema(credentials: Credentials) {
+  if (
+    !credentials ||
+    typeof credentials !== "object" ||
+    !credentials.access_token
+  ) {
+    console.error(
+      "Invalid credentials object received",
+      "Expected shape: { access_token: string, expiry_date: number, token_type: string }",
+    );
+    throw new Error("Invalid credentials object");
+  }
+}
+
+/**
+ * If the passed credentials object contains a refresh token, and the credentials are expired, this function will return a new `Credentials` object with a new access token.
+
+ */
+export async function refreshYoutubeCredentials(credentials: Credentials) {
+  try {
+    // We'll refresh the token if it will expire in this many seconds
+    const expiryThresholdMS = 1000 * 60 * 3; // 3 minutes
+
+    // Check that the credentials contain a refresh token
+    if (!credentials.refresh_token) {
+      throw new Error("No refresh token found in credentials");
+    }
+
+    // We need to create a new OAuth2Client object to refresh the token
+    // We do this because the main oAuth2Client object may be shared between multiple users, and if we set the credentials on it, it will be shared between all users
+    const youtubeOAuthClient = new OAuth2Client({
+      clientId: env.YOUTUBE_OAUTH_CLIENT_ID,
+      clientSecret: env.YOUTUBE_OAUTH_CLIENT_SECRET,
+      redirectUri: `${getURL()}/api/oauth/youtube/callback`,
+    });
+
+    youtubeOAuthClient.setCredentials(credentials);
+
+    // If token will expire soon or is already expired, retrieve a new one
+    if (
+      credentials.expiry_date &&
+      credentials.expiry_date - Date.now() < expiryThresholdMS
+    ) {
+      console.log("Refreshing token");
+
+      const { credentials: newCredentials } =
+        await youtubeOAuthClient.refreshAccessToken();
+
+      validateYoutubeCredentialsSchema(newCredentials);
+      return newCredentials;
+    }
+
+    // If the token is still valid, return the same credentials
+    return credentials;
+  } catch (error) {
+    // User will need to re-authenticate
+    console.error("Error refreshing token", error);
+    throw new Error("Error refreshing token");
+  }
+}
+
+/*
+ * When provided a `Credentials` object, and a user id, this function will store the credentials in the database, associating them with the user id.
+ * Must also be provided with the id of the youtube account (service_account_id, this can be retrieved from the youtube API channels.list endpoint)
+ */
+export async function persistYoutubeCredentialsToDB(
+  credentials: Credentials,
+  userId: string,
+  // The id of the youtube account
+  service_account_id: string,
+) {
+  console.log(
+    "Trying to persisting credentials for channel: ",
+    service_account_id,
+    " for user: ",
+    userId,
+    "to the database.",
+  );
+
+  try {
+    // Encrypt the credentials
+    const encryptedCredentials = encryptYoutubeCredentials(credentials);
+    // Make sure we can decrypt the credentials
+    decryptYoutubeCredentials(encryptedCredentials);
+
+    // Insert the encrypted credentials into the database
+    const { data, error } = await supabaseAdmin.from("oauth_creds").upsert(
+      {
+        user_id: userId,
+        service_name: "YouTube",
+        token: encryptedCredentials,
+        service_account_id,
+      },
+      { onConflict: "service_account_id", ignoreDuplicates: false },
+    );
+
+    if (error) {
+      console.error("Error while trying to persist credentials: ", error);
+      throw new Error("Error occurred while trying to persist credentials");
+    }
+
+    return data;
+  } catch (error) {
+    // User will need to re-authenticate
+    console.error("Error while trying to persist credentials: ", error);
+    throw new Error("Error occurred while trying to persist credentials");
+  }
+}
+
+// TODO: This might not be a good practice, i dont know if the youtube api will always return the channel id ? read the docs
+// We might also want to cache this with redis to prevent unnecessary requests and api quota usage
+export async function getYoutubeChannelID(credentials: Credentials) {
+  try {
+    if (!credentials.access_token) {
+      throw new Error("No credentials provided");
+    }
+
+    // Use the credentials to make a request to the YouTube API to get the user's channel ID
+    const { data: channelData } = await youtube.channels.list({
+      part: ["snippet"],
+      mine: true,
+      access_token: credentials.access_token,
+    });
+
+    if (
+      !channelData ??
+      !channelData.items ??
+      !channelData.items[0] ??
+      !channelData.items[0].id
+    ) {
+      throw new Error("No channel data found");
+    }
+
+    return channelData.items[0].id;
+  } catch (err) {
+    console.error("Error while trying to get channel ID: ", err);
+    throw new Error("Error occurred while trying to get channel ID");
+  }
 }

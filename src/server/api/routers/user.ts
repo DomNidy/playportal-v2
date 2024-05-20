@@ -13,8 +13,15 @@ import { Ratelimit } from "@upstash/ratelimit";
 import redis from "~/utils/redis";
 import { cookies, headers } from "next/headers";
 import { TRPCClientError } from "@trpc/client";
-import { oAuth2Client } from "~/utils/oauth/youtube";
-import { CodeChallengeMethod } from "google-auth-library";
+import {
+  decryptYoutubeCredentials,
+  getYoutubeChannelID,
+  oAuth2Client,
+  persistYoutubeCredentialsToDB,
+  refreshYoutubeCredentials,
+} from "~/utils/oauth/youtube";
+import { CodeChallengeMethod, Credentials } from "google-auth-library";
+import { supabaseAdmin } from "~/utils/supabase/admin";
 
 // Used for rate limit getPresignedUrlForFile
 const downloadRatelimit = new Ratelimit({
@@ -159,18 +166,82 @@ export const userRouter = createTRPCRouter({
       throw new TRPCClientError("File not found");
     }),
   // Get connected accounts
-  getConnectedAccounts: protectedProcedure.query(async ({ ctx }) => {
-    const { data: connectedAccounts, error } = await ctx.db
+  getConnectedYoutubeAccounts: protectedProcedure.query(async ({ ctx }) => {
+    console.log(ctx);
+
+    const { data: connectedAccounts, error } = await supabaseAdmin
       .from("oauth_creds")
       .select("*")
+      .eq("service_name", "YouTube")
       .eq("user_id", ctx.user.id);
 
     if (error) {
       console.error("Error while trying to get connected accounts: ", error);
-      throw new TRPCClientError("Error while trying to get connected accounts");
+      throw new TRPCClientError(
+        "Error occurred while trying to get connected YouTube accounts, please try again or contact support.",
+      );
     }
 
-    console.log(connectedAccounts);
+    // From all the connected accounts, we only want the encrypted tokens
+    const encryptedYoutubeTokens = connectedAccounts
+      ?.filter((account) => account?.token)
+      .map((account) => account.token as string);
+
+    // TODO: If this occurs, we might want to notify the user
+    if (encryptedYoutubeTokens.length !== connectedAccounts.length) {
+      console.warn(
+        "Some connected accounts did not have a token",
+        connectedAccounts,
+        encryptedYoutubeTokens,
+      );
+    }
+
+    // Create an array of all decrypted credentials owned by the user
+    const youtubeCredentialsArray: Credentials[] = encryptedYoutubeTokens
+      .map((token) => {
+        try {
+          const decryptedCredentials = decryptYoutubeCredentials(token);
+
+          return decryptedCredentials;
+        } catch (error) {
+          // TODO: If this happens, we failed to decrypt one of the credentials, we might want to notify the user here as well
+          return null;
+        }
+      })
+      .filter((credentials) => credentials !== null) as Credentials[];
+
+    // For all retrieved credentials, we will refresh them, if any fail, we will remove them from the list
+    // In case one of them fails, the user will need to re-authenticate that account
+    const refreshedYoutubeCredentials = (await Promise.all(
+      youtubeCredentialsArray.map(async (credentials) => {
+        try {
+          // Refresh the credentials if they expire soon or have already expired
+          const refreshedCredentials =
+            await refreshYoutubeCredentials(credentials);
+
+          // If the token was refreshed, we need to update the database
+          if (refreshedCredentials.expiry_date !== credentials.expiry_date) {
+            console.log("Token was refreshed");
+
+            const connectedChannelID = await getYoutubeChannelID(credentials);
+
+            await persistYoutubeCredentialsToDB(
+              refreshedCredentials,
+              ctx.user.id,
+              connectedChannelID,
+            );
+          }
+
+          return refreshedCredentials;
+        } catch (err) {
+          // User will need to re-authenticate this account
+          console.error("Error refreshing token", err);
+          return null;
+        }
+      }),
+    ).then((credentials) =>
+      credentials.filter((cred) => cred !== null),
+    )) as Credentials[];
 
     return connectedAccounts;
   }),
