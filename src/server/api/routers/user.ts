@@ -15,7 +15,7 @@ import { cookies, headers } from "next/headers";
 import { TRPCClientError } from "@trpc/client";
 import {
   decryptYoutubeCredentials,
-  getYoutubeChannelID,
+  getYoutubeChannelSummary,
   oAuth2Client,
   persistYoutubeCredentialsToDB,
   refreshYoutubeCredentials,
@@ -167,8 +167,6 @@ export const userRouter = createTRPCRouter({
     }),
   // Get connected accounts
   getConnectedYoutubeAccounts: protectedProcedure.query(async ({ ctx }) => {
-    console.log(ctx);
-
     const { data: connectedAccounts, error } = await supabaseAdmin
       .from("oauth_creds")
       .select("*")
@@ -223,12 +221,15 @@ export const userRouter = createTRPCRouter({
           if (refreshedCredentials.expiry_date !== credentials.expiry_date) {
             console.log("Token was refreshed");
 
-            const connectedChannelID = await getYoutubeChannelID(credentials);
+            const { channelAvatar, channelId, channelTitle } =
+              await getYoutubeChannelSummary(credentials);
 
             await persistYoutubeCredentialsToDB(
               refreshedCredentials,
               ctx.user.id,
-              connectedChannelID,
+              channelId,
+              channelAvatar ?? null,
+              channelTitle,
             );
           }
 
@@ -243,6 +244,6 @@ export const userRouter = createTRPCRouter({
       credentials.filter((cred) => cred !== null),
     )) as Credentials[];
 
-    return connectedAccounts;
+    return null;
   }),
 });

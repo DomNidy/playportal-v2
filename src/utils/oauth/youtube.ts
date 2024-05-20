@@ -116,7 +116,7 @@ export function validateYoutubeCredentialsSchema(credentials: Credentials) {
 export async function refreshYoutubeCredentials(credentials: Credentials) {
   try {
     // We'll refresh the token if it will expire in this many seconds
-    const expiryThresholdMS = 1000 * 60 * 3; // 3 minutes
+    const expiryThresholdMS = 1000 * 60 * 3333; // 3 minutes
 
     // Check that the credentials contain a refresh token
     if (!credentials.refresh_token) {
@@ -164,11 +164,13 @@ export async function persistYoutubeCredentialsToDB(
   credentials: Credentials,
   userId: string,
   // The id of the youtube account
-  service_account_id: string,
+  youtubeChannelId: string,
+  youtubeChannelImageUrl: string | null,
+  youtubeChannelTitle: string | null,
 ) {
   console.log(
     "Trying to persisting credentials for channel: ",
-    service_account_id,
+    youtubeChannelId,
     " for user: ",
     userId,
     "to the database.",
@@ -186,7 +188,9 @@ export async function persistYoutubeCredentialsToDB(
         user_id: userId,
         service_name: "YouTube",
         token: encryptedCredentials,
-        service_account_id,
+        service_account_id: youtubeChannelId,
+        service_account_image_url: youtubeChannelImageUrl,
+        service_account_name: youtubeChannelTitle,
       },
       { onConflict: "service_account_id", ignoreDuplicates: false },
     );
@@ -205,8 +209,9 @@ export async function persistYoutubeCredentialsToDB(
 }
 
 // TODO: This might not be a good practice, i dont know if the youtube api will always return the channel id ? read the docs
+// Returns summary of youtube channel associated with the provided credentials
 // We might also want to cache this with redis to prevent unnecessary requests and api quota usage
-export async function getYoutubeChannelID(credentials: Credentials) {
+export async function getYoutubeChannelSummary(credentials: Credentials) {
   try {
     if (!credentials.access_token) {
       throw new Error("No credentials provided");
@@ -225,10 +230,16 @@ export async function getYoutubeChannelID(credentials: Credentials) {
       !channelData.items[0] ??
       !channelData.items[0].id
     ) {
-      throw new Error("No channel data found");
+      throw new Error("Could not get channel ID from YouTube API response");
     }
 
-    return channelData.items[0].id;
+    // TODO: Get channel title, and avatar, these are not required but provide better UX
+
+    return {
+      channelId: channelData.items[0].id,
+      channelTitle: channelData.items[0]?.snippet?.title ?? "Unknown Channel",
+      channelAvatar: channelData.items[0]?.snippet?.thumbnails?.default?.url,
+    };
   } catch (err) {
     console.error("Error while trying to get channel ID: ", err);
     throw new Error("Error occurred while trying to get channel ID");

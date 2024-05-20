@@ -6,8 +6,9 @@ import { type NextRequest, NextResponse } from "next/server";
 import {
   decryptYoutubeCredentials,
   encryptYoutubeCredentials,
-  getYoutubeChannelID,
+  getYoutubeChannelSummary,
   oAuth2Client,
+  persistYoutubeCredentialsToDB,
   youtube,
 } from "~/utils/oauth/youtube";
 import { supabaseAdmin } from "~/utils/supabase/admin";
@@ -70,30 +71,23 @@ export async function GET(req: NextRequest) {
       decryptYoutubeCredentials(encryptedCredentials);
 
     // TODO: This might not be a good practice, i dont know if the youtube api will always return the channel id ? read the docs
-    const associatedYoutubeChannelID =
-      await getYoutubeChannelID(decryptedCredentials);
+    const { channelId, channelAvatar, channelTitle } =
+      await getYoutubeChannelSummary(decryptedCredentials);
 
-    if (!associatedYoutubeChannelID) {
+    if (!channelId) {
       console.error("No channel data found");
       return NextResponse.redirect(redirectErrorURL);
     }
 
     // Write the encrypted credentials to the database (this table is only accessible by the admin client)
     try {
-      const { error } = await supabaseAdmin.from("oauth_creds").upsert({
-        user_id: user.id,
-        service_name: "YouTube",
-        token: encryptedCredentials,
-        service_account_id: associatedYoutubeChannelID,
-      });
-
-      if (error) {
-        console.error(
-          "Error while trying to connect write credentials to db: ",
-          error,
-        );
-        throw new Error("Error occurred while trying to persist credentials");
-      }
+      await persistYoutubeCredentialsToDB(
+        decryptedCredentials,
+        user?.id,
+        channelId,
+        channelAvatar ?? null,
+        channelTitle,
+      );
     } catch (error) {
       console.error(
         "Error while trying to connect write credentials to db: ",

@@ -128,6 +128,8 @@ export type Database = {
           created_at: string
           id: string
           service_account_id: string
+          service_account_image_url: string | null
+          service_account_name: string | null
           service_name: Database["public"]["Enums"]["service_enum"]
           token: string
           user_id: string
@@ -136,6 +138,8 @@ export type Database = {
           created_at?: string
           id?: string
           service_account_id: string
+          service_account_image_url?: string | null
+          service_account_name?: string | null
           service_name: Database["public"]["Enums"]["service_enum"]
           token: string
           user_id: string
@@ -144,6 +148,8 @@ export type Database = {
           created_at?: string
           id?: string
           service_account_id?: string
+          service_account_image_url?: string | null
+          service_account_name?: string | null
           service_name?: Database["public"]["Enums"]["service_enum"]
           token?: string
           user_id?: string
