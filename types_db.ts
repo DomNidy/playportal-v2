@@ -127,6 +127,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          refresh_token: string | null
           service_account_id: string
           service_account_image_url: string | null
           service_account_name: string | null
@@ -137,6 +138,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          refresh_token?: string | null
           service_account_id: string
           service_account_image_url?: string | null
           service_account_name?: string | null
@@ -147,6 +149,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          refresh_token?: string | null
           service_account_id?: string
           service_account_image_url?: string | null
           service_account_name?: string | null

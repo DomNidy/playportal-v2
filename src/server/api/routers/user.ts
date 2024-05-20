@@ -19,6 +19,7 @@ import {
   oAuth2Client,
   persistYoutubeCredentialsToDB,
   refreshYoutubeCredentials,
+  decryptString,
 } from "~/utils/oauth/youtube";
 import { CodeChallengeMethod, type Credentials } from "google-auth-library";
 import { supabaseAdmin } from "~/utils/supabase/admin";
@@ -195,8 +196,6 @@ export const userRouter = createTRPCRouter({
       .eq("service_name", "YouTube")
       .eq("user_id", ctx.user.id);
 
-    console.log(connectedAccounts);
-
     if (error) {
       console.error("Error while trying to get connected accounts: ", error);
       throw new TRPCClientError(
@@ -257,6 +256,7 @@ export const userRouter = createTRPCRouter({
           // Refresh the credentials if they expire soon or have already expired
           const refreshedCredentials = await refreshYoutubeCredentials(
             channelCreds.credentials,
+            channelCreds.channelId ?? "",
           );
 
           // If the token was refreshed, we need to update the database

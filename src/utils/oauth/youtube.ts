@@ -95,6 +95,51 @@ export function decryptYoutubeCredentials(encrypted: string): Credentials {
   return decryptedCredentials as Credentials;
 }
 
+/*
+ * This function simply encrypts a string, we mainly use this for the refresh token, since we store it in a separate column
+ */
+export function encryptString(input: string) {
+  const iv = randomBytes(16);
+  const cipher = createCipheriv(algorithm, key, iv);
+  let encrypted = cipher.update(input, "utf8", "base64");
+  encrypted += cipher.final("base64");
+
+  return iv.toString("base64") + ":" + encrypted;
+}
+
+/*
+ * This function decrypts a string, we mainly use this for the refresh token, since we store it in a separate column
+ */
+export function decryptString(encrypted: string) {
+  try {
+    const [iv, encryptedString] = encrypted
+      .split(":")
+      .map((str) => Buffer.from(str, "base64"));
+
+    if (!iv || !encryptedString) {
+      console.error(
+        "Invalid encrypted string format",
+        `Parsed IV: ${iv?.toString("base64")}`,
+        `Parsed ciphertext: ${encryptedString?.toString("base64")}`,
+      );
+      throw new Error("Invalid encrypted string format");
+    }
+
+    const decipher = createDecipheriv(algorithm, key, iv);
+    let decrypted = decipher.update(
+      encryptedString.toString("base64"),
+      "base64",
+      "utf8",
+    );
+    decrypted += decipher.final("utf8");
+
+    return decrypted;
+  } catch (error) {
+    console.error("Error while trying to decrypt string: ", error);
+    throw new Error("Error occurred while trying to decrypt string");
+  }
+}
+
 export function validateYoutubeCredentialsSchema(credentials: Credentials) {
   if (
     !credentials ||
@@ -113,14 +158,39 @@ export function validateYoutubeCredentialsSchema(credentials: Credentials) {
  * If the passed credentials object contains a refresh token, and the credentials are expired, this function will return a new `Credentials` object with a new access token.
 
  */
-export async function refreshYoutubeCredentials(credentials: Credentials) {
+export async function refreshYoutubeCredentials(
+  credentials: Credentials,
+  channelID?: string,
+) {
   try {
+    let refreshToken = credentials.refresh_token ?? null;
     // We'll refresh the token if it will expire in this many seconds
     const expiryThresholdMS = 1000 * 60 * 3; // 3 minutes
 
-    // Check that the credentials contain a refresh token
-    if (!credentials.refresh_token) {
-      throw new Error("No refresh token found in credentials");
+    // Check that the credentials contain a refresh token, if they don't, we try to fetch it from the database
+    if (!refreshToken) {
+      // If the credentials do not contain a refresh token, and we do not have a channel ID, we cannot fetch the refresh token
+      if (!channelID)
+        throw new Error(
+          "Supplied credentials do not contain a refresh token, and no channel ID was provided. We cannot refresh the token, and the user must re-authenticate this account.",
+        );
+
+      const { data: credsData, error } = await supabaseAdmin
+        .from("oauth_creds")
+        .select("refresh_token")
+        .eq("service_account_id", channelID)
+        .maybeSingle();
+
+      if (error) {
+        console.error("Error while trying to fetch refresh token: ", error);
+        throw new Error("Error occurred while trying to fetch refresh token");
+      }
+
+      if (!credsData ?? !credsData?.refresh_token) {
+        throw new Error("No refresh token found in database");
+      }
+
+      refreshToken = decryptString(credsData.refresh_token as string);
     }
 
     // If expiry time will not be soon, return the same credentials
@@ -138,7 +208,7 @@ export async function refreshYoutubeCredentials(credentials: Credentials) {
       clientSecret: env.YOUTUBE_OAUTH_CLIENT_SECRET,
       redirectUri: `${getURL()}/api/oauth/youtube/callback`,
       credentials: {
-        refresh_token: credentials.refresh_token,
+        refresh_token: refreshToken,
         access_token: credentials.access_token,
         expiry_date: credentials.expiry_date,
         token_type: credentials.token_type,
@@ -147,13 +217,12 @@ export async function refreshYoutubeCredentials(credentials: Credentials) {
       },
     });
 
-    youtubeOAuthClient.setCredentials(credentials);
-
     // If token will expire soon or is already expired, retrieve a new one
     const { credentials: newCredentials } =
       await youtubeOAuthClient.refreshAccessToken();
 
     validateYoutubeCredentialsSchema(newCredentials);
+
     return newCredentials;
   } catch (error) {
     // User will need to re-authenticate
@@ -185,6 +254,18 @@ export async function persistYoutubeCredentialsToDB(
   try {
     // Encrypt the credentials
     const encryptedCredentials = encryptYoutubeCredentials(credentials);
+
+    // Check if credentials has a refresh token, if it does, we should replace the refresh token stored in the database
+    // First encrypt the refresh token
+    const encryptedRefreshToken = credentials.refresh_token
+      ? encryptString(credentials.refresh_token)
+      : null;
+
+    if (encryptedRefreshToken)
+      console.log(
+        "New refresh token was returned from youtube api, storing it in db.",
+      );
+
     // Make sure we can decrypt the credentials
     decryptYoutubeCredentials(encryptedCredentials);
 
@@ -197,6 +278,10 @@ export async function persistYoutubeCredentialsToDB(
         service_account_id: youtubeChannelId,
         service_account_image_url: youtubeChannelImageUrl,
         service_account_name: youtubeChannelTitle,
+        // Only update the refresh token if it is provided
+        ...(encryptedRefreshToken != null
+          ? { refresh_token: encryptedRefreshToken }
+          : {}),
       },
       { onConflict: "service_account_id", ignoreDuplicates: false },
     );
