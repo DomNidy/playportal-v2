@@ -1,9 +1,9 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState, type FormEvent } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { type z } from "zod";
 import { Button } from "~/components/ui/Button";
 import {
   Form,
@@ -15,7 +15,6 @@ import {
   FormMessage,
 } from "~/components/ui/Form";
 import { Input } from "~/components/ui/Input";
-import { Label } from "~/components/ui/Label";
 import { ResetPasswordFormSchema } from "~/definitions/form-schemas";
 import { createClient } from "~/utils/supabase/client";
 import { getURL } from "~/utils/utils";

@@ -1,4 +1,4 @@
-import { Database } from "types_db";
+import { type Database } from "types_db";
 import { z } from "zod";
 
 export enum VideoPreset {

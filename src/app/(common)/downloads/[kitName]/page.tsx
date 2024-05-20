@@ -1,8 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
 import Product from "~/components/ui/Product/Product";
 import { createClient } from "~/utils/supabase/server";
-import { getURL } from "~/utils/utils";
 
 export default async function KitPage({
   params,
@@ -39,7 +37,7 @@ export default async function KitPage({
           description: kitData.description ?? "",
           downloadLink: kitData.download_url,
           imageSrc: kitData.image_url ?? "",
-          variant: "large"
+          variant: "large",
         }}
       />
     </div>

@@ -79,13 +79,15 @@ export const userRouter = createTRPCRouter({
 
     const authUrl = oAuth2Client.generateAuthUrl({
       access_type: "offline",
-      scope: ["https://www.googleapis.com/auth/youtube.upload"],
+      scope: [
+        "https://www.googleapis.com/auth/youtube.upload",
+        "https://www.googleapis.com/auth/youtube",
+      ],
       // The state param is encoded into the url and sent back to the callback
       // This will make it easy to identify the user that the token is associated with, and persist it to the db
       state: ctx.user.id,
       code_challenge_method: CodeChallengeMethod.S256,
       code_challenge: codeChallenge,
-      redirect_uri: `${getURL()}/api/oauth/youtube/callback`,
     });
 
     return {
@@ -156,4 +158,20 @@ export const userRouter = createTRPCRouter({
       );
       throw new TRPCClientError("File not found");
     }),
+  // Get connected accounts
+  getConnectedAccounts: protectedProcedure.query(async ({ ctx }) => {
+    const { data: connectedAccounts, error } = await ctx.db
+      .from("oauth_creds")
+      .select("*")
+      .eq("user_id", ctx.user.id);
+
+    if (error) {
+      console.error("Error while trying to get connected accounts: ", error);
+      throw new TRPCClientError("Error while trying to get connected accounts");
+    }
+
+    console.log(connectedAccounts);
+
+    return connectedAccounts;
+  }),
 });

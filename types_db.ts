@@ -123,6 +123,41 @@ export type Database = {
         }
         Relationships: []
       }
+      oauth_creds: {
+        Row: {
+          created_at: string
+          id: string
+          service_account_id: string
+          service_name: Database["public"]["Enums"]["service_enum"]
+          token: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          service_account_id: string
+          service_name: Database["public"]["Enums"]["service_enum"]
+          token: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          service_account_id?: string
+          service_name?: Database["public"]["Enums"]["service_enum"]
+          token?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "oauth_creds_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       operation_logs: {
         Row: {
           created_at: string
@@ -688,6 +723,7 @@ export type Database = {
       operation_status: "Ongoing" | "Failed" | "Completed"
       pricing_plan_interval: "day" | "week" | "month" | "year"
       pricing_type: "one_time" | "recurring"
+      service_enum: "YouTube"
       subscription_status:
         | "trialing"
         | "active"

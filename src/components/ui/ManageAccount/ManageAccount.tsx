@@ -10,7 +10,7 @@ import { Label } from "../Label";
 import Link from "next/link";
 import StripeBillingPortalButton from "../StripeBillingPortalButton/StripeBillingPortalButton";
 import { type Tables } from "types_db";
-import ConnectYoutubeAccountButton from "../ConnectYoutubeAccountButton/ConnectYoutubeAccountButton";
+import ManageYoutubeConnections from "../ManageYoutubeConnections/ManageYoutubeConnections";
 
 export default function ManageAccount({
   userWithProduct,
@@ -81,8 +81,8 @@ export default function ManageAccount({
             </div>
 
             <div className="flex flex-col space-y-1">
-              <Label>Connect YouTube Account</Label>
-              <ConnectYoutubeAccountButton />
+              <Label>Connected YouTube Account(s)</Label>
+              <ManageYoutubeConnections />
             </div>
           </CardContent>
         </Card>

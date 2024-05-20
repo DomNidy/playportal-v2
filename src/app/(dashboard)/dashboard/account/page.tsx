@@ -1,4 +1,3 @@
-import PricingSection from "~/components/ui/LandingPage/PricingSection";
 import ManageAccount from "~/components/ui/ManageAccount/ManageAccount";
 import { createClient } from "~/utils/supabase/server";
 
