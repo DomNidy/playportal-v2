@@ -190,7 +190,8 @@ export async function refreshYoutubeCredentials(
         throw new Error("No refresh token found in database");
       }
 
-      refreshToken = decryptString(credsData.refresh_token as string);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      refreshToken = decryptString(credsData.refresh_token);
     }
 
     // If expiry time will not be soon, return the same credentials
