@@ -15,6 +15,7 @@ import ManageYoutubeConnections from "../ManageYoutubeConnections/ManageYoutubeC
 export default function ManageAccount({
   userWithProduct,
   quotas,
+  featureFlags,
 }: {
   userWithProduct?: Tables<"user_products">;
   quotas?: {
@@ -22,6 +23,9 @@ export default function ManageAccount({
       dailyQuotaLimit: number;
       dailyQuotaUsage: number;
     };
+  };
+  featureFlags?: {
+    linkYoutubeAccounts: boolean;
   };
 }) {
   return (
@@ -85,10 +89,12 @@ export default function ManageAccount({
               <StripeBillingPortalButton />
             </div>
 
-            <div className="flex flex-col space-y-1">
-              <Label>Connected YouTube Account(s)</Label>
-              <ManageYoutubeConnections />
-            </div>
+            {featureFlags?.linkYoutubeAccounts && (
+              <div className="flex flex-col space-y-1">
+                <Label>Connected YouTube Account(s)</Label>
+                <ManageYoutubeConnections />
+              </div>
+            )}
           </CardContent>
         </Card>
       </TabsContent>

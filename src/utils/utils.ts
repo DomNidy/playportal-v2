@@ -1,6 +1,8 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { env } from "~/env";
+import { createClient } from "./supabase/server";
+import { Database, Enums, Tables } from "types_db";
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -144,4 +146,28 @@ export const calculateTrialEndUnixTimestamp = (
 
 export function toIsoStringOrNull(timestamp: number | null) {
   return timestamp ? toDateTime(timestamp).toISOString() : null;
+}
+
+// Utility function to check feature flag for a user
+// Pass this a supabase server client, it works on the server side
+export async function getFeatureFlag(
+  supabase: ReturnType<typeof createClient>,
+  feature: Database["public"]["Enums"]["feature"],
+  userId: string,
+) {
+  const { data: featureFlag, error } = await supabase
+    .from("user_feature_flags_view")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("feature", feature)
+    .eq("feature_enabled", true)
+    .eq("feature_enabled_for_user", true)
+    .maybeSingle();
+
+  if (featureFlag) {
+    console.log(`Feature flag ${feature} is enabled for user ${userId}`);
+    return true;
+  }
+
+  return false;
 }

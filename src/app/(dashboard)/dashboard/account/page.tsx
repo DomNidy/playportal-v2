@@ -1,5 +1,7 @@
+import { Database } from "types_db";
 import ManageAccount from "~/components/ui/ManageAccount/ManageAccount";
 import { createClient } from "~/utils/supabase/server";
+import { getFeatureFlag } from "~/utils/utils";
 
 // TODO: Implement error handling here
 export default async function AccountPage() {
@@ -30,9 +32,15 @@ export default async function AccountPage() {
     .from("user_products")
     .select("*")
     .eq("user_id", user?.id ?? "")
-    .eq("sub_status", "active")
+    .in("sub_status", ["active", "trialing"])
     .limit(1)
     .maybeSingle();
+
+  const linkYoutubeAccountFeature = await getFeatureFlag(
+    supabase,
+    "link_youtube_accounts",
+    user?.id ?? "",
+  );
 
   return (
     <div>
@@ -43,6 +51,9 @@ export default async function AccountPage() {
             dailyQuotaLimit: quotaLimits?.create_video_daily_quota ?? 0,
             dailyQuotaUsage: createVideoDailyQuotaUsage ?? 0,
           },
+        }}
+        featureFlags={{
+          linkYoutubeAccounts: linkYoutubeAccountFeature ?? false,
         }}
       />
     </div>

@@ -57,6 +57,27 @@ export type Database = {
           },
         ]
       }
+      feature_flags: {
+        Row: {
+          description: string | null
+          enabled: boolean
+          feature: Database["public"]["Enums"]["feature"]
+          id: number
+        }
+        Insert: {
+          description?: string | null
+          enabled?: boolean
+          feature: Database["public"]["Enums"]["feature"]
+          id?: never
+        }
+        Update: {
+          description?: string | null
+          enabled?: boolean
+          feature?: Database["public"]["Enums"]["feature"]
+          id?: never
+        }
+        Relationships: []
+      }
       file_metadata: {
         Row: {
           created_at: string
@@ -574,6 +595,42 @@ export type Database = {
           },
         ]
       }
+      user_feature_flags: {
+        Row: {
+          enabled: boolean
+          feature_flag_id: number
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          enabled: boolean
+          feature_flag_id: number
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          enabled?: boolean
+          feature_flag_id?: number
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_feature_flags_feature_flag_id_fkey"
+            columns: ["feature_flag_id"]
+            isOneToOne: false
+            referencedRelation: "feature_flags"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_feature_flags_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           granted_role: string | null
@@ -649,6 +706,23 @@ export type Database = {
           unit_amount: number | null
         }
         Relationships: []
+      }
+      user_feature_flags_view: {
+        Row: {
+          feature: Database["public"]["Enums"]["feature"] | null
+          feature_enabled: boolean | null
+          feature_enabled_for_user: boolean | null
+          user_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_feature_flags_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_products: {
         Row: {
@@ -726,6 +800,7 @@ export type Database = {
       }
     }
     Enums: {
+      feature: "upload_videos" | "link_youtube_accounts"
       file_origin: "PlayportalBackend" | "UserProvided"
       file_type: "Video" | "Audio" | "Image"
       kit_type: "drum-kit" | "midi-kit" | "loop-kit" | "preset-kit" | "other"
