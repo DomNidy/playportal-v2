@@ -171,3 +171,7 @@ export async function getFeatureFlag(
 
   return false;
 }
+
+export function isSuccessStatusCode(statusCode: number) {
+  return statusCode >= 200 && statusCode < 300;
+}

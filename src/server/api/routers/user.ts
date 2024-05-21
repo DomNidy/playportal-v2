@@ -6,6 +6,7 @@ import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { env } from "~/env";
 import {
   determineBucketNameFromS3Key,
+  isSuccessStatusCode,
   parseFileExtensionFromS3Key,
 } from "~/utils/utils";
 import { Ratelimit } from "@upstash/ratelimit";
@@ -21,7 +22,11 @@ import {
   refreshYoutubeCredentials,
   decryptString,
 } from "~/utils/oauth/youtube";
-import { CodeChallengeMethod, type Credentials } from "google-auth-library";
+import {
+  CodeChallengeMethod,
+  OAuth2Client,
+  type Credentials,
+} from "google-auth-library";
 import { supabaseAdmin } from "~/utils/supabase/admin";
 
 // Used for rate limit getPresignedUrlForFile
@@ -171,21 +176,79 @@ export const userRouter = createTRPCRouter({
   unlinkYoutubeAccount: protectedProcedure
     .input(z.object({ channelId: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const { data: connectedAccounts, error } = await supabaseAdmin
-        .from("oauth_creds")
-        .delete()
-        .eq("service_account_id", input.channelId)
-        .eq("service_name", "YouTube")
-        .eq("user_id", ctx.user.id);
+      try {
+        // Try to get the token from the database
+        const { data: connectedAccounts, error } = await supabaseAdmin
+          .from("oauth_creds")
+          .select("*")
+          .eq("service_account_id", input.channelId)
+          .eq("service_name", "YouTube")
+          .eq("user_id", ctx.user.id)
+          .maybeSingle();
 
-      if (error) {
+        if (error) {
+          console.error("Error while trying to unlink account: ", error);
+          throw new TRPCClientError(
+            "Error occurred while trying to unlink the YouTube account, please try again or contact support.",
+          );
+        }
+
+        if (!connectedAccounts) {
+          console.warn(
+            `User ${ctx.user.id} attempted to unlink a youtube account that does not exist ${input.channelId}`,
+          );
+          throw new TRPCClientError("Account not found");
+        }
+
+        // Decrypt the token (so we can revoke it)
+        const decryptedToken = decryptYoutubeCredentials(
+          connectedAccounts.token,
+        );
+        const decryptedRefreshToken = decryptString(
+          connectedAccounts.refresh_token!,
+        );
+
+        // Create a new OAuth2Client with the decrypted token credentials for the user
+        const userOAuthClient = new OAuth2Client({
+          clientId: env.YOUTUBE_OAUTH_CLIENT_ID,
+          clientSecret: env.YOUTUBE_OAUTH_CLIENT_SECRET,
+          credentials: {
+            access_token: decryptedToken.access_token,
+            expiry_date: decryptedToken.expiry_date,
+            id_token: decryptedToken.id_token,
+            scope: decryptedToken.scope,
+            token_type: decryptedToken.token_type,
+            refresh_token: decryptedRefreshToken,
+          },
+        });
+
+        // Revoke the token
+        const revokeResponse = await userOAuthClient.revokeCredentials();
+
+        console.log(revokeResponse);
+
+        // If revocation was successful, we can delete the account from the database
+        if (isSuccessStatusCode(revokeResponse.status)) {
+          await supabaseAdmin
+            .from("oauth_creds")
+            .delete()
+            .eq("service_account_id", input.channelId)
+            .eq("service_name", "YouTube")
+            .eq("user_id", ctx.user.id);
+
+          return true;
+        } else {
+          console.warn(
+            `User ${ctx.user.id} attempted to unlink a youtube account that does not exist ${input.channelId}`,
+          );
+          throw new TRPCClientError("Account not found");
+        }
+      } catch (error) {
         console.error("Error while trying to unlink account: ", error);
         throw new TRPCClientError(
           "Error occurred while trying to unlink the YouTube account, please try again or contact support.",
         );
       }
-
-      return connectedAccounts;
     }),
 
   // Get connected accounts
