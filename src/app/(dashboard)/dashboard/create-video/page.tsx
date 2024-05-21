@@ -1,5 +1,6 @@
-import CreateVideoForm from "~/components/ui/CreateVideoForm/create-video-form";
+import CreateVideoForm from "~/components/ui/CreateVideoForm/CreateVideoForm";
 import { createClient } from "~/utils/supabase/server";
+import { getFeatureFlag } from "~/utils/utils";
 
 export default async function CreateVideoPage() {
   const supabase = createClient();
@@ -14,6 +15,12 @@ export default async function CreateVideoPage() {
     })
     .maybeSingle();
 
+  const uploadVideoFeature = await getFeatureFlag(
+    supabase,
+    "upload_videos",
+    user?.id ?? "",
+  );
+
   return (
     <div className="w-full max-w-[1050px]">
       <CreateVideoForm
@@ -22,6 +29,7 @@ export default async function CreateVideoPage() {
             ? quotaLimits?.file_size_limit_mb * 1024 * 1024
             : 0
         }
+        uploadVideoFeature={uploadVideoFeature}
       />
     </div>
   );

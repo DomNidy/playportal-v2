@@ -177,6 +177,10 @@ export const userRouter = createTRPCRouter({
     .input(z.object({ channelId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       try {
+        console.log(
+          `Trying to unlink youtube account for user ${ctx.user.id} and channel ${input.channelId}`,
+        );
+
         // Try to get the token from the database
         const { data: connectedAccounts, error } = await supabaseAdmin
           .from("oauth_creds")
@@ -224,8 +228,9 @@ export const userRouter = createTRPCRouter({
 
         // Revoke the token
         const revokeResponse = await userOAuthClient.revokeCredentials();
-
-        console.log(revokeResponse);
+        console.log(
+          `Revoke response status of [${revokeResponse.status}]: [${revokeResponse.statusText}], data: [${JSON.stringify(revokeResponse.data)}]`,
+        );
 
         // If revocation was successful, we can delete the account from the database
         if (isSuccessStatusCode(revokeResponse.status)) {

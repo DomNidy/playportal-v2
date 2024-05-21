@@ -14,6 +14,12 @@ export const UpdatePasswordFormSchema = z
     message: "Passwords must match.",
   });
 
+export enum YoutubeVideoVisibilities {
+  Public = "Public",
+  Unlisted = "Unlisted",
+  Private = "Private",
+}
+
 // We will validate the files on our aws backend anyway
 export const CreateVideoFormSchema = z.object({
   // This will not be the name of the video on youtube, just the internal name
@@ -60,4 +66,33 @@ export const CreateVideoFormSchema = z.object({
     .optional()
     .nullish(),
   videoPreset: z.nativeEnum(VideoPreset),
+  uploadVideoOptions: z
+    .object({
+      youtube: z
+        .object({
+          videoTitle: z
+            .string()
+            .min(1)
+            .max(100, "Title must be at most 100 characters long"),
+          videoDescription: z
+            .string()
+            .max(5000, "Description may be no longer than 5000 characters.")
+            .optional(),
+          videoTags: z.array(z.string()).optional(),
+          // An array of the channel ids that the video should be uploaded to
+          // We will use this as a mapping to the oauth tokens in the db
+          uploadToChannels: z
+            .array(z.string(), {
+              message: "Please select at least one channel to upload to.",
+            })
+            .min(1, {
+              message: "Please select at least one channel to upload to.",
+            }),
+          videoVisibility: z.nativeEnum(YoutubeVideoVisibilities, {
+            message: "Please select a visibility setting for the video.",
+          }),
+        })
+        .optional(),
+    })
+    .optional(),
 });

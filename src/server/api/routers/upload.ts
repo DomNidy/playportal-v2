@@ -12,6 +12,7 @@ import redis from "~/utils/redis";
 import { Ratelimit } from "@upstash/ratelimit";
 import { headers } from "next/headers";
 import { VideoPreset } from "~/definitions/api-schemas";
+import { getFeatureFlag } from "~/utils/utils";
 const ratelimit = new Ratelimit({
   redis: redis,
   analytics: true,
@@ -30,6 +31,20 @@ export const uploadRouter = createTRPCRouter({
         audioFileExtension: z.string().nullable(),
         imageFileExtension: z.string().nullable(),
         videoPreset: z.nativeEnum(VideoPreset),
+        uploadVideoOptions: z
+          .object({
+            youtube: z
+              .object({
+                videoTitle: z.string().min(1).max(100),
+                videoDescription: z.string().min(1).max(5000).optional(),
+                videoTags: z.array(z.string()).optional(),
+                // An array of the channel ids that the video should be uploaded to
+                // We will use this as a mapping to the oauth tokens in the db
+                uploadToChannels: z.array(z.string()).min(1),
+              })
+              .optional(),
+          })
+          .optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -103,6 +118,19 @@ export const uploadRouter = createTRPCRouter({
         if (input.audioFileSize > userQuotas.file_size_limit_mb * 1024 * 1024) {
           throw new TRPCClientError(
             `The audio file you have uploaded exceeds your plans maximum limit.`,
+          );
+        }
+
+        //* Check that the user has the feature flag enabled to upload videos
+        const uploadVideoFeature = await getFeatureFlag(
+          ctx.db,
+          "upload_videos",
+          ctx.user.id,
+        );
+
+        if (!uploadVideoFeature) {
+          throw new TRPCClientError(
+            `This feature is not available to you, please contact support if you think this is a mistake.`,
           );
         }
 

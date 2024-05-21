@@ -2,18 +2,15 @@
 import React from "react";
 import { ConnectionYoutubeAccountButton } from "./ConnectYoutubeAccountButton";
 import YoutubeChannelSummaryCard from "./YoutubeChannelSummaryCard";
-import { api } from "~/trpc/react";
 import { Button } from "../Button";
 import { useQueryClient } from "@tanstack/react-query";
 import YoutubeChannelSummaryLoadingCard from "./YoutubeChannelSummaryLoadingCard";
+import { useLinkedYoutubeAccounts } from "~/hooks/use-linked-youtube-accounts";
 
 export default function ManageYoutubeConnections() {
   const queryClient = useQueryClient();
 
-  const { data, isLoading } = api.user.getConnectedYoutubeAccounts.useQuery(
-    undefined,
-    {},
-  );
+  const { data, isLoading } = useLinkedYoutubeAccounts();
 
   return (
     <div>
