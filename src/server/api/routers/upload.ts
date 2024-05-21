@@ -13,6 +13,8 @@ import { Ratelimit } from "@upstash/ratelimit";
 import { headers } from "next/headers";
 import { VideoPreset } from "~/definitions/api-schemas";
 import { getFeatureFlag } from "~/utils/utils";
+import { YoutubeVideoVisibilities } from "~/definitions/form-schemas";
+import { I } from "node_modules/@upstash/redis/zmscore-4382faf4";
 const ratelimit = new Ratelimit({
   redis: redis,
   analytics: true,
@@ -171,6 +173,58 @@ export const uploadRouter = createTRPCRouter({
           ? `.${input.imageFileExtension}`
           : "";
 
+        // If we were provided with a list of channel ids to upload to, we will use these to look up the oauth credentials
+        let oauthCredentialIDS: string[] | null = null;
+        if (input?.uploadVideoOptions?.youtube?.uploadToChannels) {
+          // Using the provided channel ids, look up the ids of the associated rows in the oauth_credentials table
+          // We will use these ids to get the oauth tokens for the youtube upload in our lambda functions
+          const { data: oauthCredentials, error: oauthCredentialsQueryError } =
+            await supabaseAdmin
+              .from("oauth_creds")
+              .select("id")
+              .eq("user_id", ctx.user.id)
+              .in("service_account_id", [
+                ...input.uploadVideoOptions.youtube.uploadToChannels,
+              ]);
+
+          if (oauthCredentialsQueryError) {
+            console.error(
+              `Failed to retrieve oauth credentials for user ${ctx.user.id}`,
+            );
+            console.error(`Query error: ${oauthCredentialsQueryError.message}`);
+            throw new TRPCClientError(
+              "An error occured, please try again later or contact support",
+            );
+          }
+
+          if (!oauthCredentials) {
+            throw new TRPCClientError(
+              "No oauth credentials found for the provided channel ids",
+            );
+          }
+
+          if (
+            oauthCredentials.length !==
+            input.uploadVideoOptions.youtube.uploadToChannels.length
+          ) {
+            console.error(
+              "User provided channel ids:",
+              input.uploadVideoOptions.youtube.uploadToChannels,
+              "but only found oauth credentials for:",
+              oauthCredentials.map((cred) => cred.id).join(", "),
+              "we cannot proceed with the upload.",
+            );
+
+            throw new TRPCClientError(
+              "Not all channel ids provided could be authenticated, please re-link your channels in the account page.",
+            );
+          }
+
+          oauthCredentialIDS = oauthCredentials.map((cred) => cred.id);
+        }
+
+        console.log("oauthCredentialIDS", oauthCredentialIDS);
+
         try {
           const audioFileS3Key = `${ctx.user.id}/inputs/${transactionData.operation_id}-input-audio${audioFileExtension}`;
           // Ternary here is used incase we did not receive an input image from user
@@ -205,7 +259,18 @@ export const uploadRouter = createTRPCRouter({
           const createVideoMessage: z.infer<typeof CreateVideoOptionsSchema> = {
             kind: "CreateVideoOptions",
             // TODO: Read if we should upload to youtube after creation from the submitted form data
-            upload_video_to_youtube_after_creation: false,
+            upload_after_creation_options: input?.uploadVideoOptions?.youtube
+              ? {
+                  youtube: {
+                    oauth_credentials_id: oauthCredentialIDS!,
+                    video_title: input.uploadVideoOptions.youtube.videoTitle,
+                    video_description:
+                      input.uploadVideoOptions.youtube.videoDescription,
+                    video_tags: input.uploadVideoOptions.youtube.videoTags,
+                    video_visibility: YoutubeVideoVisibilities.Public,
+                  },
+                }
+              : undefined,
             associated_transaction_id: transactionData.transaction_id,
             operation: {
               id: transactionData.operation_id,
@@ -229,6 +294,8 @@ export const uploadRouter = createTRPCRouter({
               preset: input.videoPreset,
             },
           };
+
+          console.log("createVideoMessage constructed:", createVideoMessage);
 
           // Post the message to sqs queue
           const sendMsgResult = await sqsClient.send(

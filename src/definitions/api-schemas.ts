@@ -1,5 +1,6 @@
 import { type Database } from "types_db";
 import { z } from "zod";
+import { YoutubeVideoVisibilities } from "./form-schemas";
 
 export enum VideoPreset {
   YouTube = "YouTube",
@@ -10,7 +11,28 @@ export const CreateVideoOptionsSchema = z.object({
   kind: z.literal("CreateVideoOptions"),
   user_id: z.string(),
   associated_transaction_id: z.string(),
-  upload_video_to_youtube_after_creation: z.boolean().default(false),
+  upload_after_creation_options: z
+    .object({
+      youtube: z
+        .object({
+          // An array of ids, we will use each of these id's to look up the oauth creds from db
+          oauth_credentials_id: z
+            .array(z.string())
+            .min(1, "Must provide at least one oauth credentials id"),
+          video_title: z
+            .string()
+            .min(1)
+            .max(100, "Title must be at most 100 characters long"),
+          video_description: z
+            .string()
+            .max(5000, "Description may be no longer than 5000 characters.")
+            .optional(),
+          video_tags: z.array(z.string()).optional(),
+          video_visibility: z.nativeEnum(YoutubeVideoVisibilities),
+        })
+        .optional(),
+    })
+    .optional(),
   operation: z.object({
     id: z.string(),
   }),
