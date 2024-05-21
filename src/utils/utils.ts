@@ -1,8 +1,8 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { env } from "~/env";
-import { createClient } from "./supabase/server";
-import { Database, Enums, Tables } from "types_db";
+import { type createClient } from "./supabase/server";
+import { type Database } from "types_db";
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -155,7 +155,7 @@ export async function getFeatureFlag(
   feature: Database["public"]["Enums"]["feature"],
   userId: string,
 ) {
-  const { data: featureFlag, error } = await supabase
+  const { data: featureFlag } = await supabase
     .from("user_feature_flags_view")
     .select("*")
     .eq("user_id", userId)
@@ -175,11 +175,3 @@ export async function getFeatureFlag(
 export function isSuccessStatusCode(statusCode: number) {
   return statusCode >= 200 && statusCode < 300;
 }
-
-export type DeepPartial<T> = {
-  [P in keyof T]?: T[P] extends (infer U)[]
-    ? DeepPartial<U>[]
-    : T[P] extends ReadonlyArray<infer U>
-      ? ReadonlyArray<DeepPartial<U>>
-      : DeepPartial<T[P]>;
-};

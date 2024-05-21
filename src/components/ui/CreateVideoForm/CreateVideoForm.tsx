@@ -36,6 +36,7 @@ import {
 import { type VideoPreset } from "~/definitions/api-schemas";
 import { Avatar, AvatarFallback, AvatarImage } from "../avatar";
 import { Checkbox } from "../checkbox";
+import { useLinkedYoutubeAccounts } from "~/hooks/use-linked-youtube-accounts";
 
 // Hardcoded at 15MB
 const MAX_IMAGE_SIZE = 15 * 1024 * 1024;
@@ -67,7 +68,7 @@ export default function CreateVideoForm({
     isLoading: isLoadingYoutubeAccounts,
     isFetching: isFetchingYoutubeAccounts,
     refetch: refetchYoutubeAccounts,
-  } = api.user.getConnectedYoutubeAccounts.useQuery();
+  } = useLinkedYoutubeAccounts();
 
   const form = useForm({
     resolver: zodResolver(CreateVideoFormSchema),
@@ -82,12 +83,6 @@ export default function CreateVideoForm({
   // Is the upload video section toggled (with checkbox)
   const [isUploadVideoChecked, setIsUploadVideoChecked] =
     useState<boolean>(false);
-
-  // We manage some state outside of the form for platform upload options
-  // This type is partial because we'll validate the non-partials in the form schema
-  const [uploadVideoOptions, setUploadVideoOptions] = useState<
-    z.infer<typeof CreateVideoFormSchema>["uploadVideoOptions"] | null
-  >(null);
 
   // Form submit handler
   async function onSubmit(data: z.infer<typeof CreateVideoFormSchema>) {
@@ -235,13 +230,15 @@ export default function CreateVideoForm({
             audioFile: audioFile!,
             imageFile: imageFile!,
             videoTitle: data.videoTitle,
+
             // Only include the upload video options if the user has checked the box
             videoPreset: data.videoPreset,
             ...(isUploadVideoChecked
-              ? uploadVideoOptions
-              : data.uploadVideoOptions,
-            {}),
+              ? { uploadVideoOptions: data.uploadVideoOptions }
+              : {}),
           };
+
+          console.log("dataToSubmit", dataToSubmit);
 
           void onSubmit(dataToSubmit);
         })}
@@ -434,6 +431,7 @@ export default function CreateVideoForm({
                       <div className="flex flex-row gap-2">
                         <Controller
                           control={form.control}
+                          shouldUnregister={true}
                           defaultValue={undefined}
                           name="uploadVideoOptions.youtube.uploadToChannels"
                           render={({ field }) => (
@@ -515,6 +513,7 @@ export default function CreateVideoForm({
                     <FormField
                       control={form.control}
                       defaultValue=""
+                      shouldUnregister={true}
                       name="uploadVideoOptions.youtube.videoTitle"
                       render={({ field }) => (
                         <FormItem>
@@ -534,6 +533,7 @@ export default function CreateVideoForm({
 
                     <FormField
                       control={form.control}
+                      shouldUnregister={true}
                       defaultValue=""
                       name="uploadVideoOptions.youtube.videoDescription"
                       render={({ field }) => (
@@ -557,6 +557,7 @@ export default function CreateVideoForm({
 
                     <Controller
                       control={form.control}
+                      shouldUnregister={true}
                       name="uploadVideoOptions.youtube.videoVisibility"
                       render={({ field }) => (
                         <FormItem>

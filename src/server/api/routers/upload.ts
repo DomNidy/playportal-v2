@@ -36,7 +36,7 @@ export const uploadRouter = createTRPCRouter({
             youtube: z
               .object({
                 videoTitle: z.string().min(1).max(100),
-                videoDescription: z.string().min(1).max(5000).optional(),
+                videoDescription: z.string().max(5000).optional(),
                 videoTags: z.array(z.string()).optional(),
                 // An array of the channel ids that the video should be uploaded to
                 // We will use this as a mapping to the oauth tokens in the db
