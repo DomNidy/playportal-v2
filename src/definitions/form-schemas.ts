@@ -78,7 +78,13 @@ export const CreateVideoFormSchema = z.object({
             .string()
             .max(5000, "Description may be no longer than 5000 characters.")
             .optional(),
-          videoTags: z.array(z.string()).optional(),
+          videoTags: z
+            .array(z.string())
+            .refine((tags) => {
+              console.log(tags.join("").length);
+              return tags.join("").length <= 500;
+            }, "Tags must be at most 500 characters long.")
+            .optional(),
           // An array of the channel ids that the video should be uploaded to
           // We will use this as a mapping to the oauth tokens in the db
           uploadToChannels: z

@@ -37,6 +37,7 @@ import { type VideoPreset } from "~/definitions/api-schemas";
 import { Avatar, AvatarFallback, AvatarImage } from "../avatar";
 import { Checkbox } from "../checkbox";
 import { useLinkedYoutubeAccounts } from "~/hooks/use-linked-youtube-accounts";
+import TagsInput from "./TagsInput";
 
 // Hardcoded at 15MB
 const MAX_IMAGE_SIZE = 15 * 1024 * 1024;
@@ -550,6 +551,40 @@ export default function CreateVideoForm({
                           </FormDescription>
                           <FormMessage>
                             {form.formState.errors?.uploadVideoOptions?.youtube?.videoDescription?.message?.toString()}
+                          </FormMessage>
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      shouldUnregister={true}
+                      name="uploadVideoOptions.youtube.videoTags"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>YouTube Video Tags</FormLabel>
+                          <FormControl>
+                            <TagsInput
+                              controllerRenderProps={{
+                                name: field.name,
+                                ref: field.ref,
+                                onBlur: field.onBlur,
+                                onChange: field.onChange,
+                                disabled: field.disabled,
+                                // We don't need to set the value here since the TagsInput component will handle that
+                                value: null,
+                              }}
+                              onKeywordsChange={(keywords) => {
+                                field.onChange(keywords);
+                              }}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Comma separated list of tags for the video on
+                            YouTube
+                          </FormDescription>
+                          <FormMessage>
+                            {form.formState.errors?.uploadVideoOptions?.youtube?.videoTags?.message?.toString()}
                           </FormMessage>
                         </FormItem>
                       )}

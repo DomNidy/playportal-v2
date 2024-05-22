@@ -56,9 +56,7 @@ export const UploadVideoOptionsSchema = z.object({
   kind: z.literal("UploadVideoOptions"),
   user_id: z.string(),
   // Once we add support for other platforms, we will need to update this schema to be a union that includes the other platforms
-  upload_platform: z.literal(
-    "YouTube" as Database["public"]["Enums"]["upload_platform"],
-  ),
+  upload_platform: z.enum(["YouTube"]),
   // This is associated with an "UploadVideo" transaction from the "transactions" table
   associated_transaction_id: z.string(),
   operation: z.object({

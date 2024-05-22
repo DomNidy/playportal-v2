@@ -14,11 +14,11 @@ import { headers } from "next/headers";
 import { VideoPreset } from "~/definitions/api-schemas";
 import { getFeatureFlag } from "~/utils/utils";
 import { YoutubeVideoVisibilities } from "~/definitions/form-schemas";
-import { I } from "node_modules/@upstash/redis/zmscore-4382faf4";
+
 const ratelimit = new Ratelimit({
   redis: redis,
   analytics: true,
-  limiter: Ratelimit.fixedWindow(3, "3 m"),
+  limiter: Ratelimit.fixedWindow(10, "3 m"),
 });
 
 export const uploadRouter = createTRPCRouter({
@@ -43,6 +43,7 @@ export const uploadRouter = createTRPCRouter({
                 // An array of the channel ids that the video should be uploaded to
                 // We will use this as a mapping to the oauth tokens in the db
                 uploadToChannels: z.array(z.string()).min(1),
+                videoVisibility: z.nativeEnum(YoutubeVideoVisibilities),
               })
               .optional(),
           })
@@ -56,6 +57,7 @@ export const uploadRouter = createTRPCRouter({
         const result = await ratelimit.limit(ipIdentifier ?? "");
 
         if (!result.success) {
+          console.log("Rate limiting failed:", result);
           throw new TRPCClientError(
             `Please wait a few minutes before sending another request.`,
           );
@@ -258,7 +260,6 @@ export const uploadRouter = createTRPCRouter({
           // Create message that we will post to sqs queue
           const createVideoMessage: z.infer<typeof CreateVideoOptionsSchema> = {
             kind: "CreateVideoOptions",
-            // TODO: Read if we should upload to youtube after creation from the submitted form data
             upload_after_creation_options: input?.uploadVideoOptions?.youtube
               ? {
                   youtube: {
@@ -267,7 +268,8 @@ export const uploadRouter = createTRPCRouter({
                     video_description:
                       input.uploadVideoOptions.youtube.videoDescription,
                     video_tags: input.uploadVideoOptions.youtube.videoTags,
-                    video_visibility: YoutubeVideoVisibilities.Public,
+                    video_visibility:
+                      input.uploadVideoOptions.youtube.videoVisibility,
                   },
                 }
               : undefined,

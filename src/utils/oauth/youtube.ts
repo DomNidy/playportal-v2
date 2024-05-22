@@ -277,8 +277,13 @@ export async function persistYoutubeCredentialsToDB(
         service_name: "YouTube",
         token: encryptedCredentials,
         service_account_id: youtubeChannelId,
-        service_account_image_url: youtubeChannelImageUrl,
-        service_account_name: youtubeChannelTitle,
+        // Only update the service account data if it is provided
+        ...(youtubeChannelImageUrl != null
+          ? { service_account_image_url: youtubeChannelImageUrl }
+          : {}),
+        ...(youtubeChannelTitle != null
+          ? { service_account_name: youtubeChannelTitle }
+          : {}),
         // Only update the refresh token if it is provided
         ...(encryptedRefreshToken != null
           ? { refresh_token: encryptedRefreshToken }
