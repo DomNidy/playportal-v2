@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { X } from "lucide-react";
-import { ControllerRenderProps } from "react-hook-form";
-import { CreateVideoFormSchema } from "~/definitions/form-schemas";
+import { type ControllerRenderProps } from "react-hook-form";
 import { Input } from "../Input";
 
 interface TagsInputProps {
