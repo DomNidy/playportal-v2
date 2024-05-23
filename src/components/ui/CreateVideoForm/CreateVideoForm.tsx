@@ -14,7 +14,7 @@ import {
   Label,
 } from "~/components/ui/Form";
 import { Input } from "~/components/ui/Input";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   CreateVideoFormSchema,
   YoutubeVideoVisibilities,
@@ -38,6 +38,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "../avatar";
 import { Checkbox } from "../checkbox";
 import { useLinkedYoutubeAccounts } from "~/hooks/use-linked-youtube-accounts";
 import TagsInput from "./TagsInput";
+import posthog from "posthog-js";
 
 // Hardcoded at 15MB
 const MAX_IMAGE_SIZE = 15 * 1024 * 1024;
@@ -49,6 +50,10 @@ export default function CreateVideoForm({
   fileSizeQuotaLimitBytes: number;
   uploadVideoFeature?: boolean;
 }) {
+  useEffect(() => {
+    posthog.capture("create_video_form_viewed");
+  }, []);
+
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   //* We only ever set this to true and never reset it back to false since the user is supposed to be redirected
@@ -115,7 +120,6 @@ export default function CreateVideoForm({
         imageFileSize: imageFile?.size,
         videoPreset: data.videoPreset,
         uploadVideoOptions: data.uploadVideoOptions,
-        
       },
       {
         onError(error) {
@@ -645,7 +649,11 @@ export default function CreateVideoForm({
               tabIndex={1}
               type="submit"
               className="text-black"
-              disabled={isUploadingFiles || genUploadURL.isPending || form.formState.isSubmitting}
+              disabled={
+                isUploadingFiles ||
+                genUploadURL.isPending ||
+                form.formState.isSubmitting
+              }
             >
               Create video
             </Button>
