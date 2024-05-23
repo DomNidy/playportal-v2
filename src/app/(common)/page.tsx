@@ -22,7 +22,7 @@ export default function Home() {
 
       {/* Hero text section*/}
       <TextGenerateEffect
-        words="The social media automation platform for music producers."
+        words="Streamline your Type Beat Uploads with Ease"
         className="mt-24 max-w-[400px] text-center text-[1.95rem] font-semibold leading-[3.25rem] text-white md:mt-36 md:max-w-[655px] md:text-[2.5rem] lg:mt-40 "
       />
 

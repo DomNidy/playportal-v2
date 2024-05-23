@@ -8,6 +8,7 @@ import { Suspense } from "react";
 import LandingPageNavbar, {
   LandingPageNavbarFallback,
 } from "~/components/ui/LandingPage/LandingPageNavbar";
+import NextTopLoader from "nextjs-toploader";
 
 const meta = {
   title: "Playportal | Type-Beat Video Creation Tool",
@@ -76,7 +77,10 @@ export default function RootLayout({
         <Suspense fallback={<LandingPageNavbarFallback />}>
           <LandingPageNavbar />
         </Suspense>
-        <Providers>{children}</Providers>
+        <Providers>
+          <NextTopLoader color="#BC38FA" showSpinner={false} height={2} />
+          {children}
+        </Providers>
         <Analytics />
       </body>
     </html>

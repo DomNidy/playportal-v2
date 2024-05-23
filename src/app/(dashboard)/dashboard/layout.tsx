@@ -7,6 +7,7 @@ import AuthProvider from "~/providers/auth-provider";
 import Providers from "~/providers/providers";
 import { getURL } from "~/utils/utils";
 import { createClient } from "~/utils/supabase/server";
+import NextTopLoader from "nextjs-toploader";
 
 const meta = {
   title: "Playportal",
@@ -90,7 +91,11 @@ export default async function DashboardLayout({
               ]}
             />
 
-            <div className="flex flex-col items-center ">{children}</div>
+            <div className="flex flex-col items-center ">
+              <NextTopLoader color="#BC38FA" showSpinner={false} height={2} />
+
+              {children}
+            </div>
           </Providers>
         </AuthProvider>
       </body>

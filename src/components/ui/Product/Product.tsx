@@ -1,8 +1,10 @@
 import Image from "next/image";
 import { getURL } from "~/utils/utils";
 import Link from "next/link";
+import posthog from "posthog-js";
+import ProductDownloadButton from "./ProductDownloadButton";
 
-type ProductData = {
+export type ProductData = {
   title: string;
   description?: string;
   downloadLink: string;
@@ -19,7 +21,7 @@ export default function Product({ product }: { product: ProductData }) {
 
   return (
     <div
-      className={`flex   ${product.variant === "default" ? "w-64 flex-col" : "w-auto sm:flex-row flex-col gap-2"} rounded-lg`}
+      className={`flex   ${product.variant === "default" ? "w-64 flex-col" : "w-auto flex-col gap-2 sm:flex-row"} rounded-lg`}
     >
       <Image
         src={productImageURL}
@@ -42,14 +44,7 @@ export default function Product({ product }: { product: ProductData }) {
         >
           {product.description}
         </Link>
-        <a
-          href={product.downloadLink}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="w-24 rounded-lg bg-white px-3 py-2 text-sm font-semibold text-black hover:bg-white/90"
-        >
-          Download
-        </a>
+        <ProductDownloadButton productData={product} />
       </div>
     </div>
   );

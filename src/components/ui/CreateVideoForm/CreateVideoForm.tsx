@@ -115,6 +115,7 @@ export default function CreateVideoForm({
         imageFileSize: imageFile?.size,
         videoPreset: data.videoPreset,
         uploadVideoOptions: data.uploadVideoOptions,
+        
       },
       {
         onError(error) {
@@ -644,7 +645,7 @@ export default function CreateVideoForm({
               tabIndex={1}
               type="submit"
               className="text-black"
-              disabled={isUploadingFiles || genUploadURL.isPending}
+              disabled={isUploadingFiles || genUploadURL.isPending || form.formState.isSubmitting}
             >
               Create video
             </Button>

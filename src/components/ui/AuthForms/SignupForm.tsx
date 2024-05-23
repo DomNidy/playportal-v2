@@ -18,6 +18,14 @@ import {
   FormMessage,
 } from "../Form";
 import Link from "next/link";
+import ConfirmEmailScreen from "./ConfirmEmail";
+import posthog from "posthog-js";
+
+// Type used to track the status of the signup process
+type SignupStatus = {
+  email?: string;
+  shouldCheckEmail: boolean;
+};
 
 const SignUpSchema = z
   .object({
@@ -47,7 +55,10 @@ export function SignupForm() {
   // - If Confirm email is enabled, a user is returned but session is null.
   // - If Confirm email is disabled, both a user and a session are returned.
   // So if a user is returned, but session is null, they need to confirm their email address.
-  const [shouldCheckEmail, setShouldCheckEmail] = useState<boolean>(false);
+  const [signupStatus, setSignupStatus] = useState<SignupStatus>({
+    email: undefined,
+    shouldCheckEmail: false,
+  });
 
   const form = useForm<z.infer<typeof SignUpSchema>>({
     resolver: zodResolver(SignUpSchema),
@@ -59,6 +70,10 @@ export function SignupForm() {
   });
 
   async function onSubmit(data: z.infer<typeof SignUpSchema>) {
+    posthog.capture("signup_with_email_form_submitted", {
+      email: data.email,
+    });
+
     setIsSubmitting(true);
     const signUpResult = await supabase.auth.signUp({
       email: data.email,
@@ -69,9 +84,23 @@ export function SignupForm() {
     });
     setIsSubmitting(false);
     if (!!signUpResult.data.user && signUpResult.data.session === null) {
-      setShouldCheckEmail(true);
+      setSignupStatus({ email: data.email, shouldCheckEmail: true });
     }
     setFormError(signUpResult.error?.message ?? "");
+  }
+
+  if (signupStatus.shouldCheckEmail && signupStatus.email) {
+    return (
+      <ConfirmEmailScreen
+        email={signupStatus.email}
+        onCloseConfirmEmailScreen={() =>
+          setSignupStatus({
+            email: undefined,
+            shouldCheckEmail: false,
+          })
+        }
+      />
+    );
   }
 
   return (
@@ -162,26 +191,22 @@ export function SignupForm() {
         <FormMessage>{formError}</FormMessage>
       </Form>
 
-      {shouldCheckEmail && (
-        <p className="my-3 text-center">
-          Please check your email address to confirm your registration
-        </p>
-      )}
-
       <div className="my-8 h-[1px] w-full bg-gradient-to-r from-transparent via-neutral-300 to-transparent dark:via-neutral-700" />
 
       <div className="flex flex-col space-y-4">
         <Button
           className=" group/btn relative flex h-10 w-full items-center justify-start space-x-2 rounded-md bg-gray-50 px-4 font-medium text-black shadow-input dark:bg-zinc-900 dark:shadow-[0px_0px_1px_1px_var(--neutral-800)]"
           disabled={isSubmitting}
-          onClick={() =>
-            supabase.auth.signInWithOAuth({
+          onClick={() => {
+            posthog.capture("signup_with_google_button_clicked");
+
+            void supabase.auth.signInWithOAuth({
               provider: "google",
               options: {
                 redirectTo: getURL("/auth/callback"),
               },
-            })
-          }
+            });
+          }}
         >
           <IconBrandGoogle className="h-4 w-4 text-neutral-800 dark:text-neutral-300" />
           <span className="text-sm text-neutral-700 dark:text-neutral-300">

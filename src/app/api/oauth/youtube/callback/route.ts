@@ -1,7 +1,3 @@
-// TODO:
-// Parse code from params, use it to exchange for access token and refresh token, persist that to DB and associate with user
-// We will probably need to use cookies to check which user is currently logged in via the supabase session
-
 import { type NextRequest, NextResponse } from "next/server";
 import {
   decryptYoutubeCredentials,
@@ -9,9 +5,7 @@ import {
   getYoutubeChannelSummary,
   oAuth2Client,
   persistYoutubeCredentialsToDB,
-  youtube,
 } from "~/utils/oauth/youtube";
-import { supabaseAdmin } from "~/utils/supabase/admin";
 import { createClient } from "~/utils/supabase/server";
 import { getErrorRedirect, getStatusRedirect, getURL } from "~/utils/utils";
 
