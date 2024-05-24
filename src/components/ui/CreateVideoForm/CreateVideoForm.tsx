@@ -40,8 +40,8 @@ import { useLinkedYoutubeAccounts } from "~/hooks/use-linked-youtube-accounts";
 import TagsInput from "./TagsInput";
 import posthog from "posthog-js";
 
-// Hardcoded at 15MB
-const MAX_IMAGE_SIZE = 15 * 1024 * 1024;
+// Hardcoded at 8MB
+const MAX_IMAGE_SIZE = 8 * 1024 * 1024;
 
 export default function CreateVideoForm({
   fileSizeQuotaLimitBytes,

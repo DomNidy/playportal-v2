@@ -28,6 +28,13 @@ export default async function AccountPage() {
     },
   );
 
+  const { data: uploadYoutubeVideoDailyQuotaUsage } = await supabase.rpc(
+    "get_user_quota_usage_daily_upload_youtube_video",
+    {
+      user_id: user?.id ?? "",
+    },
+  );
+
   const { data: userWithProduct } = await supabase
     .from("user_products")
     .select("*")
@@ -50,6 +57,11 @@ export default async function AccountPage() {
           createVideo: {
             dailyQuotaLimit: quotaLimits?.create_video_daily_quota ?? 0,
             dailyQuotaUsage: createVideoDailyQuotaUsage ?? 0,
+          },
+          uploadYoutubeVideo: {
+            dailyQuotaLimit: (quotaLimits?.upload_youtube_daily_quota ??
+              0) as number,
+            dailyQuotaUsage: uploadYoutubeVideoDailyQuotaUsage ?? 0,
           },
         }}
         featureFlags={{

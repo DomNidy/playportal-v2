@@ -175,3 +175,8 @@ export async function getFeatureFlag(
 export function isSuccessStatusCode(statusCode: number) {
   return statusCode >= 200 && statusCode < 300;
 }
+
+// Utility type that asserts all properties of an object are non-nullable (not undefined or null)
+export type NonNullableProperties<T> = {
+  [P in keyof T]: NonNullable<T[P]>;
+};

@@ -23,6 +23,10 @@ export default function ManageAccount({
       dailyQuotaLimit: number;
       dailyQuotaUsage: number;
     };
+    uploadYoutubeVideo: {
+      dailyQuotaLimit: number;
+      dailyQuotaUsage: number;
+    };
   };
   featureFlags?: {
     linkYoutubeAccounts: boolean;
@@ -69,6 +73,15 @@ export default function ManageAccount({
               <p>
                 {userWithProduct && quotas
                   ? `${quotas.createVideo.dailyQuotaUsage} / ${quotas.createVideo.dailyQuotaLimit}`
+                  : "You are not subscribed to any plan."}
+              </p>
+            </div>
+
+            <div className="flex flex-col space-y-1">
+              <Label>YouTube videos uploaded Today</Label>
+              <p>
+                {userWithProduct && quotas
+                  ? `${quotas.uploadYoutubeVideo.dailyQuotaUsage} / ${quotas.uploadYoutubeVideo.dailyQuotaLimit}`
                   : "You are not subscribed to any plan."}
               </p>
             </div>

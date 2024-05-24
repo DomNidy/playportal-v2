@@ -356,18 +356,21 @@ export type Database = {
           file_size_limit_mb: number
           for_plan: string | null
           id: string
+          upload_youtube_daily_quota: number
         }
         Insert: {
           create_video_daily_quota: number
           file_size_limit_mb: number
           for_plan?: string | null
           id: string
+          upload_youtube_daily_quota?: number
         }
         Update: {
           create_video_daily_quota?: number
           file_size_limit_mb?: number
           for_plan?: string | null
           id?: string
+          upload_youtube_daily_quota?: number
         }
         Relationships: [
           {
@@ -529,6 +532,8 @@ export type Database = {
           create_operation_id: string
           created_at: string | null
           id: string
+          metadata: Json | null
+          oauth_creds_id: string | null
           status: Database["public"]["Enums"]["upload_video_status"]
           upload_platform: Database["public"]["Enums"]["upload_platform"]
         }
@@ -536,6 +541,8 @@ export type Database = {
           create_operation_id?: string
           created_at?: string | null
           id?: string
+          metadata?: Json | null
+          oauth_creds_id?: string | null
           status?: Database["public"]["Enums"]["upload_video_status"]
           upload_platform: Database["public"]["Enums"]["upload_platform"]
         }
@@ -543,6 +550,8 @@ export type Database = {
           create_operation_id?: string
           created_at?: string | null
           id?: string
+          metadata?: Json | null
+          oauth_creds_id?: string | null
           status?: Database["public"]["Enums"]["upload_video_status"]
           upload_platform?: Database["public"]["Enums"]["upload_platform"]
         }
@@ -560,6 +569,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "operations_filemetadata"
             referencedColumns: ["operation_id"]
+          },
+          {
+            foreignKeyName: "upload_video_operations_oauth_creds_id_fkey"
+            columns: ["oauth_creds_id"]
+            isOneToOne: false
+            referencedRelation: "oauth_creds"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -587,7 +603,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "user_data_id_users_id_fk"
+            foreignKeyName: "user_data_id_fkey"
             columns: ["id"]
             isOneToOne: true
             referencedRelation: "users"
@@ -765,6 +781,18 @@ export type Database = {
         }
         Returns: Database["public"]["CompositeTypes"]["operation_and_transaction_ids"]
       }
+      create_upload_video_operation: {
+        Args: {
+          user_id: string
+          created_from_operation_id: string
+          using_oauth_creds_id: string
+          metadata: Json
+        }
+        Returns: {
+          upload_op_id: string
+          trans_id: string
+        }[]
+      }
       delete_all_operation_data: {
         Args: {
           operation_to_delete_id: string
@@ -783,9 +811,16 @@ export type Database = {
           role_id: string
           create_video_daily_quota: number
           file_size_limit_mb: number
+          upload_youtube_daily_quota: number
         }[]
       }
       get_user_quota_usage_daily_create_video: {
+        Args: {
+          user_id: string
+        }
+        Returns: number
+      }
+      get_user_quota_usage_daily_upload_youtube_video: {
         Args: {
           user_id: string
         }
@@ -798,12 +833,34 @@ export type Database = {
         }
         Returns: undefined
       }
+      handle_failed_upload_video_operation_refund: {
+        Args: {
+          upload_video_operation_id: string
+          transaction_id_to_refund: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       feature: "upload_videos" | "link_youtube_accounts"
       file_origin: "PlayportalBackend" | "UserProvided"
       file_type: "Video" | "Audio" | "Image"
       kit_type: "drum-kit" | "midi-kit" | "loop-kit" | "preset-kit" | "other"
+      operation_logs_enum:
+        | "cv_unexpected_error"
+        | "cv_dl_input_success"
+        | "cv_dl_input_fail"
+        | "cv_render_success"
+        | "cv_render_fail"
+        | "cv_output_to_s3_success"
+        | "cv_output_to_s3_fail"
+        | "uv_auth_success"
+        | "uv_auth_fail"
+        | "uv_unexpected_error"
+        | "uv_dl_input_success"
+        | "uv_dl_input_fail"
+        | "uv_upload_success"
+        | "uv_upload_fail"
       operation_status: "Ongoing" | "Failed" | "Completed"
       pricing_plan_interval: "day" | "week" | "month" | "year"
       pricing_type: "one_time" | "recurring"
@@ -817,7 +874,7 @@ export type Database = {
         | "past_due"
         | "unpaid"
         | "paused"
-      transaction_type: "CreateVideo"
+      transaction_type: "CreateVideo" | "UploadYoutubeVideo"
       upload_platform: "YouTube"
       upload_video_status: "Pending" | "Uploading" | "Completed" | "Failed"
     }

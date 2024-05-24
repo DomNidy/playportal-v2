@@ -15,10 +15,16 @@ export const CreateVideoOptionsSchema = z.object({
     .object({
       youtube: z
         .object({
-          // An array of ids, we will use each of these id's to look up the oauth creds from db
-          oauth_credentials_id: z
-            .array(z.string())
-            .min(1, "Must provide at least one oauth credentials id"),
+          // An array of objects containing the `upload_video_operation` ids and the associated `transaction` ids, so we can refund them on the lambda side if the video creation fails
+          // We will use the foreign key relation in the `upload_video_operation` table to lookup the associated `oauth_creds` id in the lambdas
+          upload_video_operations: z
+            .array(
+              z.object({
+                upload_video_operation_id: z.string(),
+                transaction_id: z.string(),
+              }),
+            )
+            .min(1, "Must provide at least one upload video operation"),
           video_title: z
             .string()
             .min(1)

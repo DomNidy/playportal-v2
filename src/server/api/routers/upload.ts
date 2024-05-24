@@ -14,6 +14,20 @@ import { headers } from "next/headers";
 import { VideoPreset } from "~/definitions/api-schemas";
 import { getFeatureFlag } from "~/utils/utils";
 import { YoutubeVideoVisibilities } from "~/definitions/form-schemas";
+import {
+  createCreateVideoOperation,
+  createYoutubeUploadOperation,
+  enforceQuotaLimits,
+  getOAuthCredentialsForYoutubeChannels,
+  getUserCreateVideoQuotaUsage,
+  getUserQuotaLimits,
+  getUserUploadYoutubeVideoQuotaUsage,
+  refundFailedCreateVideoOperation,
+  refundFailedUploadVideoOperation,
+} from "~/server/server-utils";
+import { PostgrestResponse } from "@supabase/supabase-js";
+import { PostgrestResponseSuccess } from "@supabase/postgrest-js";
+import { Database } from "types_db";
 
 const ratelimit = new Ratelimit({
   redis: redis,
@@ -57,113 +71,9 @@ export const uploadRouter = createTRPCRouter({
         const result = await ratelimit.limit(ipIdentifier ?? "");
 
         if (!result.success) {
-          console.log("Rate limiting failed:", result);
           throw new TRPCClientError(
             `Please wait a few minutes before sending another request.`,
           );
-        }
-
-        //* Check the quota that the users' plan grants them
-        const { data: userQuotas, error: quotaLimitQueryError } = await ctx.db
-          .rpc("get_user_quota_limits", {
-            user_id: ctx.user.id,
-          })
-          .single();
-
-        // Handle case where we are unable to retrieve the quota limits for a user
-        // This can occur if a user has no `user_role`, if a user tries to create a video and they are not subscribed, they will be stopped here
-        if (!userQuotas) {
-          console.warn(
-            `Failed to retrieve quota limits for user [${ctx.user.id}], if the user does not have an active subscription, this is expected behavior.`,
-          );
-          throw new TRPCClientError(
-            "An active subscription is required to perform this action, if you think this is a mistake; please contact support or try again later.",
-          );
-        } else if (quotaLimitQueryError) {
-          console.error(
-            `Error occured while trying to get the quota limits for user ${ctx.user.id}`,
-          );
-          throw new TRPCClientError(
-            `An error occured, please try again later or contact support`,
-          );
-        }
-
-        //* Check the users current daily quota usage
-        const { data: dailyQuotaUsed, error: quoatedUsedQueryError } =
-          await ctx.db.rpc("get_user_quota_usage_daily_create_video", {
-            user_id: ctx.user.id,
-          });
-
-        // Handle the case where we are unable to check the quota usage for a user
-        // If an error happens here, it may be network related, or an issue relating to the `transactions` or `transactions_refund` tables
-        if (quoatedUsedQueryError ?? dailyQuotaUsed === null) {
-          console.error(
-            `Failed to check the daily quota usage for user [${ctx.user.id}]`,
-          );
-          console.error(
-            `Query error: ${quoatedUsedQueryError?.message ?? "no query error"}`,
-          );
-          throw new TRPCClientError(
-            `An error occured, please try again later or contact support`,
-          );
-        }
-
-        //* Check that the user has not exceeded their daily quota usage
-        // If the user has exceeded their quota for the day, deny them
-        if (dailyQuotaUsed >= userQuotas.create_video_daily_quota) {
-          console.warn(
-            `User [${ctx.user.id}] attempted to create a video, but they've exceeded their daily quota usage.`,
-          );
-          throw new TRPCClientError(
-            `You have exceeded your daily quota usage, please wait until tomorrow, or upgrade your plan.`,
-          );
-        }
-
-        if (input.audioFileSize > userQuotas.file_size_limit_mb * 1024 * 1024) {
-          throw new TRPCClientError(
-            `The audio file you have uploaded exceeds your plans maximum limit.`,
-          );
-        }
-
-        //* Check that the user has the feature flag enabled to upload videos
-        const uploadVideoFeature = await getFeatureFlag(
-          ctx.db,
-          "upload_videos",
-          ctx.user.id,
-        );
-
-        if (!uploadVideoFeature) {
-          throw new TRPCClientError(
-            `This feature is not available to you, please contact support if you think this is a mistake.`,
-          );
-        }
-
-        // This rpc is a transaction which creates the operation record, creates transaction recor
-        const { data: transactionData, error: createOperationError } =
-          await supabaseAdmin.rpc("create_operation_and_transaction", {
-            user_id: ctx.user.id,
-            video_title: input.videoTitle,
-          });
-
-        if (
-          createOperationError ??
-          !transactionData?.transaction_id ??
-          !transactionData?.operation_id
-        ) {
-          console.error(
-            `An error occured while trying to create the operation and transaction documents`,
-          );
-          console.error(
-            "Operation error:",
-            createOperationError,
-            "Transaction data:",
-            transactionData,
-          );
-          throw new TRPCClientError(
-            "Something went wrong, please try again later or contct support",
-          );
-        } else {
-          console.log(transactionData);
         }
 
         // Parse file extensions
@@ -175,63 +85,161 @@ export const uploadRouter = createTRPCRouter({
           ? `.${input.imageFileExtension}`
           : "";
 
+        //* Get the quota that the users' plan grants them
+        const userQuotas = await getUserQuotaLimits(ctx);
+        console.log("Got user quotas", userQuotas);
+
+        //* Get the users current daily create video quota usage
+        const createVideoQuotaUsage = await getUserCreateVideoQuotaUsage(ctx);
+        console.log("Got create video quota usage", createVideoQuotaUsage);
+
+        //* Get user's daily upload to youtube quota usage if we are uploading to youtube, otherwise set to 0
+        // We don't really need to check this if the user is not uploading to youtube, but we will do it anyway
+        const uploadYoutubeVideoQuotaUsage =
+          await getUserUploadYoutubeVideoQuotaUsage(ctx);
+
+        //* Enforce quota limits
+        enforceQuotaLimits(
+          userQuotas,
+          input,
+          createVideoQuotaUsage,
+          uploadYoutubeVideoQuotaUsage,
+        );
+
+        //* Get the oauth credentials for the youtube channels that the user wants to upload to
         // If we were provided with a list of channel ids to upload to, we will use these to look up the oauth credentials
         let oauthCredentialIDS: string[] | null = null;
         if (input?.uploadVideoOptions?.youtube?.uploadToChannels) {
-          // Using the provided channel ids, look up the ids of the associated rows in the oauth_credentials table
-          // We will use these ids to get the oauth tokens for the youtube upload in our lambda functions
-          const { data: oauthCredentials, error: oauthCredentialsQueryError } =
-            await supabaseAdmin
-              .from("oauth_creds")
-              .select("id")
-              .eq("user_id", ctx.user.id)
-              .in("service_account_id", [
-                ...input.uploadVideoOptions.youtube.uploadToChannels,
-              ]);
+          // Make sure user has feature flag to upload to youtube
+          const uploadVideoFeature = await getFeatureFlag(
+            ctx.db,
+            "upload_videos",
+            ctx.user.id,
+          );
 
-          if (oauthCredentialsQueryError) {
-            console.error(
-              `Failed to retrieve oauth credentials for user ${ctx.user.id}`,
-            );
-            console.error(`Query error: ${oauthCredentialsQueryError.message}`);
+          if (!uploadVideoFeature) {
             throw new TRPCClientError(
-              "An error occured, please try again later or contact support",
+              `This feature is not available to you, please contact support if you think this is a mistake.`,
             );
           }
 
-          if (!oauthCredentials) {
-            throw new TRPCClientError(
-              "No oauth credentials found for the provided channel ids",
-            );
-          }
-
-          if (
-            oauthCredentials.length !==
-            input.uploadVideoOptions.youtube.uploadToChannels.length
-          ) {
-            console.error(
-              "User provided channel ids:",
+          // Get the oauth credential ids associated with the service accounts (youtube channel ids in this case)
+          const youtubeOAuthCredentials =
+            await getOAuthCredentialsForYoutubeChannels(
+              ctx,
               input.uploadVideoOptions.youtube.uploadToChannels,
-              "but only found oauth credentials for:",
-              oauthCredentials.map((cred) => cred.id).join(", "),
-              "we cannot proceed with the upload.",
             );
 
-            throw new TRPCClientError(
-              "Not all channel ids provided could be authenticated, please re-link your channels in the account page.",
+          // Add the oauth credential ids to the array
+          oauthCredentialIDS = youtubeOAuthCredentials.map((cred) => cred.id);
+        }
+        console.log("Got oauthCredentialIDS", oauthCredentialIDS);
+        if (!oauthCredentialIDS)
+          throw new TRPCClientError(
+            "Failed to authenticate one or more of your connected youtube channels. Please try re-connecting your accounts.",
+          );
+
+        //* Create the operation and transaction in the database, (this charges the user for the create video operation only)
+        const createVideoOperation = await createCreateVideoOperation(
+          ctx,
+          input,
+        );
+
+        //* Create the upload video operations and transactions in the database, (this charges the user for the upload video operations)
+        let uploadOperationAndTransactionIds = [];
+        // Create youtube upload transactions if user wants to upload to youtube
+        if (input.uploadVideoOptions?.youtube) {
+          try {
+            // Charge the user for the upload
+            // For each channel, run the upload cost rpc
+            // This will return an array of upload operation ids, and their transaction ids
+            const youtubeUploadTransactions = await Promise.all(
+              oauthCredentialIDS.map(async (credsId) => {
+                console.log(
+                  `Charging user ${ctx.user.id} for upload using credentials id: ${credsId}`,
+                );
+                return createYoutubeUploadOperation(
+                  ctx,
+                  input,
+                  createVideoOperation.operation_id,
+                  credsId,
+                );
+              }),
             );
+
+            // Push all the upload operation and transaction ids to the array
+            uploadOperationAndTransactionIds.push(...youtubeUploadTransactions);
+
+            // Check if any of the transactions failed
+            const failedTransactions = uploadOperationAndTransactionIds.filter(
+              (transaction) => {
+                if (transaction.error ?? !transaction.data) {
+                  console.error(
+                    `Failed to charge user ${ctx.user.id} for youtube upload, error: ${transaction?.error?.message}`,
+                  );
+                  return true;
+                }
+              },
+            );
+
+            // If any of the transactions failed, we should refund all upload video transactions AND the create video transaction, then throw an error
+            if (failedTransactions.length > 0) {
+              console.error(
+                `Failed to charge user ${ctx.user.id} for youtube upload, refunding all transactions`,
+              );
+
+              //* Refund all upload video transactions
+              await Promise.all(
+                uploadOperationAndTransactionIds.map(async (transaction) => {
+                  if (transaction.data) {
+                    await refundFailedUploadVideoOperation(
+                      transaction.data.upload_op_id as string,
+                      transaction.data.trans_id as string,
+                    );
+                  } else {
+                    console.warn(
+                      "Some upload video transactions could not be refunded...",
+                    );
+                  }
+                }),
+              );
+
+              throw new TRPCClientError(
+                "An error occured, please try again later or contact support",
+              );
+            }
+          } catch (error) {
+            console.error("Error in youtube upload charge logic:", error);
+            console.log(
+              "Refunding all transactions in this create video operation",
+            );
+
+            //* Note: We refund the upload video transactions in the try block above because that scope has access to the transaction ids
+            //* Refund the create video transaction
+            await refundFailedCreateVideoOperation(
+              createVideoOperation.operation_id,
+              createVideoOperation.transaction_id,
+            );
+
+            if (error instanceof TRPCClientError) {
+              throw error;
+            }
+            throw new TRPCClientError("Something went wrong");
           }
-
-          oauthCredentialIDS = oauthCredentials.map((cred) => cred.id);
         }
 
-        console.log("oauthCredentialIDS", oauthCredentialIDS);
+        // After above logic, the uploadOperationAndTransactionIds array should contain the upload operation and transaction ids, and no failed transactions, so we'll assert that here
+        // The assertion we are using is the success response from the rpc function that our createYoutubeUploadOperation function returns
+        uploadOperationAndTransactionIds =
+          uploadOperationAndTransactionIds as PostgrestResponseSuccess<
+            Database["public"]["Functions"]["create_upload_video_operation"]["Returns"][0]
+          >[];
 
         try {
-          const audioFileS3Key = `${ctx.user.id}/inputs/${transactionData.operation_id}-input-audio${audioFileExtension}`;
+          const audioFileS3Key = `${ctx.user.id}/inputs/${createVideoOperation.operation_id}-input-audio${audioFileExtension}`;
           // Ternary here is used incase we did not receive an input image from user
           const imageFileS3Key = input.imageFileSize
-            ? `${ctx.user.id}/inputs/${transactionData.operation_id}-input-image${imageFileExtension}`
+            ? `${ctx.user.id}/inputs/${createVideoOperation.operation_id}-input-image${imageFileExtension}`
             : null;
 
           // Create the S3 presigned urls first, if we fail to create those, run handle refund logic
@@ -263,7 +271,20 @@ export const uploadRouter = createTRPCRouter({
             upload_after_creation_options: input?.uploadVideoOptions?.youtube
               ? {
                   youtube: {
-                    oauth_credentials_id: oauthCredentialIDS!,
+                    upload_video_operations:
+                      uploadOperationAndTransactionIds.map(
+                        (
+                          // The type assertion here is safe because we have already checked that the transactions are successful
+                          // This is just to shut up the typescript compiler
+                          op: PostgrestResponseSuccess<{
+                            trans_id: string;
+                            upload_op_id: string;
+                          }>,
+                        ) => ({
+                          transaction_id: op.data.trans_id,
+                          upload_video_operation_id: op.data.upload_op_id,
+                        }),
+                      ),
                     video_title: input.uploadVideoOptions.youtube.videoTitle,
                     video_description:
                       input.uploadVideoOptions.youtube.videoDescription,
@@ -273,9 +294,9 @@ export const uploadRouter = createTRPCRouter({
                   },
                 }
               : undefined,
-            associated_transaction_id: transactionData.transaction_id,
+            associated_transaction_id: createVideoOperation.transaction_id,
             operation: {
-              id: transactionData.operation_id,
+              id: createVideoOperation.operation_id,
             },
             audio_file: {
               file_size_bytes: input.audioFileSize,
@@ -298,7 +319,6 @@ export const uploadRouter = createTRPCRouter({
           };
 
           console.log("createVideoMessage constructed:", createVideoMessage);
-
           // Post the message to sqs queue
           const sendMsgResult = await sqsClient.send(
             new SendMessageCommand({
@@ -308,21 +328,45 @@ export const uploadRouter = createTRPCRouter({
           );
 
           console.log("Message sent to SQS queue", sendMsgResult);
-
+          // Return the presigned urls and operation id
           return {
             presignedUrlAudio: presignedUrlAudio,
             presignedUrlImage: presignedUrlImage,
-            operationId: transactionData.operation_id,
+            operationId: createVideoOperation.operation_id,
           };
         } catch (err) {
           //* We should only call this when we know the operation_id and transaction_id exist
           await supabaseAdmin.rpc("handle_failed_operation_refund", {
-            operation_id: transactionData.operation_id,
-            transaction_to_refund_id: transactionData.transaction_id,
+            operation_id: createVideoOperation.operation_id,
+            transaction_to_refund_id: createVideoOperation.transaction_id,
           });
-        }
 
-        // 4. return the presigned urls
+          //* Refund all upload video transactions
+          await Promise.all(
+            uploadOperationAndTransactionIds.map(
+              async (
+                transaction: PostgrestResponseSuccess<{
+                  trans_id: string;
+                  upload_op_id: string;
+                }>,
+              ) => {
+                if (transaction.data) {
+                  await refundFailedUploadVideoOperation(
+                    transaction.data.upload_op_id,
+                    transaction.data.trans_id,
+                  );
+                } else {
+                  console.warn(
+                    "Some upload video transactions could not be refunded...",
+                  );
+                }
+              },
+            ),
+          );
+
+          // Re-throw the error after handling refunds
+          throw err;
+        }
       } catch (error) {
         if (error instanceof TRPCClientError) {
           throw error;
