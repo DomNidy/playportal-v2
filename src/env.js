@@ -1,5 +1,5 @@
 import { createEnv } from "@t3-oss/env-nextjs";
-import { z } from "zod";
+import { coerce, z } from "zod";
 
 export const env = createEnv({
   /**
@@ -34,6 +34,9 @@ export const env = createEnv({
     OAUTH_TOKEN_ENCRYPTION_KEY: z.string().min(1),
     YOUTUBE_OAUTH_CLIENT_ID: z.string().min(1),
     YOUTUBE_OAUTH_CLIENT_SECRET: z.string().min(1),
+    // Resend
+    RESEND_API_KEY: z.string(),
+    RESEND_PLAYPORTAL_AUDIENCE_ID: z.string()
   },
 
   /**
@@ -51,6 +54,7 @@ export const env = createEnv({
     NEXT_PUBLIC_STRIPE_PRODUCT_ID_PRO_PLAN: z.string(),
     NEXT_PUBLIC_POSTHOG_KEY: z.string(),
     NEXT_PUBLIC_POSTHOG_HOST: z.string(),
+    NEXT_PUBLIC_PLAYPORTAL_DISPLAY_SIGNUP_PAGE: z.boolean(),
   },
 
   /**
@@ -88,6 +92,10 @@ export const env = createEnv({
     NEXT_PUBLIC_STRIPE_PRODUCT_ID_PRO_PLAN: process.env.NEXT_PUBLIC_STRIPE_PRODUCT_ID_PRO_PLAN,
     NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
     NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    NEXT_PUBLIC_PLAYPORTAL_DISPLAY_SIGNUP_PAGE: JSON.parse(process.env.NEXT_PUBLIC_PLAYPORTAL_DISPLAY_SIGNUP_PAGE ?? "false"),
+    RESEND_API_KEY: process.env.RESEND_API_KEY,
+    RESEND_PLAYPORTAL_AUDIENCE_ID: process.env.RESEND_PLAYPORTAL_AUDIENCE_ID,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

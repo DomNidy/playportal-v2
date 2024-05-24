@@ -72,8 +72,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={` ${GeistSans.className} bg-black `}>
-        <div className="landing-bg-gradient pointer-events-none absolute top-0 h-[1450px] w-full" />
-
         <Suspense fallback={<LandingPageNavbarFallback />}>
           <LandingPageNavbar />
         </Suspense>

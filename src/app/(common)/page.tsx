@@ -13,6 +13,8 @@ import PricingSection from "~/components/ui/LandingPage/PricingSection";
 export default function Home() {
   return (
     <main className="mt-10   flex  min-h-screen flex-col  items-center  bg-black ">
+      <div className="landing-bg-gradient pointer-events-none absolute top-0 h-[1450px] w-full " />
+
       {/* The styled grid lines */}
       <Image
         src={styledGridlines}
