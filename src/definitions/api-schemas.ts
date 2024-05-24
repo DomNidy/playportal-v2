@@ -1,4 +1,3 @@
-import { type Database } from "types_db";
 import { z } from "zod";
 import { YoutubeVideoVisibilities } from "./form-schemas";
 
@@ -21,7 +20,7 @@ export const CreateVideoOptionsSchema = z.object({
             .array(
               z.object({
                 upload_video_operation_id: z.string(),
-                transaction_id: z.string(),
+                upload_video_transaction_id: z.string(),
               }),
             )
             .min(1, "Must provide at least one upload video operation"),

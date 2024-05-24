@@ -281,7 +281,7 @@ export const uploadRouter = createTRPCRouter({
                             upload_op_id: string;
                           }>,
                         ) => ({
-                          transaction_id: op.data.trans_id,
+                          upload_video_transaction_id: op.data.trans_id,
                           upload_video_operation_id: op.data.upload_op_id,
                         }),
                       ),

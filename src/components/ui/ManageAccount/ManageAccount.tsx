@@ -80,7 +80,7 @@ export default function ManageAccount({
             <div className="flex flex-col space-y-1">
               <Label>YouTube videos uploaded Today</Label>
               <p>
-                {userWithProduct && quotas
+                {userWithProduct && featureFlags?.linkYoutubeAccounts && quotas
                   ? `${quotas.uploadYoutubeVideo.dailyQuotaUsage} / ${quotas.uploadYoutubeVideo.dailyQuotaLimit}`
                   : "You are not subscribed to any plan."}
               </p>
