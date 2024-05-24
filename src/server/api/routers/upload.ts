@@ -25,9 +25,8 @@ import {
   refundFailedCreateVideoOperation,
   refundFailedUploadVideoOperation,
 } from "~/server/server-utils";
-import { PostgrestResponse } from "@supabase/supabase-js";
-import { PostgrestResponseSuccess } from "@supabase/postgrest-js";
-import { Database } from "types_db";
+import { type PostgrestResponseSuccess } from "@supabase/postgrest-js";
+import { type Database } from "types_db";
 
 const ratelimit = new Ratelimit({
   redis: redis,
@@ -193,8 +192,8 @@ export const uploadRouter = createTRPCRouter({
                 uploadOperationAndTransactionIds.map(async (transaction) => {
                   if (transaction.data) {
                     await refundFailedUploadVideoOperation(
-                      transaction.data.upload_op_id as string,
-                      transaction.data.trans_id as string,
+                      transaction.data.upload_op_id,
+                      transaction.data.trans_id,
                     );
                   } else {
                     console.warn(

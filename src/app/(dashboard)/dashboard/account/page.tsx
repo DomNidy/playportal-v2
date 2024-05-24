@@ -1,4 +1,3 @@
-import { Database } from "types_db";
 import ManageAccount from "~/components/ui/ManageAccount/ManageAccount";
 import { createClient } from "~/utils/supabase/server";
 import { getFeatureFlag } from "~/utils/utils";
@@ -59,8 +58,7 @@ export default async function AccountPage() {
             dailyQuotaUsage: createVideoDailyQuotaUsage ?? 0,
           },
           uploadYoutubeVideo: {
-            dailyQuotaLimit: (quotaLimits?.upload_youtube_daily_quota ??
-              0) as number,
+            dailyQuotaLimit: quotaLimits?.upload_youtube_daily_quota ?? 0,
             dailyQuotaUsage: uploadYoutubeVideoDailyQuotaUsage ?? 0,
           },
         }}

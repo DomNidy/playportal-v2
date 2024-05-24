@@ -1,7 +1,6 @@
 import Image from "next/image";
 import { getURL } from "~/utils/utils";
 import Link from "next/link";
-import posthog from "posthog-js";
 import ProductDownloadButton from "./ProductDownloadButton";
 
 export type ProductData = {

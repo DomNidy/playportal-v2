@@ -1,9 +1,9 @@
 import { TRPCClientError } from "@trpc/client";
 import { type createTRPCContext } from "./api/trpc";
-import { Database } from "types_db";
-import { RouterInputs } from "~/trpc/react";
+import { type Database } from "types_db";
+import { type RouterInputs } from "~/trpc/react";
 import { supabaseAdmin } from "~/utils/supabase/admin";
-import { NonNullableProperties } from "~/utils/utils";
+import { type NonNullableProperties } from "~/utils/utils";
 
 // Alias for the type of the context that is passed to the tRPC API
 type TRPCContext = Awaited<ReturnType<typeof createTRPCContext>>;
