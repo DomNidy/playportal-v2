@@ -14,7 +14,7 @@ import {
   Label,
 } from "~/components/ui/Form";
 import { Input } from "~/components/ui/Input";
-import { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   CreateVideoFormSchema,
   YoutubeVideoVisibilities,
@@ -39,6 +39,7 @@ import { Checkbox } from "../checkbox";
 import { useLinkedYoutubeAccounts } from "~/hooks/use-linked-youtube-accounts";
 import TagsInput from "./TagsInput";
 import posthog from "posthog-js";
+import MultiSelectFormField from "../MultiSelect";
 
 // Hardcoded at 8MB
 const MAX_IMAGE_SIZE = 8 * 1024 * 1024;
@@ -434,7 +435,7 @@ export default function CreateVideoForm({
                     <div className="flex flex-col space-y-2">
                       <Label>Upload to this YouTube Channel</Label>
 
-                      <div className="flex flex-row gap-2">
+                      <div className="flex flex-row gap-2 dark">
                         <Controller
                           control={form.control}
                           shouldUnregister={true}
@@ -442,58 +443,35 @@ export default function CreateVideoForm({
                           name="uploadVideoOptions.youtube.uploadToChannels"
                           render={({ field }) => (
                             <>
-                              <Select
-                                onValueChange={(value) => {
-                                  // TODO: We will need to change this to support multiple channels
-                                  const newValue = [value];
-                                  field.onChange(newValue);
-                                }}
-                              >
-                                <SelectTrigger
-                                  className="w-[180px]"
-                                  onBlur={field.onBlur}
-                                  ref={field.ref}
-                                >
-                                  <SelectValue placeholder="Upload to" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {!isLoadingYoutubeAccounts ? (
-                                    connectedYoutubeAccounts?.map(
-                                      (youtubeAccount) => (
-                                        <SelectItem
-                                          className="flex items-start justify-between"
-                                          key={youtubeAccount.channelId}
-                                          value={youtubeAccount.channelId}
-                                        >
-                                          <div className="flex w-full flex-row justify-between">
-                                            <Avatar className="h-[16px] w-[16px] ">
-                                              <AvatarImage
-                                                src={
-                                                  youtubeAccount.channelAvatar ??
-                                                  ""
-                                                }
-                                                alt="Youtube channel thumbnail"
-                                                width={16}
-                                                height={16}
-                                                className="rounded-full"
-                                              />
-                                              <AvatarFallback>
-                                                {youtubeAccount.channelTitle}
-                                              </AvatarFallback>
-                                            </Avatar>
-
-                                            <p className="ml-4">
-                                              {youtubeAccount.channelTitle}
-                                            </p>
-                                          </div>
-                                        </SelectItem>
+                              <MultiSelectFormField
+                                onValueChange={field.onChange}
+                                options={
+                                  connectedYoutubeAccounts?.map(
+                                    (youtubeAccount) => ({
+                                      label: youtubeAccount.channelTitle,
+                                      value: youtubeAccount.channelId,
+                                      icon: () => (
+                                        <Avatar className="h-[16px] w-[16px] ">
+                                          <AvatarImage
+                                            src={
+                                              youtubeAccount.channelAvatar ?? ""
+                                            }
+                                            alt="Youtube channel thumbnail"
+                                            width={16}
+                                            height={16}
+                                            className="rounded-full"
+                                          />
+                                          <AvatarFallback>
+                                            {youtubeAccount.channelTitle}
+                                          </AvatarFallback>
+                                        </Avatar>
                                       ),
-                                    )
-                                  ) : (
-                                    <p>Loading...</p>
-                                  )}
-                                </SelectContent>
-                              </Select>
+                                    }),
+                                  ) ?? []
+                                }
+                                defaultValue={field.value}
+                                placeholder="Select a channel"
+                              />
                             </>
                           )}
                         />
