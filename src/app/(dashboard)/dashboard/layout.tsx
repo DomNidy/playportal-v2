@@ -5,7 +5,7 @@ import { GeistSans } from "geist/font/sans";
 import DashboardNavbar from "~/components/ui/DashboardNavbar/DashboardNavbar";
 import AuthProvider from "~/providers/auth-provider";
 import Providers from "~/providers/providers";
-import { getURL } from "~/utils/utils";
+import { getStatusRedirect, getURL } from "~/utils/utils";
 import { createClient } from "~/utils/supabase/server";
 import NextTopLoader from "nextjs-toploader";
 
@@ -64,10 +64,21 @@ export default async function DashboardLayout({
 
   const {
     data: { user },
+    error,
   } = await supabase.auth.getUser();
 
   //* Since this layout is on the server-side, the user will not even end up on the dashboard route at all, they'll just be instantly redirected
-  if (!user) redirect("/sign-in");
+  if (!user ?? error) {
+    console.log("User not found, redirecting to sign-in");
+    console.log("Get user error", error);
+    return redirect(
+      getStatusRedirect(
+        getURL("/sign-in"),
+        "Please sign in",
+        "You must be signed in to access the dashboard.",
+      ),
+    );
+  }
 
   return (
     <html lang="en">

@@ -67,7 +67,7 @@ export async function login(email: string, password: string) {
     password,
   });
 
-  console.log("error", error, email, password);
+  console.log("error", error);
 
   if (error)
     redirect(

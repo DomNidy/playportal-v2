@@ -2,11 +2,11 @@ import { createClient } from "~/utils/supabase/server";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getErrorRedirect, getStatusRedirect, getURL } from "~/utils/utils";
-import { cookies } from "next/headers";
+
+export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   // Putting this here to force dynamic nextjs endpoint
-  cookies();
   console.log("auth/callback request", request.url);
 
   // The `/auth/callback` route is required for the server-side auth flow implemented
@@ -19,7 +19,9 @@ export async function GET(request: NextRequest) {
   if (code) {
     const supabase = createClient();
 
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { error, data } = await supabase.auth.exchangeCodeForSession(code);
+    console.log(data.user?.id, "exchanged code for session");
+
     if (error) {
       return NextResponse.redirect(
         getErrorRedirect(
