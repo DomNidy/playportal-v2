@@ -207,7 +207,7 @@ export function SignupForm() {
         >
           <IconBrandGoogle className="h-4 w-4 text-neutral-800 dark:text-neutral-300" />
           <span className="text-sm text-neutral-700 dark:text-neutral-300">
-            Sign in with Google
+            Sign up with Google
           </span>
           <BottomGradient />
         </Button>

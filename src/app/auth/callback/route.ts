@@ -1,7 +1,7 @@
 import { createClient } from "~/utils/supabase/server";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { getErrorRedirect, getStatusRedirect } from "~/utils/utils";
+import { getErrorRedirect, getStatusRedirect, getURL } from "~/utils/utils";
 
 export async function GET(request: NextRequest) {
   console.log("auth/callback request", request.url);
@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     if (error) {
       return NextResponse.redirect(
         getErrorRedirect(
-          `${requestUrl.origin}/sign-in`,
+          getURL("/sign-in"),
           error.name,
           "Sorry, we weren't able to log you in. Please try again.",
         ),
@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
   // URL to redirect to after sign in process completes
   return NextResponse.redirect(
     getStatusRedirect(
-      `${requestUrl.origin}/dashboard`,
+      getURL("/dashboard"),
       "Success!",
       "You are now signed in.",
     ),

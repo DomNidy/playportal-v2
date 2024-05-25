@@ -22,6 +22,7 @@ export async function checkoutWithStripe(
   price: Price,
   redirectPath = "/dashboard",
 ): Promise<CheckoutResponse> {
+  console.log("Checkout with stripe initiated", price, redirectPath);
   try {
     // Get the user from Supabase auth
     const supabase = createClient();

@@ -61,9 +61,13 @@ export default function UserButton({
           Account
         </Link>
 
-        <DropdownMenuItem className="text-muted-foreground focus:cursor-pointer focus:bg-white/30 focus:text-white">
+        <Link
+          href={"/support"}
+          className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm text-muted-foreground outline-none transition-colors hover:bg-white/30 hover:text-white focus:cursor-pointer focus:bg-white/30 focus:text-accent-foreground focus:text-white data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+        >
           Support
-        </DropdownMenuItem>
+        </Link>
+
         <DropdownMenuItem
           className="text-muted-foreground focus:cursor-pointer focus:bg-white/30 focus:text-white"
           onClick={() => {

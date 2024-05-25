@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import UserButton from "../UserButton/UserButton";
 import { createClient } from "~/utils/supabase/server";
-import { DashboardNavbarLinks } from "./DashboardNavlbarLinks";
+import { DashboardNavbarLinks } from "./DashboardNavbarLinks";
 
 export type DashNavLink = {
   href: string;
