@@ -102,7 +102,7 @@ export async function signUp(
     },
   });
 
-  console.log("Sign up response", data, error, email);
+  console.log("Sign up response", error, email);
 
   if (error) {
     return redirect(

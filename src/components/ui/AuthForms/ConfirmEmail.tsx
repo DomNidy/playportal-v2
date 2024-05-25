@@ -18,7 +18,12 @@ export default function ConfirmEmailScreen({
   onCloseConfirmEmailScreen: () => void;
 }) {
   return (
-    <div className="mx-auto w-full max-w-md rounded-none bg-white p-4 shadow-input dark:bg-black md:rounded-2xl md:p-8">
+    <div
+      className="mx-auto flex  w-full max-w-md items-center rounded-none bg-white p-4 shadow-input dark:bg-black  md:rounded-2xl md:p-8"
+      style={{
+        height: "calc(100vh - 1326px)",
+      }}
+    >
       <Card>
         <CardHeader>
           <CardTitle> Please check your email inbox</CardTitle>
