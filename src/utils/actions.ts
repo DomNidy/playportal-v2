@@ -3,6 +3,10 @@
 import posthog from "posthog-js";
 import { Resend } from "resend";
 import { env } from "~/env";
+import { createClient } from "./supabase/server";
+import { redirect } from "next/navigation";
+import { getErrorRedirect, getStatusRedirect, getURL } from "./utils";
+import { revalidatePath } from "next/cache";
 
 export type SignupToMailingListResponse = {
   status: "success" | "error";
@@ -53,4 +57,84 @@ export async function signupToMailingList(
     status: "success",
     text: "You've been added to the mailing list!",
   };
+}
+
+export async function login(email: string, password: string) {
+  const supabase = createClient();
+
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  console.log("error", error, email, password);
+
+  if (error)
+    redirect(
+      getErrorRedirect(
+        "/sign-in",
+        "Failed login",
+        "Please verify your login credentials and try again.",
+      ),
+    );
+
+  revalidatePath("/dashboard", "layout");
+  redirect(
+    getStatusRedirect(
+      "/dashboard",
+      "Successfully logged in",
+      "Welcome to playportal, you have logged in!",
+    ),
+  );
+}
+
+export async function signUp(
+  email: string,
+  password: string,
+): Promise<{ showConfirmEmail: boolean } | void> {
+  const supabase = createClient();
+
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      emailRedirectTo: getURL("/auth/callback"),
+    },
+  });
+
+  console.log("Sign up response", data, error, email);
+
+  if (error) {
+    return redirect(
+      getErrorRedirect("/sign-up", "Failed sign-up", error.message),
+    );
+  } else if (data.session) {
+    return redirect(
+      getStatusRedirect(
+        "/dashboard",
+        "Successfully signed up",
+        "Welcome to playportal, you are now signed in!",
+      ),
+    );
+  } else if (data.user?.identities && data.user.identities.length == 0) {
+    console.warn("User with pre-existing account tried to sign up again");
+    return redirect(
+      getErrorRedirect(
+        "/sign-up",
+        "Account already exists",
+        "Please sign in with your existing account. Try resetting your password if you forgot it.",
+      ),
+    );
+  } else if (data.user) {
+    console.log("User signed up, but needs to confirm email", data.user.id);
+    return { showConfirmEmail: true };
+  } else {
+    return redirect(
+      getErrorRedirect(
+        "/sign-up",
+        "Hmm... something went wrong.",
+        "Please try again later or contact support.",
+      ),
+    );
+  }
 }

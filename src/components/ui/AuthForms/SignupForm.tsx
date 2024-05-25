@@ -20,6 +20,8 @@ import {
 import Link from "next/link";
 import ConfirmEmailScreen from "./ConfirmEmail";
 import posthog from "posthog-js";
+import { ClipLoader } from "react-spinners";
+import { signUp } from "~/utils/actions";
 
 // Type used to track the status of the signup process
 type SignupStatus = {
@@ -45,9 +47,6 @@ export function SignupForm() {
 
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  // For displaying general-form errors (not simply validation errors, those are displayed by the individual form items)
-  const [formError, setFormError] = useState<string>("");
-
   // Whether or not the user should be shown the "Confirm your email" screen
   // We should set this to true when the user successfully signs up, and when only a
   // Reference to supabase docs: https://supabase.com/docs/reference/javascript/auth-signup
@@ -70,23 +69,16 @@ export function SignupForm() {
   });
 
   async function onSubmit(data: z.infer<typeof SignUpSchema>) {
+    setIsSubmitting(true);
     posthog.capture("signup_with_email_form_submitted", {
       email: data.email,
     });
-
-    setIsSubmitting(true);
-    const signUpResult = await supabase.auth.signUp({
-      email: data.email,
-      password: data.password,
-      options: {
-        emailRedirectTo: getURL("/auth/callback"),
-      },
-    });
+    const signUpResponse = await signUp(data.email, data.password);
     setIsSubmitting(false);
-    if (!!signUpResult.data.user && signUpResult.data.session === null) {
+    if (signUpResponse && "showConfirmEmail" in signUpResponse) {
       setSignupStatus({ email: data.email, shouldCheckEmail: true });
+      form.reset();
     }
-    setFormError(signUpResult.error?.message ?? "");
   }
 
   if (signupStatus.shouldCheckEmail && signupStatus.email) {
@@ -184,11 +176,17 @@ export function SignupForm() {
                          dark:from-zinc-900 dark:to-zinc-900 dark:shadow-[0px_1px_0px_0px_var(--zinc-800)_inset,0px_-1px_0px_0px_var(--zinc-800)_inset]`}
             type="submit"
           >
-            Sign up &rarr;
+            {!isSubmitting ? (
+              <>Sign up &rarr; </>
+            ) : (
+              <>
+                <ClipLoader size={20} color={"#fff"} className="inline" />
+              </>
+            )}
+
             <BottomGradient />
           </Button>
         </form>
-        <FormMessage>{formError}</FormMessage>
       </Form>
 
       <div className="my-8 h-[1px] w-full bg-gradient-to-r from-transparent via-neutral-300 to-transparent dark:via-neutral-700" />
@@ -196,7 +194,6 @@ export function SignupForm() {
       <div className="flex flex-col space-y-4">
         <Button
           className=" group/btn relative flex h-10 w-full items-center justify-start space-x-2 rounded-md bg-gray-50 px-4 font-medium text-black shadow-input dark:bg-zinc-900 dark:shadow-[0px_0px_1px_1px_var(--neutral-800)]"
-          disabled={isSubmitting}
           onClick={() => {
             posthog.capture("signup_with_google_button_clicked");
 

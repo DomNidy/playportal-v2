@@ -23,11 +23,9 @@ export default function ConfirmEmailScreen({
         <CardHeader>
           <CardTitle> Please check your email inbox</CardTitle>
           <CardDescription>
-            <p>
-              We{"'ve"} sent your email address{" "}
-              <span className="text-foreground"> {email}</span> a link to verify
-              your email address.
-            </p>
+            We{"'ve"} sent your email address{" "}
+            <span className="text-foreground"> {email}</span> a link to verify
+            your email address.
           </CardDescription>
         </CardHeader>
         <CardContent>

@@ -1,8 +1,20 @@
+import { redirect } from "next/navigation";
 import { SignupForm } from "~/components/ui/AuthForms/SignupForm";
 import SignupToMailingListInput from "~/components/ui/MailingList/SignupToMailingListInput";
 import { env } from "~/env";
+import { createClient } from "~/utils/supabase/server";
 
 export default async function Page() {
+  const supabase = createClient();
+
+  // Check if the user is already logged in, if so, redirect them
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  //* Since this layout is on the server-side, the user will not even end up on the dashboard route at all, they'll just be instantly redirected
+  if (user) redirect("/dashboard");
+
   // Display waitlist signup if the signup page is disabled
   if (!env.NEXT_PUBLIC_PLAYPORTAL_DISPLAY_SIGNUP_PAGE) {
     return (
@@ -24,7 +36,12 @@ export default async function Page() {
   }
 
   return (
-    <div className="dark">
+    <div
+      className="dark flex items-center "
+      style={{
+        height: "calc(100vh - 126px)",
+      }}
+    >
       {/* <SignUp /> */}
       <SignupForm />
     </div>

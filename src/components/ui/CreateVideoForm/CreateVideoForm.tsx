@@ -232,6 +232,7 @@ export default function CreateVideoForm({
   return (
     <Form {...form}>
       <form
+      className="pb-4"
         onSubmit={form.handleSubmit((data) => {
           const dataToSubmit = {
             audioFile: audioFile!,
@@ -626,7 +627,7 @@ export default function CreateVideoForm({
             <Button
               tabIndex={1}
               type="submit"
-              className="text-black"
+              className="text-black mb-4"
               disabled={
                 isUploadingFiles ||
                 genUploadURL.isPending ||

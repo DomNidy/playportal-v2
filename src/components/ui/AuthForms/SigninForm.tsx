@@ -1,5 +1,4 @@
 "use client";
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -15,11 +14,12 @@ import { Input } from "../Input";
 import { Button } from "../Button";
 import { useState } from "react";
 import { createClient } from "~/utils/supabase/client";
-import { getStatusRedirect, getURL } from "~/utils/utils";
-import { useRouter } from "next/navigation";
+import { getURL } from "~/utils/utils";
 import Link from "next/link";
 import { IconBrandGoogle } from "@tabler/icons-react";
 import { cn } from "~/utils/utils";
+import { login } from "~/utils/actions";
+import { ClipLoader } from "react-spinners";
 
 const SignInSchema = z.object({
   email: z.string().email(),
@@ -28,7 +28,6 @@ const SignInSchema = z.object({
 
 export default function SigninForm() {
   const supabase = createClient();
-  const router = useRouter();
 
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
@@ -42,27 +41,7 @@ export default function SigninForm() {
 
   async function onSubmit(data: z.infer<typeof SignInSchema>) {
     setIsSubmitting(true);
-
-    await supabase.auth
-      .signInWithPassword({
-        email: data.email,
-        password: data.password,
-      })
-      .then((res) => {
-        if (res.data.user && res.data.session) {
-          const redirectPath = getStatusRedirect(
-            "/dashboard",
-            "Successfully logged in",
-            "Welcome to playportal, you have logged in!",
-          );
-
-          router.push(redirectPath);
-        }
-
-        if (res.error) {
-          form.setError("password", { message: res.error.message });
-        }
-      });
+    await login(data.email, data.password);
     setIsSubmitting(false);
   }
 
@@ -125,7 +104,13 @@ export default function SigninForm() {
                          dark:from-zinc-900 dark:to-zinc-900 dark:shadow-[0px_1px_0px_0px_var(--zinc-800)_inset,0px_-1px_0px_0px_var(--zinc-800)_inset]`}
             type="submit"
           >
-            Sign in &rarr;
+            {!isSubmitting ? (
+              <>Sign in &rarr; </>
+            ) : (
+              <>
+                <ClipLoader size={20} color={"#fff"} className="inline" />
+              </>
+            )}
             <BottomGradient />
           </Button>
         </form>
@@ -164,7 +149,7 @@ export default function SigninForm() {
 const BottomGradient = () => {
   return (
     <>
-      <span className="absolute inset-x-0 -bottom-px block h-px w-full bg-gradient-to-r from-transparent via-cyan-500 to-transparent opacity-0 transition duration-500 group-hover/btn:opacity-100" />
+      <span className="absolute inset-x-0 -bottom-px block h-px w-full bg-gradient-to-r from-transparent via-ptl_accent-def to-transparent opacity-0 transition duration-500 group-hover/btn:opacity-100" />
       <span className="absolute inset-x-10 -bottom-px mx-auto block h-px w-1/2 bg-gradient-to-r from-transparent via-indigo-500 to-transparent opacity-0 blur-sm transition duration-500 group-hover/btn:opacity-100" />
     </>
   );
