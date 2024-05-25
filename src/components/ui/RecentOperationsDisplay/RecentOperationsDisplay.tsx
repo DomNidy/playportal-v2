@@ -7,13 +7,11 @@ import {
   OperationCardSkeleton,
 } from "../OperationCard";
 import { useEffect, useRef } from "react";
-import useAuth from "~/hooks/use-auth";
 
 const itemsPerPage = 20;
 
 export default function RecentOperationsDisplay() {
   const supabase = createClient();
-  const auth = useAuth();
 
   const lastOperationCardRef = useRef<HTMLDivElement>(null);
 
@@ -24,14 +22,18 @@ export default function RecentOperationsDisplay() {
     }: {
       pageParam: { from: number; to: number };
     }) => {
-      if (!auth?.user?.id) return [];
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user?.id) return [];
 
       const { data, error } = await supabase
         .from("operations_filemetadata")
         .select("*")
         .order("created_at", { ascending: false })
         .eq("file_origin", "PlayportalBackend")
-        .eq("user_id", auth.user?.id ?? "")
+        .eq("user_id", user.id)
         .range(pageParam.from, pageParam.to)
         .limit(itemsPerPage);
 

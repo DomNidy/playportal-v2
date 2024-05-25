@@ -3,7 +3,6 @@ import { type Metadata } from "next";
 import { redirect } from "next/navigation";
 import { GeistSans } from "geist/font/sans";
 import DashboardNavbar from "~/components/ui/DashboardNavbar/DashboardNavbar";
-import AuthProvider from "~/providers/auth-provider";
 import Providers from "~/providers/providers";
 import { getStatusRedirect, getURL } from "~/utils/utils";
 import { createClient } from "~/utils/supabase/server";
@@ -83,32 +82,30 @@ export default async function DashboardLayout({
   return (
     <html lang="en">
       <body className={` ${GeistSans.className} bg-black`}>
-        <AuthProvider initialUser={user}>
-          <Providers>
-            <DashboardNavbar
-              links={[
-                {
-                  href: "/dashboard",
-                  text: "Dashboard",
-                },
-                {
-                  href: "/dashboard/my-videos",
-                  text: "Videos",
-                },
-                {
-                  href: "/dashboard/transactions",
-                  text: "Transactions",
-                },
-              ]}
-            />
+        <Providers>
+          <DashboardNavbar
+            links={[
+              {
+                href: "/dashboard",
+                text: "Dashboard",
+              },
+              {
+                href: "/dashboard/my-videos",
+                text: "Videos",
+              },
+              {
+                href: "/dashboard/transactions",
+                text: "Transactions",
+              },
+            ]}
+          />
 
-            <div className="flex flex-col items-center ">
-              <NextTopLoader color="#BC38FA" showSpinner={false} height={2} />
+          <div className="flex flex-col items-center ">
+            <NextTopLoader color="#BC38FA" showSpinner={false} height={2} />
 
-              {children}
-            </div>
-          </Providers>
-        </AuthProvider>
+            {children}
+          </div>
+        </Providers>
       </body>
     </html>
   );
