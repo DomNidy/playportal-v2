@@ -43,7 +43,7 @@ export default function ResetPasswordPage() {
 
     if (!error) {
       setStatusMessage(
-        "If an account with that email exists, we sent you an email with instructions to reset your password.",
+        "If an account with that email exists, we sent you an email to log in. Once logged in, you can change your password from the account settings page (top right corner of the dashboard)",
       );
       setShowForm(false);
       return;

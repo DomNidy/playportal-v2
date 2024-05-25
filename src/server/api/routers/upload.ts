@@ -132,11 +132,6 @@ export const uploadRouter = createTRPCRouter({
           // Add the oauth credential ids to the array
           oauthCredentialIDS = youtubeOAuthCredentials.map((cred) => cred.id);
         }
-        console.log("Got oauthCredentialIDS", oauthCredentialIDS);
-        if (!oauthCredentialIDS)
-          throw new TRPCClientError(
-            "Failed to authenticate one or more of your connected youtube channels. Please try re-connecting your accounts.",
-          );
 
         //* Create the operation and transaction in the database, (this charges the user for the create video operation only)
         const createVideoOperation = await createCreateVideoOperation(
@@ -148,6 +143,11 @@ export const uploadRouter = createTRPCRouter({
         let uploadOperationAndTransactionIds = [];
         // Create youtube upload transactions if user wants to upload to youtube
         if (input.uploadVideoOptions?.youtube) {
+          console.log("Got oauthCredentialIDS", oauthCredentialIDS);
+          if (!oauthCredentialIDS)
+            throw new TRPCClientError(
+              "Failed to authenticate one or more of your connected youtube channels. Please try re-connecting your accounts.",
+            );
           try {
             // Charge the user for the upload
             // For each channel, run the upload cost rpc

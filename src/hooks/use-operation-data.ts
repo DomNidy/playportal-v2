@@ -15,8 +15,8 @@ type AssociatedFileMetadata =
 
 // If the operation is live, we will open up a socket connection
 export default function useOperationData(operationId: string | null): {
-  video_title: string;
-  started_at: string;
+  videoTitle: string;
+  startedAt: string;
   associatedFiles?: AssociatedFileMetadata[];
   status: OperationStatus | null; // LoadingData is for when we are still loading data... (so we can show loading state)
   logs: OperationLog[];
@@ -102,6 +102,7 @@ export default function useOperationData(operationId: string | null): {
       // If operation doesn't exist, return
       if (!operationData.data) {
         console.log("operation doesnt exist");
+        setIsOperationDataLoading(false);
         return;
       }
 
@@ -214,8 +215,8 @@ export default function useOperationData(operationId: string | null): {
   }, [operationId, operationStatus, supabase]);
 
   return {
-    video_title: videoTitle ?? "",
-    started_at: startedAt ?? "",
+    videoTitle: videoTitle ?? "",
+    startedAt: startedAt ?? "",
     associatedFiles,
     status: operationStatus,
     logs,
