@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Get the code verifier from the cookie
-    const codeVerifierCookie = req.cookies.get("code_verifier");
+    const codeVerifierCookie = req.cookies.get("codeVerifier");
 
     if (!codeVerifierCookie) {
       console.error("No code verifier found in cookies");
@@ -53,10 +53,12 @@ export async function GET(req: NextRequest) {
 
     // Exchange the code for an access token and refresh token
     // We need to use the code verifier that we stored in a cookie
-    const { tokens } = await oAuth2Client.getToken({
+    const { tokens, res: getTokenResponse } = await oAuth2Client.getToken({
       code,
       codeVerifier,
     });
+
+    console.log("Get token response", JSON.stringify(getTokenResponse));
 
     // We will persist the credentials to the database
     const encryptedCredentials = encryptYoutubeCredentials(tokens);

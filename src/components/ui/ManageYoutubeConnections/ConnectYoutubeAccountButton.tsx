@@ -1,7 +1,5 @@
 "use client";
-
 import { useRouter } from "next/navigation";
-import Cookies from "js-cookie";
 import { api } from "~/trpc/react";
 import { Button } from "../Button";
 import { toast } from "../Toasts/use-toast";
@@ -11,18 +9,7 @@ export function ConnectionYoutubeAccountButton() {
   const apiUtils = api.useUtils();
 
   const handleConnectYoutubeAccount = async () => {
-    const { authUrl, codeVerifier } =
-      await apiUtils.user.getYouTubeAuthorizationURL.fetch();
-
-    console.log("Generated code verifier", codeVerifier);
-
-    // Store received code verifier in a secure cookie
-    Cookies.set("code_verifier", codeVerifier, {
-      secure: true,
-      sameSite: "Lax",
-    });
-
-    console.log(codeVerifier);
+    const { authUrl } = await apiUtils.user.getYouTubeAuthorizationURL.fetch();
 
     if (!authUrl) {
       toast({

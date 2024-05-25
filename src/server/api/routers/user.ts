@@ -88,13 +88,17 @@ export const userRouter = createTRPCRouter({
     const { codeChallenge, codeVerifier } =
       await oAuth2Client.generateCodeVerifierAsync();
 
-    cookies().set("codeVerifier", codeVerifier);
+    // Store code verifier in a secure cookie
+    ctx.setCookie("codeVerifier", codeVerifier, {
+      httpOnly: true,
+      sameSite: "lax",
+    });
 
     const authUrl = oAuth2Client.generateAuthUrl({
       access_type: "offline",
       scope: [
         "https://www.googleapis.com/auth/youtube.upload",
-        "https://www.googleapis.com/auth/youtube",
+        "https://www.googleapis.com/auth/youtube.readonly",
       ],
       // The state param is encoded into the url and sent back to the callback
       // This will make it easy to identify the user that the token is associated with, and persist it to the db
@@ -105,7 +109,6 @@ export const userRouter = createTRPCRouter({
 
     return {
       authUrl,
-      codeVerifier,
     };
   }),
 
@@ -234,12 +237,23 @@ export const userRouter = createTRPCRouter({
 
         // If revocation was successful, we can delete the account from the database
         if (isSuccessStatusCode(revokeResponse.status)) {
-          await supabaseAdmin
+          const { error: deleteCredentialsFromDBError } = await supabaseAdmin
             .from("oauth_creds")
-            .delete()
+            .delete({ count: "exact" })
             .eq("service_account_id", input.channelId)
             .eq("service_name", "YouTube")
-            .eq("user_id", ctx.user.id);
+            .eq("user_id", ctx.user.id)
+            .single();
+
+          if (deleteCredentialsFromDBError) {
+            console.warn(
+              "Error while trying to delete youtube account from backend: ",
+              error,
+            );
+            throw new TRPCClientError(
+              "Error occurred while trying to unlink the YouTube account, please try again or contact support.",
+            );
+          }
 
           return true;
         } else {

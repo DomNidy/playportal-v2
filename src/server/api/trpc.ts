@@ -8,8 +8,10 @@
  */
 import { type User } from "@supabase/supabase-js";
 import { TRPCError, initTRPC } from "@trpc/server";
+import { ResponseCookie } from "next/dist/compiled/@edge-runtime/cookies";
+import { cookies } from "next/headers";
 import superjson from "superjson";
-import { ZodError } from "zod";
+import { ZodError, set } from "zod";
 
 import { createClient } from "~/utils/supabase/server";
 
@@ -36,8 +38,6 @@ export const createTRPCContext = async (opts: CreateContextOptions) => {
     ...opts,
   };
 };
-
-
 
 /**
  * 2. INITIALIZATION
@@ -103,11 +103,18 @@ const enforceUserIsAuthed = t.middleware(async ({ ctx, next }) => {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
 
+  const { set: setCookie } = cookies();
+
   return next({
     ctx: {
       // infers the `session` as non-nullable
       user: data.user,
       headers: ctx.headers,
+      setCookie: (
+        key: string,
+        value: string,
+        cookie: Partial<ResponseCookie> | undefined,
+      ) => setCookie(key, value, cookie),
     },
   });
 });
