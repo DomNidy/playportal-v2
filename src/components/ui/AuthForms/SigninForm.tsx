@@ -121,8 +121,8 @@ export default function SigninForm() {
       <div className="flex flex-col space-y-4">
         <Button
           className=" group/btn relative flex h-10 w-full items-center justify-start space-x-2 rounded-md bg-gray-50 px-4 font-medium text-black shadow-input dark:bg-zinc-900 dark:shadow-[0px_0px_1px_1px_var(--neutral-800)]"
-          onClick={() =>
-            void supabase.auth.signInWithOAuth({
+          onClick={async () =>
+            await supabase.auth.signInWithOAuth({
               provider: "google",
               options: {
                 redirectTo: getURL("/auth/callback"),
