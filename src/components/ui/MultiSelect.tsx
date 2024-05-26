@@ -64,6 +64,10 @@ interface MultiSelectFormFieldProps
   className?: string;
   animation?: number;
   onValueChange: (value: string[]) => void;
+  // Custom prop that tracks if the associated data is loading
+  isDataLoading?: boolean;
+  // Custom prop that allows us to pass some loading data to display in the dropdown
+  loadingPlaceholder?: React.ReactNode;
 }
 
 const MultiSelectFormField = React.forwardRef<
@@ -202,6 +206,9 @@ const MultiSelectFormField = React.forwardRef<
             />
             <CommandList>
               <CommandEmpty>No results found.</CommandEmpty>
+
+              {props.isDataLoading && props.loadingPlaceholder}
+
               <CommandGroup>
                 {options.map((option) => {
                   const isSelected = selectedValuesSet.current.has(

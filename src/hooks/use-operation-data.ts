@@ -47,51 +47,51 @@ export default function useOperationData(operationId: string | null): {
     RealtimeChannel | undefined
   >();
 
-  // Reset data when operation id changes
-  useEffect(() => {
-    setVideoTitle(undefined);
-    setStartedAt(undefined);
-    setAssociatedFiles([]);
-    setOperationStatus(null);
-    setLogs([]);
-  }, [operationId]);
-
   // Whenever the operation status changes, we make sure we still need the sockets open
   // If we don't, we unsubscribe from the channels
   useEffect(() => {
-    if (operationId === null) {
-      console.debug("OperationId is null, not doing any data-fetching");
-      return;
-    }
-
     const unsubscribeFromChannels = async () => {
+      // Don't unsubscribe if the operation is still ongoing
       if (operationStatus === "Ongoing") return;
 
       // If we have connection open reading the operations table, unsub
       if (operationsSubscription?.socket.isConnected()) {
+        console.debug("Unsubscribing from operations channel");
         await operationsSubscription.unsubscribe();
         setOperationsSubscription(undefined);
       }
 
       // If we have connection open reading the operation_logs table, unsub
       if (logsSubscription?.socket.isConnected()) {
+        console.debug("Unsubscribing from logs channel");
         await logsSubscription.unsubscribe();
         setLogsSubscription(undefined);
       }
     };
 
+    // Unsub as the operation status changes
     void unsubscribeFromChannels();
-  }, [logsSubscription, operationId, operationStatus, operationsSubscription]);
 
-  // If the operation is not live, just query for all pre-existing logs & data
-  // If it is live, open socket connections to read the data as it is updated in real time
+    // Also run the unsubscribe function when the component unmounts
+    return () => {
+      console.debug("Component unmounting, unsubscribing from channels");
+      void unsubscribeFromChannels();
+    };
+  }, [logsSubscription, operationStatus, operationsSubscription]);
+
+  // We want this effect to do the following:
+  // Fetch our initial operation data (if any can be found)
+  // Based off that initial data, we can decide if we need to open up socket connections
+  // Should only run once when the component mounts
   useEffect(() => {
+    let isMounted = true;
+
     if (operationId === null) {
       console.debug("OperationId is null, not doing any data-fetching");
       return;
     }
 
-    const fetchStatus = async () => {
+    const fetchInitialOperationData = async () => {
       setIsOperationDataLoading(true);
       const operationData = await supabase
         .from("operations")
@@ -106,45 +106,32 @@ export default function useOperationData(operationId: string | null): {
         return;
       }
 
-      // If not ongoing, fetch all pre-existing data and return
-      if (operationData.data?.status !== "Ongoing") {
-        console.debug(
-          "Operation is not ongoing, fetching all pre-existing data",
-          operationData.data?.status,
-        );
+      // Fetch all pre-existing data and return
+      console.debug(
+        "Fetching all pre-existing data",
+        operationData.data?.status,
+      );
 
-        const logs = await supabase
-          .from("operation_logs")
-          .select("*")
-          .eq("operation_id", operationId)
-          .order("created_at", { ascending: true });
-
-        setLogs(logs.data ?? []);
-        setOperationStatus(operationData.data?.status ?? "Ongoing");
-        setVideoTitle(operationData.data?.video_title);
-        setStartedAt(operationData.data?.created_at);
-
-        // If status is completed, query for the s3 key
-        const s3Key = await supabase
-          .from("file_metadata")
-          .select("*")
-          .eq("operation_id", operationId);
-
-        setIsOperationDataLoading(false);
-        setAssociatedFiles(s3Key.data ?? []);
-        return;
-      }
-
-      console.debug("Operation is ongoing, opening socket connections");
-      // If ongoing, subscribe to relevant channels
-
-      //* We also want to fetch pre-existing logs even if operation is still ongoing (incase of refresh or something, we will combine the logs received from the channels later)
       const logs = await supabase
         .from("operation_logs")
         .select("*")
         .eq("operation_id", operationId)
         .order("created_at", { ascending: true });
 
+      // If status is completed, query for the s3 key
+      setIsOperationDataLoading(false);
+      return {
+        logs: logs.data ?? [],
+        operationStatus: operationData.data?.status ?? null,
+        videoTitle: operationData.data?.video_title,
+        startedAt: operationData.data?.created_at,
+      };
+    };
+
+    const openSocketConnection = async () => {
+      console.debug("Operation is ongoing, opening socket connections");
+      // If ongoing, subscribe to relevant channels
+      //* We also want to fetch pre-existing logs even if operation is still ongoing (incase of refresh or something, we will combine the logs received from the channels later)
       // TODO: Add the `filter` property to only check for the relevant rows (with matching id)
       const logsChannel = supabase
         .channel("realtime operation logs")
@@ -183,35 +170,42 @@ export default function useOperationData(operationId: string | null): {
         .subscribe();
 
       setLogsSubscription(logsChannel);
-      setLogs(logs.data ?? []);
       setOperationsSubscription(operationsChannel);
-      setOperationStatus(operationData.data.status ?? "Ongoing");
-      setVideoTitle(operationData.data.video_title);
-      setStartedAt(operationData.data.created_at);
     };
 
-    void fetchStatus();
+    // Fetch initial data, then open socket connections if operation is ongoing
+    void fetchInitialOperationData().then((initialData) => {
+      console.log("Initial data fetched", initialData);
+      // Set the initial data returned from fetchInitialOperationData
+      setOperationStatus(initialData?.operationStatus ?? null);
+      setLogs(initialData?.logs ?? []);
+      setVideoTitle(initialData?.videoTitle ?? "");
+      setStartedAt(initialData?.startedAt ?? "");
+
+      if (isMounted && initialData?.operationStatus === "Ongoing") {
+        void openSocketConnection();
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
   }, [operationId, supabase]);
 
+  // Hook that fetches the associated files when the operation is completed
   useEffect(() => {
-    console.log(
-      "Operation Status changed to: ",
-      operationStatus,
-      "fetching associated files",
-    );
-    // Query for associated files when the status changes to completed
-    if (operationStatus !== "Completed" ?? !operationId) return;
-
     const fetchAssociatedFiles = async () => {
+      console.log("Operation is completed, fetching associated files");
+
       const s3Key = await supabase
         .from("file_metadata")
         .select("*")
-        .eq("operation_id", operationId);
+        .eq("operation_id", operationId ?? "");
 
       setAssociatedFiles(s3Key.data ?? []);
     };
 
-    void fetchAssociatedFiles();
+    if (operationStatus === "Completed") void fetchAssociatedFiles();
   }, [operationId, operationStatus, supabase]);
 
   return {

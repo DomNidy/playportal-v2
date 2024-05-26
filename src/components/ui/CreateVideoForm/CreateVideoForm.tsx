@@ -232,7 +232,7 @@ export default function CreateVideoForm({
   return (
     <Form {...form}>
       <form
-      className="pb-4"
+        className="pb-4"
         onSubmit={form.handleSubmit((data) => {
           const dataToSubmit = {
             audioFile: audioFile!,
@@ -436,7 +436,7 @@ export default function CreateVideoForm({
                     <div className="flex flex-col space-y-2">
                       <Label>Upload to this YouTube Channel</Label>
 
-                      <div className="flex flex-row gap-2 dark">
+                      <div className="dark flex flex-row gap-2">
                         <Controller
                           control={form.control}
                           shouldUnregister={true}
@@ -445,6 +445,12 @@ export default function CreateVideoForm({
                           render={({ field }) => (
                             <>
                               <MultiSelectFormField
+                                isDataLoading={isLoadingYoutubeAccounts}
+                                loadingPlaceholder={
+                                  <p className="text-center text-white">
+                                    Loading...
+                                  </p>
+                                }
                                 onValueChange={field.onChange}
                                 options={
                                   connectedYoutubeAccounts?.map(
@@ -452,7 +458,7 @@ export default function CreateVideoForm({
                                       label: youtubeAccount.channelTitle,
                                       value: youtubeAccount.channelId,
                                       icon: () => (
-                                        <Avatar className="h-[16px] w-[16px] ">
+                                        <Avatar className="mr-2 h-[16px] w-[16px] ">
                                           <AvatarImage
                                             src={
                                               youtubeAccount.channelAvatar ?? ""
@@ -627,7 +633,7 @@ export default function CreateVideoForm({
             <Button
               tabIndex={1}
               type="submit"
-              className="text-black mb-4"
+              className="mb-4 text-black"
               disabled={
                 isUploadingFiles ||
                 genUploadURL.isPending ||

@@ -3,8 +3,6 @@ import { updateSession } from "~/utils/supabase/middleware";
 
 export default async function middlware(request: NextRequest) {
   const refreshedSession = await updateSession(request);
-
-  // console.log("Middleware refreshed session", refreshedSession);
   return refreshedSession;
 }
 
