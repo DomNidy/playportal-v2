@@ -157,7 +157,7 @@ export const uploadRouter = createTRPCRouter({
                 console.log(
                   `Charging user ${ctx.user.id} for upload using credentials id: ${credsId}`,
                 );
-                return createYoutubeUploadOperation(
+                return await createYoutubeUploadOperation(
                   ctx,
                   input,
                   createVideoOperation.operation_id,
@@ -169,7 +169,8 @@ export const uploadRouter = createTRPCRouter({
             // Push all the upload operation and transaction ids to the array
             uploadOperationAndTransactionIds.push(...youtubeUploadTransactions);
 
-            // Check if any of the transactions failed
+            // Create an array of the failed transactions (if any)
+            // Note: Transactions that do not return data are considered failed in this case
             const failedTransactions = uploadOperationAndTransactionIds.filter(
               (transaction) => {
                 if (transaction.error ?? !transaction.data) {
@@ -184,8 +185,28 @@ export const uploadRouter = createTRPCRouter({
             // If any of the transactions failed, we should refund all upload video transactions AND the create video transaction, then throw an error
             if (failedTransactions.length > 0) {
               console.error(
+                `We failed to create some upload youtube video operations for user ${ctx.user.id} for create video operation ${createVideoOperation.operation_id}, we will abort this request and refund all transactions that have occurred so far`,
+              );
+              throw new Error(
                 `Failed to charge user ${ctx.user.id} for youtube upload, refunding all transactions`,
               );
+            }
+          } catch (error) {
+            console.error("Error in youtube upload charge logic:", error);
+            console.log(
+              "Refunding all transactions in this create video operation",
+            );
+
+            //* Note: We refund the upload video transactions in the try block above because that scope has access to the transaction ids
+            //* Refund the create video transaction
+            await refundFailedCreateVideoOperation(
+              createVideoOperation.operation_id,
+              createVideoOperation.transaction_id,
+            );
+
+            //* Refund all upload video transactions
+            if (uploadOperationAndTransactionIds.length > 0) {
+              console.log("Refunding all upload youtube video transactions");
 
               //* Refund all upload video transactions
               await Promise.all(
@@ -202,23 +223,7 @@ export const uploadRouter = createTRPCRouter({
                   }
                 }),
               );
-
-              throw new TRPCClientError(
-                "An error occured, please try again later or contact support",
-              );
             }
-          } catch (error) {
-            console.error("Error in youtube upload charge logic:", error);
-            console.log(
-              "Refunding all transactions in this create video operation",
-            );
-
-            //* Note: We refund the upload video transactions in the try block above because that scope has access to the transaction ids
-            //* Refund the create video transaction
-            await refundFailedCreateVideoOperation(
-              createVideoOperation.operation_id,
-              createVideoOperation.transaction_id,
-            );
 
             if (error instanceof TRPCClientError) {
               throw error;
@@ -345,8 +350,8 @@ export const uploadRouter = createTRPCRouter({
             uploadOperationAndTransactionIds.map(
               async (
                 transaction: PostgrestResponseSuccess<{
-                  trans_id: string;
                   upload_op_id: string;
+                  trans_id: string;
                 }>,
               ) => {
                 if (transaction.data) {

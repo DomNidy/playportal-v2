@@ -142,7 +142,7 @@ export async function refundFailedCreateVideoOperation(
 
   if (refundError) {
     console.warn(
-      `An error occured while trying to refund operation ${createVideoOperationId} and transaction ${transactionToRefundId}`,
+      `An error occured while trying to refund create video operation ${createVideoOperationId} and transaction ${transactionToRefundId}: ${JSON.stringify(refundError)}`,
     );
     return;
   }
@@ -156,6 +156,12 @@ export async function refundFailedUploadVideoOperation(
   uploadVideoOperationId: string,
   transactionToRefundId: string,
 ) {
+  console.log(
+    "Trying to refund upload operation",
+    uploadVideoOperationId,
+    "and transaction",
+    transactionToRefundId,
+  );
   const { error: refundError } = await supabaseAdmin.rpc(
     "handle_failed_upload_video_operation_refund",
     {
@@ -166,7 +172,7 @@ export async function refundFailedUploadVideoOperation(
 
   if (refundError) {
     console.warn(
-      `An error occured while trying to refund operation ${uploadVideoOperationId} and transaction ${transactionToRefundId}`,
+      `An error occured while trying to refund upload video operation ${uploadVideoOperationId} and transaction ${transactionToRefundId}: ${JSON.stringify(refundError)}`,
     );
     return;
   }
@@ -216,13 +222,11 @@ export async function createYoutubeUploadOperation(
   // The primary key used in oauth creds table, we'll use this to get the oauth creds we need to upload the video
   oAuthCredsId: string,
 ) {
-  if (!ctx.user?.id || !ctx.user) {
-    handleError("User not found", "Something went wrong. Please try again.");
-  }
+  // It might be bad if this function throws an error, because we won't be able to refund other upload video operations
 
   return await supabaseAdmin
     .rpc("create_upload_video_operation", {
-      user_id: ctx.user.id,
+      user_id: ctx?.user?.id ?? "",
       created_from_operation_id: relatedCreateVideoOperationId,
       using_oauth_creds_id: oAuthCredsId,
       metadata: {
