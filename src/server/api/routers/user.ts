@@ -9,9 +9,7 @@ import {
   isSuccessStatusCode,
   parseFileExtensionFromS3Key,
 } from "~/utils/utils";
-import { Ratelimit } from "@upstash/ratelimit";
-import redis from "~/utils/redis";
-import { cookies, headers } from "next/headers";
+import { headers } from "next/headers";
 import { TRPCClientError } from "@trpc/client";
 import {
   type YoutubeChannelSummary,
@@ -28,20 +26,10 @@ import {
   type Credentials,
 } from "google-auth-library";
 import { supabaseAdmin } from "~/utils/supabase/admin";
-
-// Used for rate limit getPresignedUrlForFile
-const downloadRatelimit = new Ratelimit({
-  redis: redis,
-  analytics: true,
-  limiter: Ratelimit.fixedWindow(25, "3 m"),
-});
-
-// Used for rate limiting getUserVideos
-const getUserVideosRatelimit = new Ratelimit({
-  redis: redis,
-  analytics: true,
-  limiter: Ratelimit.slidingWindow(50, "2 m"),
-});
+import {
+  getPresignedUrlForFileRatelimit,
+  getUserVideosRatelimit,
+} from "~/utils/upstash/ratelimiters";
 
 export const userRouter = createTRPCRouter({
   getUserVideos: protectedProcedure
@@ -122,7 +110,9 @@ export const userRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const headersList = headers();
       const ipIdentifier = headersList.get("x-real-ip");
-      const result = await downloadRatelimit.limit(ipIdentifier ?? "");
+      const result = await getPresignedUrlForFileRatelimit.limit(
+        ipIdentifier ?? "",
+      );
 
       if (!result.success) {
         throw new TRPCClientError(

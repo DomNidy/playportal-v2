@@ -875,7 +875,7 @@ export type Database = {
         | "unpaid"
         | "paused"
       transaction_type: "CreateVideo" | "UploadYoutubeVideo"
-      upload_platform: "YouTube"
+      upload_platform: "YouTube" 
       upload_video_status: "Pending" | "Uploading" | "Completed" | "Failed"
     }
     CompositeTypes: {

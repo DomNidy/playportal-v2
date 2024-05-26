@@ -8,15 +8,8 @@ import {
 import { env } from "~/env";
 import { s3Client } from "~/server/aws-clients";
 import { supabaseAdmin } from "~/utils/supabase/admin";
-import redis from "~/utils/redis";
-import { Ratelimit } from "@upstash/ratelimit";
 import { headers } from "next/headers";
-
-const ratelimit = new Ratelimit({
-  redis: redis,
-  analytics: true,
-  limiter: Ratelimit.fixedWindow(25, "3 m"),
-});
+import { deleteOperationRatelimiter } from "~/utils/upstash/ratelimiters";
 
 export const deleteRouter = createTRPCRouter({
   // This endpoint deletes all files associated with an operation ID
@@ -30,7 +23,9 @@ export const deleteRouter = createTRPCRouter({
       try {
         const headersList = headers();
         const ipIdentifier = headersList.get("x-real-ip");
-        const result = await ratelimit.limit(ipIdentifier ?? "");
+        const result = await deleteOperationRatelimiter.limit(
+          ipIdentifier ?? "",
+        );
 
         if (!result.success) {
           throw new TRPCClientError(

@@ -8,8 +8,6 @@ import { supabaseAdmin } from "~/utils/supabase/admin";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { s3Client, sqsClient } from "~/server/aws-clients";
 import { type CreateVideoOptionsSchema } from "~/definitions/api-schemas";
-import redis from "~/utils/redis";
-import { Ratelimit } from "@upstash/ratelimit";
 import { headers } from "next/headers";
 import { VideoPreset } from "~/definitions/api-schemas";
 import { getFeatureFlag } from "~/utils/utils";
@@ -27,12 +25,7 @@ import {
 } from "~/server/server-utils";
 import { type PostgrestResponseSuccess } from "@supabase/postgrest-js";
 import { type Database } from "types_db";
-
-const ratelimit = new Ratelimit({
-  redis: redis,
-  analytics: true,
-  limiter: Ratelimit.fixedWindow(10, "3 m"),
-});
+import { generateUploadURLRatelimiter } from "~/utils/upstash/ratelimiters";
 
 export const uploadRouter = createTRPCRouter({
   generateUploadURL: protectedProcedure
@@ -67,7 +60,9 @@ export const uploadRouter = createTRPCRouter({
       try {
         const headersList = headers();
         const ipIdentifier = headersList.get("x-real-ip");
-        const result = await ratelimit.limit(ipIdentifier ?? "");
+        const result = await generateUploadURLRatelimiter.limit(
+          ipIdentifier ?? "",
+        );
 
         if (!result.success) {
           throw new TRPCClientError(

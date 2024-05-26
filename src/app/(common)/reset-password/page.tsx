@@ -1,5 +1,4 @@
 "use client";
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -16,11 +15,9 @@ import {
 } from "~/components/ui/Form";
 import { Input } from "~/components/ui/Input";
 import { ResetPasswordFormSchema } from "~/definitions/form-schemas";
-import { createClient } from "~/utils/supabase/client";
-import { getURL } from "~/utils/utils";
+import { resetPasswordForEmail } from "~/utils/actions";
 
 export default function ResetPasswordPage() {
-  const supabase = createClient();
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [showForm, setShowForm] = useState<boolean>(true);
 
@@ -35,21 +32,15 @@ export default function ResetPasswordPage() {
     formData: z.infer<typeof ResetPasswordFormSchema>,
   ) => {
     const { email } = formData;
-    console.log(email);
+    const { status, text } = await resetPasswordForEmail(email);
 
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: getURL("/auth/reset-password"),
-    });
-
-    if (!error) {
-      setStatusMessage(
-        "If an account with that email exists, we sent you an email to log in. Once logged in, you can change your password from the account settings page (top right corner of the dashboard)",
-      );
+    if (status === "success") {
+      setStatusMessage(text);
       setShowForm(false);
       return;
     }
 
-    setStatusMessage("An error occurred. Please try again or contact support.");
+    form.setError("email", { message: text });
   };
 
   return (

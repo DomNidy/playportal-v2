@@ -12,7 +12,7 @@ type Operation = Database["public"]["Tables"]["operations"]["Row"];
 // The files associated with this operation
 type AssociatedFileMetadata =
   Database["public"]["Tables"]["file_metadata"]["Row"];
-
+  
 // If the operation is live, we will open up a socket connection
 export default function useOperationData(operationId: string | null): {
   videoTitle: string;
