@@ -8,10 +8,10 @@
  */
 import { type User } from "@supabase/supabase-js";
 import { TRPCError, initTRPC } from "@trpc/server";
-import { ResponseCookie } from "next/dist/compiled/@edge-runtime/cookies";
+import { type ResponseCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { cookies } from "next/headers";
 import superjson from "superjson";
-import { ZodError, set } from "zod";
+import { ZodError } from "zod";
 
 import { createClient } from "~/utils/supabase/server";
 

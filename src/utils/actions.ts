@@ -226,7 +226,7 @@ export async function resetPasswordForEmail(
 
     return {
       status: "success",
-      text: "If an email with that password has an account, we've sent them an email with instructions on how to reset their password.",
+      text: "If that email has an account, we've sent them an email with instructions on how to reset their password.",
     };
   } catch (err) {
     console.error(

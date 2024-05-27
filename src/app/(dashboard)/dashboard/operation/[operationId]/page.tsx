@@ -3,14 +3,19 @@ import Link from "next/link";
 import { DownloadFileButton } from "~/components/ui/DownloadFileButton";
 import OperationLogDisplay from "~/components/ui/OperationLogDisplay/OperationLogDisplay";
 import useOperationData from "~/hooks/use-operation-data";
+import { useUploadOperationsData } from "~/hooks/use-upload-operation-data";
 
 export default function OperationDataPage({
   params,
 }: {
   params: { operationId: string };
 }) {
+  const { operationId } = params;
+
   const { isOperationDataLoading, videoTitle, logs, status, associatedFiles } =
-    useOperationData(params.operationId);
+    useOperationData(operationId);
+
+  const { YouTube: youtubeUploads } = useUploadOperationsData(operationId);
 
   return (
     <div>
@@ -32,6 +37,13 @@ export default function OperationDataPage({
           videoTitle={videoTitle}
         />
       )}
+
+      {youtubeUploads?.map((upload) => (
+        <p key={upload.id}>
+          {upload.id} - {upload.status} - {JSON.stringify(upload.metadata)}
+          {upload.targetAccount?.name} - {upload?.targetAccount?.id}
+        </p>
+      ))}
 
       {!!associatedFiles &&
         associatedFiles.map((fileData) => (
