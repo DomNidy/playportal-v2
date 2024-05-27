@@ -28,7 +28,6 @@ const SignInSchema = z.object({
 
 export default function SigninForm() {
   const supabase = createClient();
-
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const form = useForm<z.infer<typeof SignInSchema>>({

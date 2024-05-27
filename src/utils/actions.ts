@@ -12,6 +12,7 @@ import {
   resetPasswordForEmailRatelimit,
   signupToMailingListRatelimit,
 } from "./upstash/ratelimiters";
+import { GoTrueClient } from "@supabase/supabase-js";
 
 export type SignupToMailingListResponse = {
   status: "success" | "error" | "ratelimited";
@@ -239,3 +240,15 @@ export async function resetPasswordForEmail(
     };
   }
 }
+
+// export async function signInWithOAuth(
+//   ...params: Parameters<typeof GoTrueClient.prototype.signInWithOAuth>
+// ) {
+//   const supabase = createClient();
+
+//   const { error } = await supabase.auth.signInWithOAuth(...params);
+
+//   if (error) {
+//     console.error("Error occured while trying to sign in with oauth", error);
+//   }
+// }

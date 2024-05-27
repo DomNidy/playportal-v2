@@ -13,7 +13,7 @@ export default async function Page() {
   } = await supabase.auth.getUser();
 
   //* Since this layout is on the server-side, the user will not even end up on the dashboard route at all, they'll just be instantly redirected
-  if (user) redirect("/dashboard");
+  if (user?.id) return redirect("/dashboard");
 
   // Display waitlist signup if the signup page is disabled
   if (!env.NEXT_PUBLIC_PLAYPORTAL_DISPLAY_SIGNUP_PAGE) {

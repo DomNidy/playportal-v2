@@ -18,11 +18,11 @@ export async function GET(request: NextRequest) {
 
   if (code) {
     const supabase = createClient();
-
     const { error, data } = await supabase.auth.exchangeCodeForSession(code);
     console.log(data.user?.id, "exchanged code for session");
 
     if (error) {
+      console.error("Supabase error changing code for session", code);
       return NextResponse.redirect(
         getErrorRedirect(
           getURL("/sign-in"),
@@ -32,6 +32,8 @@ export async function GET(request: NextRequest) {
       );
     }
   }
+
+  console.log("Redirect to dashboard");
 
   // URL to redirect to after sign in process completes
   return NextResponse.redirect(

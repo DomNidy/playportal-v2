@@ -59,6 +59,7 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
+  // Might the error relate to me using supabase server client, and it's not getting the cookies
   const supabase = createClient();
 
   const {
@@ -84,6 +85,7 @@ export default async function DashboardLayout({
       <body className={` ${GeistSans.className} bg-black`}>
         <Providers>
           <DashboardNavbar
+            user={user}
             links={[
               {
                 href: "/dashboard",

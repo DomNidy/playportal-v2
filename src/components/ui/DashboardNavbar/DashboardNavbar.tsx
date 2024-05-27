@@ -1,7 +1,8 @@
-import { redirect } from "next/navigation";
+import { User } from "@supabase/supabase-js";
 import UserButton from "../UserButton/UserButton";
-import { createClient } from "~/utils/supabase/server";
 import { DashboardNavbarLinks } from "./DashboardNavbarLinks";
+import { type Database } from "types_db";
+import { createClient } from "~/utils/supabase/server";
 
 export type DashNavLink = {
   href: string;
@@ -10,30 +11,29 @@ export type DashNavLink = {
 
 export default async function DashboardNavbar({
   links,
+  user,
 }: {
   links: DashNavLink[];
+  user: User | null;
 }) {
   const supabase = createClient();
+  // Fetch user data
+  const { data: userData, error: fetchUserDataError } = await supabase
+    .from("user_data")
+    .select("*")
+    .eq("id", user?.id ?? "")
+    .maybeSingle();
 
-  const userDataResponse = await supabase.auth.getUser().then(async (res) => {
-    if (res.data?.user) {
-      return await supabase
-        .from("user_data")
-        .select("*")
-        .eq("id", res.data.user.id)
-        .single();
-    }
-  });
-
-  // If we cant fetch user data, redirect to sign in
-  if (!userDataResponse?.data?.id) redirect("/sign-in");
+  if (fetchUserDataError) {
+    console.error("Error fetching user data", fetchUserDataError);
+  }
 
   return (
     <div className="sticky top-0 z-50 m-auto mb-4 flex h-fit w-full shrink-0 flex-col border-b bg-neutral-950 px-4 pb-0 md:px-6">
       <div className="mt-4 flex h-12 w-full flex-row justify-between font-semibold tracking-tight">
         Playportal
         <div className="top-0 flex flex-row items-start justify-center gap-4">
-          <UserButton user={userDataResponse.data} />
+          <UserButton user={userData} />
         </div>
       </div>
       <div className="mt-auto flex gap-8">

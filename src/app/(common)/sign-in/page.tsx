@@ -10,10 +10,16 @@ export default async function Page() {
   // Check if the user is already logged in, if so, redirect them
   const {
     data: { user },
+    error: supabaseAuthError,
   } = await supabase.auth.getUser();
 
   //* Since this layout is on the server-side, the user will not even end up on the dashboard route at all, they'll just be instantly redirected
-  if (user) redirect("/dashboard");
+  if (user?.id) {
+    console.log("user in signin", user);
+    return redirect("/dashboard");
+  } else if (supabaseAuthError) {
+    console.error(supabaseAuthError);
+  }
 
   // Display waitlist signup if the signup page is disabled
   if (!env.NEXT_PUBLIC_PLAYPORTAL_DISPLAY_SIGNUP_PAGE) {
