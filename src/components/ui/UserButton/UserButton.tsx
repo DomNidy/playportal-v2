@@ -14,8 +14,9 @@ import { createClient } from "~/utils/supabase/client";
 import { getStatusRedirect } from "~/utils/utils";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useUserSubscription } from "~/hooks/use-user-subscription";
 
-// This is a client component, but will be provided the props from a server components
+// This is a client component, but will be provided the props from server components
 export default function UserButton({
   user,
 }: {
@@ -24,6 +25,9 @@ export default function UserButton({
   const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
   const router = useRouter();
   const supabase = createClient();
+  // TODO: Should we move this user subscription hook up the component tree? Maybe context?
+  const { data: userSubData, isLoading: isUserSubDataLoading } =
+    useUserSubscription();
 
   return (
     <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
@@ -52,7 +56,7 @@ export default function UserButton({
         <DropdownMenuLabel className="text-muted-foreground">
           My Account
         </DropdownMenuLabel>
-        <DropdownMenuSeparator />
+        <DropdownMenuSeparator className="bg-muted-foreground/20" />
 
         <Link
           href={"/dashboard/account"}
@@ -87,6 +91,14 @@ export default function UserButton({
         >
           Logout
         </DropdownMenuItem>
+        <DropdownMenuSeparator className="bg-muted-foreground/20" />
+
+        {/** This should trigger a modal that shows the 3 subscription cards if the user clicks it*/}
+        {/** For subscribed users, we'll show them this as the options they can upgrade to */}
+
+        <div className="relative m-1 flex cursor-pointer select-none items-center rounded-sm bg-white px-2 py-1.5 text-sm text-black  outline-none transition-colors hover:bg-white/85 focus:cursor-pointer focus:bg-white/85  data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
+          {userSubData?.product_name ?? "Upgrade Now"}
+        </div>
       </DropdownMenuContent>
     </DropdownMenu>
   );

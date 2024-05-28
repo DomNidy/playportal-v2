@@ -40,6 +40,7 @@ import { useLinkedYoutubeAccounts } from "~/hooks/use-linked-youtube-accounts";
 import TagsInput from "./TagsInput";
 import posthog from "posthog-js";
 import MultiSelectFormField from "../MultiSelect";
+import { Textarea } from "../textarea";
 
 // Hardcoded at 8MB
 const MAX_IMAGE_SIZE = 8 * 1024 * 1024;
@@ -531,7 +532,8 @@ export default function CreateVideoForm({
                         <FormItem>
                           <FormLabel>YouTube Video Description</FormLabel>
                           <FormControl>
-                            <Input
+                            <Textarea
+                              maxLength={5000}
                               placeholder="My video description"
                               {...field}
                             />
