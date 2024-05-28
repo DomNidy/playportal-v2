@@ -8,10 +8,41 @@ import {
   getURL,
   getErrorRedirect,
   calculateTrialEndUnixTimestamp,
+  getStatusRedirect,
 } from "~/utils/utils";
 import type { Tables } from "types_db";
 
 type Price = Tables<"prices">;
+
+// Function which tries to retrieve the name of a stripe product from it's price id, returns null if the product name cannot be found
+// Note: This is useful for cases where we don't necessarily need the product name, and don't want to error out if we can't find it
+async function getProductNameFromPriceID(
+  priceId: string,
+): Promise<string | null> {
+  try {
+    const supabase = createClient();
+    const { data: productData, error: fetchProductDataError } = await supabase
+      .from("prices")
+      .select(`products (name)`)
+      .eq("id", priceId)
+      .maybeSingle();
+
+    if (fetchProductDataError) throw new Error(fetchProductDataError.message);
+
+    return productData?.products?.name ?? null;
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
+}
+
+// Function which returns a status message that will be displayed in toast on redirect after a user subscribes to stripe
+function generateSubscribtionRedirectMessage(productName: string | null) {
+  if (productName) {
+    return `Thank you for subscribing, you're now a ${productName} subscriber! Let's make some music!`;
+  }
+  return `Thank you for subscribing! Let's make some music!`;
+}
 
 type CheckoutResponse = {
   errorRedirect?: string;
@@ -30,6 +61,12 @@ export async function checkoutWithStripe(
       error,
       data: { user },
     } = await supabase.auth.getUser();
+
+    // Try to get product name (if we can't find it, we'll just display a message on redirect toast)
+    const productName = await getProductNameFromPriceID(price.id);
+    // Displayed in the toast on redirect
+    const redirectStatusMessage =
+      generateSubscribtionRedirectMessage(productName);
 
     if (error ?? !user) {
       console.error(error);
@@ -58,13 +95,12 @@ export async function checkoutWithStripe(
       },
       line_items: [{ price: price.id, quantity: 1 }],
       cancel_url: getURL(),
-      success_url: getURL(redirectPath),
+      success_url: getStatusRedirect(
+        getURL(redirectPath),
+        "You've subscribed!",
+        redirectStatusMessage,
+      ),
     };
-
-    console.log(
-      "Trial end:",
-      calculateTrialEndUnixTimestamp(price.trial_period_days),
-    );
 
     if (price.type === "recurring") {
       params = {
