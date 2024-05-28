@@ -1,7 +1,6 @@
-import { User } from "@supabase/supabase-js";
+import { type User } from "@supabase/supabase-js";
 import UserButton from "../UserButton/UserButton";
 import { DashboardNavbarLinks } from "./DashboardNavbarLinks";
-import { type Database } from "types_db";
 import { createClient } from "~/utils/supabase/server";
 
 export type DashNavLink = {

@@ -77,14 +77,16 @@ export default function ManageAccount({
               </p>
             </div>
 
-            <div className="flex flex-col space-y-1">
-              <Label>YouTube videos uploaded Today</Label>
-              <p>
-                {userWithProduct && featureFlags?.linkYoutubeAccounts && quotas
-                  ? `${quotas.uploadYoutubeVideo.dailyQuotaUsage} / ${quotas.uploadYoutubeVideo.dailyQuotaLimit}`
-                  : "You are not subscribed to any plan."}
-              </p>
-            </div>
+            {featureFlags?.linkYoutubeAccounts && (
+              <div className="flex flex-col space-y-1">
+                <Label>YouTube videos uploaded Today</Label>
+                <p>
+                  {userWithProduct && quotas
+                    ? `${quotas.uploadYoutubeVideo.dailyQuotaUsage} / ${quotas.uploadYoutubeVideo.dailyQuotaLimit}`
+                    : "You are not subscribed to any plan."}
+                </p>
+              </div>
+            )}
 
             <div className="flex flex-col space-y-1">
               <Label>Reset password</Label>

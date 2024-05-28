@@ -50,3 +50,19 @@ export const signupToMailingListRatelimit = new Ratelimit({
   prefix: "signupToMailingList",
   limiter: Ratelimit.fixedWindow(3, "10 m"),
 });
+
+// Used to rate limit login server action
+export const loginRatelimit = new Ratelimit({
+  redis: redis,
+  analytics: true,
+  prefix: "login",
+  limiter: Ratelimit.fixedWindow(10, "5 m"),
+});
+
+// Used to rate limit signup
+export const signUpRatelimit = new Ratelimit({
+  redis: redis,
+  analytics: true,
+  prefix: "signup",
+  limiter: Ratelimit.fixedWindow(6, "1 h"),
+});

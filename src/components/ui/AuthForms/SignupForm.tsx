@@ -75,7 +75,7 @@ export function SignupForm() {
     });
     const signUpResponse = await signUp(data.email, data.password);
     setIsSubmitting(false);
-    if (signUpResponse && "showConfirmEmail" in signUpResponse) {
+    if (signUpResponse && signUpResponse.status === "success") {
       setSignupStatus({ email: data.email, shouldCheckEmail: true });
       form.reset();
     }

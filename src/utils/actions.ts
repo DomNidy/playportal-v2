@@ -9,10 +9,11 @@ import { getErrorRedirect, getStatusRedirect, getURL } from "./utils";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import {
+  loginRatelimit,
   resetPasswordForEmailRatelimit,
+  signUpRatelimit,
   signupToMailingListRatelimit,
 } from "./upstash/ratelimiters";
-import { GoTrueClient } from "@supabase/supabase-js";
 
 export type SignupToMailingListResponse = {
   status: "success" | "error" | "ratelimited";
@@ -27,7 +28,6 @@ export async function signupToMailingList(
     const headersList = headers();
     const ipIdentifier = headersList.get("x-real-ip");
     const result = await signupToMailingListRatelimit.limit(ipIdentifier ?? "");
-    console.log(result);
 
     const email = data.get("email") as string | undefined;
 
@@ -80,6 +80,21 @@ export async function signupToMailingList(
 }
 
 export async function login(email: string, password: string) {
+  const headersList = headers();
+  const ipIdentifier = headersList.get("x-real-ip");
+  const result = await loginRatelimit.limit(ipIdentifier ?? "");
+
+  if (!result.success) {
+    console.warn(ipIdentifier, "ip was rate limited at login server action.");
+    return redirect(
+      getErrorRedirect(
+        "/sign-in",
+        "Rate limited",
+        "You're doing that too fast, please wait a few minutes.",
+      ),
+    );
+  }
+
   const supabase = createClient();
 
   const { error } = await supabase.auth.signInWithPassword({
@@ -108,10 +123,27 @@ export async function login(email: string, password: string) {
   );
 }
 
+type SignUpResponse = {
+  status: "success" | "error" | "ratelimited";
+  text?: string;
+};
+
 export async function signUp(
   email: string,
   password: string,
-): Promise<{ showConfirmEmail: boolean } | void> {
+): Promise<SignUpResponse | void> {
+  const headersList = headers();
+  const ipIdentifier = headersList.get("x-real-ip");
+  const result = await signUpRatelimit.limit(ipIdentifier ?? "");
+
+  // If the ip has exceeded their ratelimit, return
+  if (!result.success) {
+    return {
+      status: "ratelimited",
+      text: "You're doing that too much, please wait a few minutes.",
+    };
+  }
+
   const supabase = createClient();
 
   const { data, error } = await supabase.auth.signUp({
@@ -147,7 +179,7 @@ export async function signUp(
     );
   } else if (data.user) {
     console.log("User signed up, but needs to confirm email", data.user.id);
-    return { showConfirmEmail: true };
+    return { status: "success", text: "Please confirm your email" };
   } else {
     return redirect(
       getErrorRedirect(
@@ -175,8 +207,6 @@ export async function resetPasswordForEmail(
     const result = await resetPasswordForEmailRatelimit.limit(
       ipIdentifier ?? "",
     );
-
-    console.log(result);
 
     console.log(ipIdentifier, "requested");
 

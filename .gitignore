@@ -40,3 +40,7 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
+
+data_dump.sql
+full_dump.sql
+seed.sql
