@@ -18,6 +18,9 @@ export function useUserSubscription() {
         .from("user_products")
         .select("*")
         .eq("user_id", user?.id ?? "")
+        .in("sub_status", ["active", "trialing"])
+        .order("sub_current_period_start", { ascending: false })
+        .limit(1)
         .maybeSingle();
 
       return data;

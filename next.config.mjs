@@ -4,6 +4,8 @@
  */
 
 import createMDX from "fumadocs-mdx/config";
+import withPlaiceholder from "@plaiceholder/next";
+
 await import("./src/env.js");
 
 
@@ -29,4 +31,4 @@ const config = {
     }
 };
 
-export default withMDX(config);
+export default withPlaiceholder(withMDX(config));

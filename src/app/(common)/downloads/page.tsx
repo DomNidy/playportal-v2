@@ -68,7 +68,9 @@ export default async function DownloadsPage() {
       <div className="landing-bg-gradient pointer-events-none absolute top-0 h-[1450px] max-h-screen w-full " />
 
       <div className="mt-24 grid justify-items-center gap-10 lg:grid-cols-2 xl:grid-cols-3">
-        {kits?.map((kit) => <MusicKit key={kit.title} {...kit} />)}
+        {kits?.map((kit) => (
+          <MusicKit key={kit.title} {...kit} variant="default" />
+        ))}
       </div>
     </div>
   );

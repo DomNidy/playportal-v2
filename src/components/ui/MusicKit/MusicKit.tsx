@@ -2,6 +2,7 @@ import Image from "next/image";
 import { getURL } from "~/utils/utils";
 import { Link } from "~/components/ui/Link";
 import MusicKitDownloadButton from "./MusicKitDownloadButton";
+import { getBlurData } from "~/utils/blur-data-generator";
 
 export type KitData = {
   title: string;
@@ -11,14 +12,15 @@ export type KitData = {
   variant?: "default" | "large";
 };
 
-export default function MusicKit({ ...kit }: KitData) {
+export default async function MusicKit({ ...kit }: KitData) {
   const { title, description, imageSrc, variant } = kit;
 
   const productImageURL = imageSrc
-    ? `/${kit.imageSrc}`
+    ? `${getURL()}/${kit.imageSrc}`
     : `${getURL()}/placeholder.jpg`;
 
   const imageSize = variant === "default" ? 200 : 350;
+  const { base64 } = await getBlurData(productImageURL);
 
   return (
     <div
@@ -30,6 +32,8 @@ export default function MusicKit({ ...kit }: KitData) {
         alt={""}
         width={imageSize}
         height={imageSize}
+        placeholder="blur"
+        blurDataURL={base64}
       />
 
       <div className=" flex flex-col rounded-lg p-1">

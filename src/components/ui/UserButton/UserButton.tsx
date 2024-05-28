@@ -26,8 +26,7 @@ export default function UserButton({
   const router = useRouter();
   const supabase = createClient();
   // TODO: Should we move this user subscription hook up the component tree? Maybe context?
-  const { data: userSubData, isLoading: isUserSubDataLoading } =
-    useUserSubscription();
+  const { data: userSubData, error } = useUserSubscription();
 
   return (
     <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
@@ -35,7 +34,6 @@ export default function UserButton({
         <Avatar
           className="pointer-events-none h-7 w-7 hover:cursor-pointer"
           onClick={() => {
-            console.log("Open");
             setDropdownOpen(!dropdownOpen);
           }}
         >
