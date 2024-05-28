@@ -26,15 +26,17 @@ export default async function MusicKit({ ...kit }: KitData) {
     <div
       className={`flex ${variant === "default" ? "w-64 flex-col" : "w-auto flex-col gap-2 sm:flex-row"} rounded-lg`}
     >
+      {/** Turning off optimization since it seems it causes issues with our blur implementation */}
       <Image
         src={productImageURL}
         className="rounded-2xl"
-        alt={""}
+        alt={`${title} kit image`}
         width={imageSize}
         height={imageSize}
         placeholder="blur"
         blurDataURL={base64}
-      />
+        unoptimized={true}
+        />
 
       <div className=" flex flex-col rounded-lg p-1">
         <Link className=" text-lg font-semibold" href={`/downloads/${title}`}>
