@@ -4,7 +4,7 @@ import { api } from "~/trpc/react";
 import { Button } from "../Button";
 import { toast } from "../Toasts/use-toast";
 
-export function ConnectionYoutubeAccountButton() {
+export default function ConnectionYoutubeAccountButton() {
   const router = useRouter();
   const apiUtils = api.useUtils();
 

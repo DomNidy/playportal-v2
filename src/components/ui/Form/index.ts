@@ -6,6 +6,4 @@ export {
   FormItem,
   FormLabel,
   FormMessage,
-} from "./form";
-
-export { Label } from "./label";
+} from "./Form";

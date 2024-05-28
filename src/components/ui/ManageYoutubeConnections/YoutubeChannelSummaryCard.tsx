@@ -1,5 +1,5 @@
 import { type YoutubeChannelSummary } from "~/utils/oauth/youtube";
-import { Avatar, AvatarFallback, AvatarImage } from "../avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "../Avatar/Avatar";
 import UnlinkYoutubeChannelButton from "./UnlinkYoutubeChannelButton";
 
 export default function YoutubeChannelSummaryCard({

@@ -1,6 +1,6 @@
 "use client";
 import { columns } from "~/components/ui/MyVideosTable/columns";
-import { DataTable } from "~/components/ui/data-table";
+import { DataTable } from "~/components/ui/DataTable";
 import { api } from "~/trpc/react";
 
 export default function MyVideosPage() {

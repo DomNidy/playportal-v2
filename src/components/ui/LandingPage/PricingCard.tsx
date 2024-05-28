@@ -11,7 +11,7 @@ import { checkoutWithStripe } from "~/utils/stripe/server";
 import { getErrorRedirect, getStatusRedirect } from "~/utils/utils";
 import { getStripe } from "~/utils/stripe/client";
 
-export function PricingCard({
+export default function PricingCard({
   planData,
   planName,
   planDescription,

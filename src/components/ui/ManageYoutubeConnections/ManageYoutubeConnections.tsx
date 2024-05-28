@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { ConnectionYoutubeAccountButton } from "./ConnectYoutubeAccountButton";
+import ConnectionYoutubeAccountButton from "./ConnectYoutubeAccountButton";
 import YoutubeChannelSummaryCard from "./YoutubeChannelSummaryCard";
 import { Button } from "../Button";
 import { useQueryClient } from "@tanstack/react-query";

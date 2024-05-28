@@ -2,7 +2,7 @@
 
 import { type Database } from "types_db";
 import { OperationLogMessage } from "./OperationLogMessage";
-import { Card, CardContent, CardHeader, CardTitle } from "../card";
+import { Card, CardContent, CardHeader, CardTitle } from "../Card/Card";
 
 export type OperationLog =
   Database["public"]["Tables"]["operation_logs"]["Row"];

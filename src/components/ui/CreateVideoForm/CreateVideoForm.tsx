@@ -11,7 +11,6 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  Label,
 } from "~/components/ui/Form";
 import { Input } from "~/components/ui/Input";
 import React, { useCallback, useEffect, useState } from "react";
@@ -32,15 +31,15 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../select";
+} from "../Select/Select";
 import { type VideoPreset } from "~/definitions/api-schemas";
-import { Avatar, AvatarFallback, AvatarImage } from "../avatar";
-import { Checkbox } from "../checkbox";
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/Avatar";
+import { Checkbox } from "../Checkbox/Checkbox";
 import { useLinkedYoutubeAccounts } from "~/hooks/use-linked-youtube-accounts";
 import TagsInput from "./TagsInput";
 import posthog from "posthog-js";
-import MultiSelectFormField from "../MultiSelect";
-import { Textarea } from "../textarea";
+import MultiSelectFormField from "../MultiSelect/MultiSelect";
+import { Textarea } from "../Textarea/Textarea";
 
 // Hardcoded at 8MB
 const MAX_IMAGE_SIZE = 8 * 1024 * 1024;
@@ -392,7 +391,7 @@ export default function CreateVideoForm({
 
             {/** Preset selection */}
             <div>
-              <Label>Video preset</Label>
+              <FormLabel>Video preset</FormLabel>
               <Select
                 defaultValue="YouTube"
                 onValueChange={(value) => {
@@ -422,7 +421,7 @@ export default function CreateVideoForm({
             {uploadVideoFeature && (
               <div className="flex flex-col space-y-4">
                 <div className="flex flex-row gap-4">
-                  <Label>Upload video to YouTube?</Label>
+                  <FormLabel>Upload video to YouTube?</FormLabel>
                   <Checkbox
                     onCheckedChange={() =>
                       setIsUploadVideoChecked(!isUploadVideoChecked)
@@ -435,7 +434,7 @@ export default function CreateVideoForm({
                 {isUploadVideoChecked && (
                   <>
                     <div className="flex flex-col space-y-2">
-                      <Label>Upload to this YouTube Channel</Label>
+                      <FormLabel>Upload to this YouTube Channel</FormLabel>
 
                       <div className="dark flex flex-row gap-2">
                         <Controller

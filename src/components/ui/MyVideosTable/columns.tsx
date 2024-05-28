@@ -1,7 +1,7 @@
 "use client";
 import { type Database } from "types_db";
 import { type ColumnDef } from "@tanstack/react-table";
-import Typography from "../Typography";
+import Typography from "../Typography/Typography";
 import { Button } from "../Button";
 import { ArrowUpDown, DownloadIcon } from "lucide-react";
 import { DownloadFileButton } from "../DownloadFileButton";

@@ -4,8 +4,8 @@ import {
   NavigationMenu,
   NavigationMenuLink,
   NavigationMenuList,
-} from "~/components/ui/navigation-menu";
-import { Sheet, SheetContent, SheetTrigger } from "~/components/ui/sheet";
+} from "~/components/ui/NavigationMenu";
+import { Sheet, SheetContent, SheetTrigger } from "~/components/ui/Sheet/Sheet";
 import { MenuIcon } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";

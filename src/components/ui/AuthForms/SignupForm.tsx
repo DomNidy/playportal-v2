@@ -42,7 +42,7 @@ const SignUpSchema = z
     { message: "Your passwords must match", path: ["confirmPassword"] },
   );
 
-export function SignupForm() {
+export default function SignupForm() {
   const supabase = createClient();
 
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);

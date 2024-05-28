@@ -2,7 +2,7 @@ import React from "react";
 import { type Tables } from "types_db";
 import { env } from "~/env";
 import { createClient } from "~/utils/supabase/server";
-import { PricingCard } from "./PricingCard";
+import PricingCard from "./PricingCard";
 
 export type PricingPlan = {
   planName: string;

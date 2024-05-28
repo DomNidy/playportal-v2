@@ -1,5 +1,5 @@
-import Link from "next/link";
-import Product from "~/components/ui/Product/Product";
+import { Link } from "~/components/ui/Link";
+import { MusicKit } from "~/components/ui/MusicKit";
 import { createClient } from "~/utils/supabase/server";
 
 export default async function KitPage({
@@ -12,7 +12,9 @@ export default async function KitPage({
 
   const { data: kitData, error } = await supabase
     .from("kits")
-    .select()
+    .select(
+      "title:name, downloadURL:download_url, description, type, imageSrc:image_url",
+    )
     .eq("name", kitName)
     .maybeSingle();
 
@@ -33,15 +35,7 @@ export default async function KitPage({
   return (
     <div className="mt-32 flex h-full flex-col items-center justify-center">
       <div className="landing-bg-gradient pointer-events-none absolute top-0 h-[1450px] max-h-screen w-full " />
-      <Product
-        product={{
-          title: kitData.name,
-          description: kitData.description ?? "",
-          downloadLink: kitData.download_url,
-          imageSrc: kitData.image_url ?? "",
-          variant: "large",
-        }}
-      />
+      <MusicKit {...kitData} />
     </div>
   );
 }

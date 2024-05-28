@@ -6,7 +6,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "../dropdown-menu";
+} from "../DropdownMenu/DropdownMenu";
 import { useState } from "react";
 import { type Database } from "types_db";
 import {
@@ -18,8 +18,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "../alert-dialog";
-import { DeleteOperationButton } from "../DeleteOperationButton";
+} from "../AlertDialog/AlertDialog";
+import { DeleteOperationButton } from "../DeleteOperationButton/DeleteOperationButton";
 import Link from "next/link";
 
 export default function OperationCardDropdown({

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-export function OperationCardDummy() {
+export default function OperationCardDummy() {
   return (
     <Link
       href={"/dashboard/create-video"}

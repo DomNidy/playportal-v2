@@ -1,8 +1,8 @@
 "use client";
 import { type Database } from "types_db";
 import { type ColumnDef } from "@tanstack/react-table";
-import Typography from "../Typography";
-import { Button } from "../Button/button";
+import Typography from "../Typography/Typography";
+import { Button } from "../Button/Button";
 import { ArrowUpDown } from "lucide-react";
 
 type Transaction = Database["public"]["Tables"]["transactions"]["Row"];

@@ -1,3 +1,3 @@
 export { OperationCard } from "./OperationCard";
-export { OperationCardSkeleton } from "./OperationCardSkeleton";
-export { OperationCardDummy } from "./OperationCardDummy";
+export { default as OperationCardSkeleton } from "./OperationCardSkeleton";
+export { default as OperationCardDummy } from "./OperationCardDummy";

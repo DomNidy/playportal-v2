@@ -7,7 +7,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "../card";
+} from "../Card/Card";
 import { Button } from "../Button";
 
 export default function ConfirmEmailScreen({

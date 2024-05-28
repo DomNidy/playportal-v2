@@ -1,6 +1,6 @@
 "use client";
 import { type Database } from "types_db";
-import { Avatar, AvatarFallback, AvatarImage } from "../avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "../Avatar/Avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,7 +8,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "../dropdown-menu";
+} from "../DropdownMenu/DropdownMenu";
 import { useState } from "react";
 import { createClient } from "~/utils/supabase/client";
 import { getStatusRedirect } from "~/utils/utils";

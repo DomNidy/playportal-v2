@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
-import SigninForm from "~/components/ui/AuthForms/SigninForm";
-import SignupToMailingListInput from "~/components/ui/MailingList/SignupToMailingListInput";
+import { SigninForm } from "~/components/ui/AuthForms";
+import { SignupToMailingListForm } from "~/components/ui/MailingList";
 import { env } from "~/env";
 import { createClient } from "~/utils/supabase/server";
 
@@ -35,7 +35,7 @@ export default async function Page() {
             Perhaps we{"'"}ll even send you something special (other than
             marketing emails, of course!)
           </p>
-          <SignupToMailingListInput />
+          <SignupToMailingListForm />
         </div>
       </div>
     );

@@ -1,5 +1,5 @@
 import { type Metadata } from "next";
-import Product from "~/components/ui/Product/Product";
+import { MusicKit } from "~/components/ui/MusicKit";
 import { createClient } from "~/utils/supabase/server";
 import { getURL } from "~/utils/utils";
 
@@ -57,25 +57,18 @@ export default async function DownloadsPage() {
   const supabase = createClient();
 
   // TODO: Implement pagination eventually
-  const { data: kits } = await supabase.from("kits").select("*");
+  const { data: kits } = await supabase
+    .from("kits")
+    .select(
+      "title:name, downloadURL:download_url, description, type, imageSrc:image_url",
+    );
 
   return (
     <div className="flex flex-col items-center px-24">
       <div className="landing-bg-gradient pointer-events-none absolute top-0 h-[1450px] max-h-screen w-full " />
 
       <div className="mt-24 grid justify-items-center gap-10 lg:grid-cols-2 xl:grid-cols-3">
-        {kits?.map((kit) => (
-          <Product
-            key={kit.name}
-            product={{
-              description: kit.description ?? "",
-              downloadLink: kit.download_url,
-              imageSrc: kit.image_url ?? "",
-              title: kit.name,
-              variant: "default",
-            }}
-          />
-        ))}
+        {kits?.map((kit) => <MusicKit key={kit.title} {...kit} />)}
       </div>
     </div>
   );

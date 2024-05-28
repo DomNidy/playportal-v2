@@ -4,8 +4,8 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "~/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+} from "~/components/ui/Card/Card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/Tabs/Tabs";
 import { Label } from "../Label";
 import Link from "next/link";
 import StripeBillingPortalButton from "../StripeBillingPortalButton/StripeBillingPortalButton";
