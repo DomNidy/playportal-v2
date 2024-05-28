@@ -15,7 +15,7 @@ import { Button } from "../Button";
 import { useState } from "react";
 import { createClient } from "~/utils/supabase/client";
 import { getURL } from "~/utils/utils";
-import Link from "next/link";
+import { Link } from "~/components/ui/Link";
 import { IconBrandGoogle } from "@tabler/icons-react";
 import { cn } from "~/utils/utils";
 import { login } from "~/utils/actions";

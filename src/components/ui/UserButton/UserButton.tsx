@@ -13,7 +13,7 @@ import { useState } from "react";
 import { createClient } from "~/utils/supabase/client";
 import { getStatusRedirect } from "~/utils/utils";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { Link } from "~/components/ui/Link";
 import { useUserSubscription } from "~/hooks/use-user-subscription";
 
 // This is a client component, but will be provided the props from server components
@@ -58,17 +58,11 @@ export default function UserButton({
         </DropdownMenuLabel>
         <DropdownMenuSeparator className="bg-muted-foreground/20" />
 
-        <Link
-          href={"/dashboard/account"}
-          className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm text-muted-foreground outline-none transition-colors hover:bg-white/30 hover:text-white focus:cursor-pointer focus:bg-white/30 focus:text-accent-foreground focus:text-white data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
-        >
+        <Link href={"/dashboard/account"} variant={"mutedHover"}>
           Account
         </Link>
 
-        <Link
-          href={"/support"}
-          className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm text-muted-foreground outline-none transition-colors hover:bg-white/30 hover:text-white focus:cursor-pointer focus:bg-white/30 focus:text-accent-foreground focus:text-white data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
-        >
+        <Link href={"/support"} variant={"mutedHover"}>
           Support
         </Link>
 

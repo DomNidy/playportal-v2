@@ -1,5 +1,5 @@
 "use client";
-import Link from "next/link";
+import { Link } from "~/components/ui/Link";
 import { DownloadFileButton } from "~/components/ui/DownloadFileButton";
 import OperationLogDisplay from "~/components/ui/OperationLogDisplay/OperationLogDisplay";
 import useOperationData from "~/hooks/use-operation-data";

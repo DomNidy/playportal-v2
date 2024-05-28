@@ -1,6 +1,6 @@
 // This is an operation card that is displayed to prompt the user to create a new video
 
-import Link from "next/link";
+import { Link } from "~/components/ui/Link";
 
 export default function OperationCardDummy() {
   return (

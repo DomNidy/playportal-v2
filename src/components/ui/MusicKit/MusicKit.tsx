@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { getURL } from "~/utils/utils";
-import Link from "next/link";
+import { Link } from "~/components/ui/Link";
 import MusicKitDownloadButton from "./MusicKitDownloadButton";
 
 export type KitData = {

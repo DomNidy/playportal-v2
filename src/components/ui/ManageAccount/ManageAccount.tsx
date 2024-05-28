@@ -5,9 +5,14 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/Card/Card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/Tabs/Tabs";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "~/components/ui/Tabs/Tabs";
 import { Label } from "../Label";
-import Link from "next/link";
+import { Link } from "~/components/ui/Link";
 import StripeBillingPortalButton from "../StripeBillingPortalButton/StripeBillingPortalButton";
 import { type Tables } from "types_db";
 import ManageYoutubeConnections from "../ManageYoutubeConnections/ManageYoutubeConnections";

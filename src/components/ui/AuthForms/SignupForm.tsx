@@ -17,7 +17,7 @@ import {
   FormLabel,
   FormMessage,
 } from "../Form";
-import Link from "next/link";
+import { Link } from "~/components/ui/Link";
 import ConfirmEmailScreen from "./ConfirmEmail";
 import posthog from "posthog-js";
 import { ClipLoader } from "react-spinners";

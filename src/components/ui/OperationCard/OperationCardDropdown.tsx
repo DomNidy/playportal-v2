@@ -20,7 +20,8 @@ import {
   AlertDialogTitle,
 } from "../AlertDialog/AlertDialog";
 import { DeleteOperationButton } from "../DeleteOperationButton/DeleteOperationButton";
-import Link from "next/link";
+import { Link } from "~/components/ui/Link";
+
 
 export default function OperationCardDropdown({
   operation,

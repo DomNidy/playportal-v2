@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import Link from "next/link";
+import { Link } from "~/components/ui/Link";
 import styledGridlines from "../../../public/styled-gridlines.svg";
 import dashboardPreview from "../../../public/dashboard-preview.png";
 import dashboardPresetPreview from "../../../public/dashboard-preview-preset.png";

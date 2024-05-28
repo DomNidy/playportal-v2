@@ -7,7 +7,7 @@ import {
 } from "~/components/ui/NavigationMenu";
 import { Sheet, SheetContent, SheetTrigger } from "~/components/ui/Sheet/Sheet";
 import { MenuIcon } from "lucide-react";
-import Link from "next/link";
+import { Link } from "~/components/ui/Link";
 import Image from "next/image";
 import PlayportalIcon from "../../../../public/playportal.svg";
 import { createClient } from "~/utils/supabase/client";
