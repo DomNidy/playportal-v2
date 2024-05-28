@@ -69,7 +69,7 @@ export default async function DownloadsPage() {
 
       <div className="mt-24 grid justify-items-center gap-10 lg:grid-cols-2 xl:grid-cols-3">
         {kits?.map((kit) => (
-          <MusicKit key={kit.title} {...kit} variant="default" />
+          <MusicKit key={kit.title} {...kit} variant="default"  />
         ))}
       </div>
     </div>

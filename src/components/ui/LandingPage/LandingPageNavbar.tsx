@@ -19,8 +19,6 @@ export default function LandingPageNavbar() {
 
   const [user, setUser] = useState<User>();
   useEffect(() => {
-    console.log("Running effect");
-
     const fetchUser = async () => {
       const { data } = await supabase.auth.getUser();
 
