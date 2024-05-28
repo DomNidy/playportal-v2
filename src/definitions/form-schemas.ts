@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { VideoPreset } from "./api-schemas";
+import { isFileExtensionInList } from "~/utils/utils";
 
 export const ResetPasswordFormSchema = z.object({
   email: z.string().email(),
@@ -20,6 +21,9 @@ export enum YoutubeVideoVisibilities {
   Private = "Private",
 }
 
+export const SupportedAudioFileExtensions = [".mp3", ".wav", ".ogg"];
+export const SupportedImageFileExtensions = [".png", ".jpg", ".jpeg", ".webp"];
+
 // We will validate the files on our aws backend anyway
 export const CreateVideoFormSchema = z.object({
   // This will not be the name of the video on youtube, just the internal name
@@ -32,9 +36,7 @@ export const CreateVideoFormSchema = z.object({
       if (!file) {
         return false;
       }
-
-      // TODO: Problem, we are receiving the file as a string instead of a File
-      return file.name.endsWith(".mp3") || file.name.endsWith(".wav");
+      return isFileExtensionInList(file.name, SupportedAudioFileExtensions);
     },
     {
       message: "Audio file must be a .mp3 or .wav file",
@@ -45,19 +47,11 @@ export const CreateVideoFormSchema = z.object({
     .refine(
       (file: File) => {
         const filePath = file.name;
-
         if (!filePath) {
           return false;
         }
 
-        return (
-          filePath.endsWith(".png") ||
-          filePath.endsWith(".jpg") ||
-          filePath.endsWith(".jpeg") ||
-          filePath.endsWith(".webp") ||
-          filePath == null ||
-          filePath == ""
-        );
+        return isFileExtensionInList(filePath, SupportedImageFileExtensions);
       },
       {
         message: "Must be a file with a valid image extension",

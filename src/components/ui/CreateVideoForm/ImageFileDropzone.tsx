@@ -1,5 +1,7 @@
-import { useDropzone, ErrorCode } from "react-dropzone";
+import { useDropzone, type ErrorCode } from "react-dropzone";
 import { toast } from "../Toasts/use-toast";
+import { SupportedImageFileExtensions } from "~/definitions/form-schemas";
+import { getFileDropErrorMessage } from "./utils";
 
 export default function ImageFileDropzone({
   onDrop,
@@ -23,10 +25,12 @@ export default function ImageFileDropzone({
     maxFiles: 1,
     maxSize: allowedImageFileSizeBytes,
     onDropRejected: (files) => {
-      const error =
-        files[0]?.errors[0]?.code === ErrorCode.FileTooLarge
-          ? `File size exceeds your plan's limit of ${(allowedImageFileSizeBytes / 1024 / 1024).toFixed(2)} MB`
-          : files[0]?.errors[0]?.message;
+      const error = getFileDropErrorMessage(
+        "image",
+        (files[0]?.errors[0]?.code as ErrorCode) ?? null,
+        allowedImageFileSizeBytes,
+        SupportedImageFileExtensions,
+      );
 
       toast({
         title: "Error",

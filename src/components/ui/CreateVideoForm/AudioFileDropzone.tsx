@@ -1,5 +1,7 @@
-import { useDropzone, ErrorCode } from "react-dropzone";
+import { useDropzone, type ErrorCode } from "react-dropzone";
 import { toast } from "../Toasts/use-toast";
+import { SupportedAudioFileExtensions } from "~/definitions/form-schemas";
+import { getFileDropErrorMessage } from "./utils";
 
 export default function AudioFileDropzone({
   onDrop,
@@ -18,14 +20,17 @@ export default function AudioFileDropzone({
     accept: {
       "audio/mp3": [".mp3"],
       "audio/wav": [".wav"],
+      "audio/ogg": [".ogg"],
     },
     maxFiles: 1,
     maxSize: allowedAudioFileSizeBytes,
     onDropRejected: (files) => {
-      const error =
-        files[0]?.errors[0]?.code === ErrorCode.FileTooLarge
-          ? `File size exceeds your plan's limit of ${(allowedAudioFileSizeBytes / 1024 / 1024).toFixed(2)} MB`
-          : files[0]?.errors[0]?.message;
+      const error = getFileDropErrorMessage(
+        "audio",
+        (files[0]?.errors[0]?.code as ErrorCode) ?? null,
+        allowedAudioFileSizeBytes,
+        SupportedAudioFileExtensions,
+      );
 
       toast({
         title: "Error",

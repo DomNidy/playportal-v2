@@ -181,4 +181,13 @@ export type NonNullableProperties<T> = {
   [P in keyof T]: NonNullable<T[P]>;
 };
 
-// Type 
+// Utility Function that checks if a string ends with any of the provided suffixes
+// Extensions should be prefixed with a dot, e.g. ".mp3" (if they aren't we will add it)
+export function isFileExtensionInList(
+  fileName: string,
+  allowedFileExtensions: string[],
+) {
+  return allowedFileExtensions.some((extension) =>
+    fileName.endsWith(extension.startsWith(".") ? extension : `.${extension}`),
+  );
+}
