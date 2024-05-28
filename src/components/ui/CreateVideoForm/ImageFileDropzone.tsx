@@ -43,7 +43,7 @@ export default function ImageFileDropzone({
   return (
     <div
       {...getRootProps()}
-      className={`flex h-[65vh] cursor-pointer flex-col items-center justify-center rounded-lg border-[1.5px] border-dashed border-white border-opacity-15 bg-[#0C0B0C] p-4 ${isDragActive ? "bg-[#171618]" : ""}`}
+      className={`flex h-full w-full  cursor-pointer flex-col items-center justify-center rounded-lg border-[1.5px] border-dashed border-white border-opacity-15 bg-[#0C0B0C] p-4 ${isDragActive ? "bg-[#171618]" : ""}`}
     >
       <input {...getInputProps()} />
       {imageFileName ? (

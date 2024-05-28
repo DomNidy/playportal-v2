@@ -2,8 +2,6 @@ import { Link } from "~/components/ui/Link";
 import RecentOperationsDisplay from "~/components/ui/RecentOperationsDisplay";
 
 export default function Dashboard() {
-  // Query for recent operations
-
   return (
     <div className="mt-10 flex flex-col items-center">
       <div className="flex w-full flex-row-reverse">

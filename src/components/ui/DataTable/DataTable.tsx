@@ -53,12 +53,12 @@ export function DataTable<TData, TValue>({
   });
 
   return (
-    <div>
-      <div className="rounded-md border">
+    <div className="flex max-w-[335px] flex-col items-center overflow-clip rounded-lg border-2 sm:max-w-[600px] md:max-w-max">
+      <div className="w-full overflow-x-auto ">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
+              <TableRow key={headerGroup.id} className="overflow-x-scroll">
                 {headerGroup.headers.map((header) => {
                   return (
                     <TableHead key={header.id}>
@@ -129,7 +129,7 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
+      <div className="px-4 w-full border-t-[1.5px] flex items-center justify-end space-x-2 self-end py-4 ">
         <Button
           variant="outline"
           size="sm"

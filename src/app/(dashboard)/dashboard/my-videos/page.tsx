@@ -2,6 +2,7 @@
 import { columns } from "~/components/ui/MyVideosTable/columns";
 import { DataTable } from "~/components/ui/DataTable";
 import { api } from "~/trpc/react";
+import { Link } from "~/components/ui/Link";
 
 export default function MyVideosPage() {
   // We maybe want to use separate query hashes for different pages
@@ -15,7 +16,10 @@ export default function MyVideosPage() {
   );
 
   return (
-    <>
+    <div className="flex flex-col overflow-x-clip">
+      <Link variant={"button"} href={"/dashboard/create-video"} className="self-end mb-2">
+        Create a video
+      </Link>
       <DataTable
         isLoading={myVideos.isLoading}
         columns={columns}
@@ -27,6 +31,6 @@ export default function MyVideosPage() {
         fetchNext={myVideos.fetchNextPage}
         fetchPrevious={myVideos.fetchPreviousPage}
       />
-    </>
+    </div>
   );
 }

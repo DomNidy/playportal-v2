@@ -18,39 +18,55 @@ export default function OperationDataPage({
   const { YouTube: youtubeUploads } = useUploadOperationsData(operationId);
 
   return (
-    <div>
+    <div className="px-4">
       {!isOperationDataLoading && !videoTitle && (
         <>
           <p className="text-lg text-white">Video does not exist</p>
-          <Link
-            className="inline-flex items-center justify-center whitespace-nowrap rounded-md bg-primary p-2 text-sm font-medium text-black ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-            href={"/dashboard/create-video"}
-          >
+          <Link variant={"button"} href={"/dashboard/create-video"}>
             Create one
           </Link>
         </>
       )}
-      {status && (
-        <OperationLogDisplay
-          operationLogs={logs}
-          operationStatus={status}
-          videoTitle={videoTitle}
-        />
-      )}
 
-      {youtubeUploads?.map((upload) => (
-        <p key={upload.id}>
-          {upload.id} - {upload.status} - {JSON.stringify(upload.metadata)}
-          {upload.targetAccount?.name} - {upload?.targetAccount?.id}
-        </p>
-      ))}
+      <div className="flex w-full flex-col  space-y-2 last:mt-2 lg:max-w-[900px]">
+        {status === "Completed" && (
+          <Link
+            variant={"button"}
+            className="self-end"
+            href="/dashboard/create-video"
+          >
+            Create another
+          </Link>
+        )}
 
-      {!!associatedFiles &&
-        associatedFiles.map((fileData) => (
-          <DownloadFileButton s3Key={fileData.s3_key} key={fileData.s3_key}>
-            Download {fileData.file_type}
-          </DownloadFileButton>
+        {status && (
+          <OperationLogDisplay
+            operationLogs={logs}
+            operationStatus={status}
+            videoTitle={videoTitle}
+          />
+        )}
+        {youtubeUploads?.map((upload) => (
+          <p key={upload.id}>
+            {upload.id} - {upload.status} - {JSON.stringify(upload.metadata)}
+            {upload.targetAccount?.name} - {upload?.targetAccount?.id}
+          </p>
         ))}
+
+        {!!associatedFiles && (
+          <div className="flex w-full flex-col justify-evenly gap-2 sm:flex-row ">
+            {associatedFiles.map((fileData) => (
+              <DownloadFileButton
+                s3Key={fileData.s3_key}
+                key={fileData.s3_key}
+                props={{ className: "w-full" }}
+              >
+                Download {fileData.file_type}
+              </DownloadFileButton>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

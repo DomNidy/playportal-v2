@@ -95,6 +95,8 @@ export default function CreateVideoForm({
   async function onSubmit(data: z.infer<typeof CreateVideoFormSchema>) {
     console.log("data", data);
 
+    setIsUploadingFiles(true);
+
     if (!audioFile) {
       toast({
         title: "Error",
@@ -135,6 +137,13 @@ export default function CreateVideoForm({
             queryKey: ["userData"],
           });
 
+          // Remove the recent operations query so that the new operation is shown
+          // We do this because there is an edge case where the first operation created by a user
+          // will result in the dummy operation card showing for a few moments before the new data is fetched
+          void queryClient.removeQueries({
+            queryKey: ["recentOperations"],
+          });
+
           void queryClient.invalidateQueries({
             queryKey: ["transactions", "getTransaction"],
           });
@@ -150,7 +159,6 @@ export default function CreateVideoForm({
           const presignedUrlAudio = data?.presignedUrlAudio;
           const presignedUrlImage = data?.presignedUrlImage;
 
-          setIsUploadingFiles(true);
           if (presignedUrlAudio && audioFileBuffer) {
             putRequests.push(
               fetch(presignedUrlAudio, {
@@ -173,8 +181,21 @@ export default function CreateVideoForm({
           }
 
           // After uploads are complete, redirect the user
-          await Promise.all(putRequests);
-          router.push(`/dashboard/operation/${data?.operationId}`);
+          const responses = await Promise.all(putRequests);
+
+          // IF any of the uploads failed, show an error
+          if (responses.some((response) => !response.ok)) {
+            toast({
+              title: "Error",
+              description: "Failed to upload files",
+              variant: "destructive",
+            });
+            setIsUploadingFiles(false);
+            return;
+          } else {
+            // Don't set isUploadingFiles to false as it will cause the button to be enabled again (and we're about to redirect the user anyway)
+            router.push(`/dashboard/operation/${data?.operationId}`);
+          }
         },
       },
     );
@@ -232,7 +253,7 @@ export default function CreateVideoForm({
   return (
     <Form {...form}>
       <form
-        className="pb-4"
+        className="flex flex-col items-center px-4"
         onSubmit={form.handleSubmit((data) => {
           const dataToSubmit = {
             audioFile: audioFile!,
@@ -255,10 +276,10 @@ export default function CreateVideoForm({
           <>
             {/* Only display the continue button when we have an audio file */}
             {form.getValues().audioFile && (
-              <div className="flex-end flex">
+              <div className="flex w-full">
                 <Button
                   type="button"
-                  className="ml-auto"
+                  className="ml-auto self-end"
                   onClick={() => {
                     if (!form.getValues().audioFile) {
                       toast({
@@ -282,15 +303,18 @@ export default function CreateVideoForm({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Audio File</FormLabel>
-                  <AudioFileDropzone
-                    audioFileName={audioFile?.name}
-                    allowedAudioFileSizeBytes={fileSizeQuotaLimitBytes}
-                    onDrop={(acceptedFiles) => {
-                      field.onChange(acceptedFiles[0]);
-                      onAudioFileChange(acceptedFiles[0]);
-                    }}
-                    onDropAccepted={() => setFormStage("UploadImage")}
-                  />
+
+                  <div className="h-80 w-80">
+                    <AudioFileDropzone
+                      audioFileName={audioFile?.name}
+                      allowedAudioFileSizeBytes={fileSizeQuotaLimitBytes}
+                      onDrop={(acceptedFiles) => {
+                        field.onChange(acceptedFiles[0]);
+                        onAudioFileChange(acceptedFiles[0]);
+                      }}
+                      onDropAccepted={() => setFormStage("UploadImage")}
+                    />
+                  </div>
                   <FormDescription>
                     The audio file to create the video with.
                   </FormDescription>
@@ -306,14 +330,19 @@ export default function CreateVideoForm({
 
         {formStage === "UploadImage" && (
           <>
-            <div className="flex justify-between">
-              <Button type="button" onClick={() => setFormStage("UploadAudio")}>
+            <div className="flex w-full flex-row justify-between ">
+              <Button
+                type="button"
+                className="self-start"
+                onClick={() => setFormStage("UploadAudio")}
+              >
                 Go back
               </Button>
 
               {/* Only display the continue button when we have an image file */}
               {form.getValues().imageFile && (
                 <Button
+                  className="self-end"
                   type="button"
                   onClick={() => {
                     if (!form.getValues().imageFile) {
@@ -339,15 +368,17 @@ export default function CreateVideoForm({
                 <FormItem>
                   <FormLabel>Image File</FormLabel>
                   <FormControl>
-                    <ImageFileDropzone
-                      allowedImageFileSizeBytes={MAX_IMAGE_SIZE}
-                      imageFileName={imageFile?.name}
-                      onDrop={(acceptedFiles) => {
-                        field.onChange(acceptedFiles[0]);
-                        onImageFileChange(acceptedFiles[0]);
-                      }}
-                      onDropAccepted={() => setFormStage("VideoOptions")}
-                    />
+                    <div className="h-80 w-80">
+                      <ImageFileDropzone
+                        allowedImageFileSizeBytes={MAX_IMAGE_SIZE}
+                        imageFileName={imageFile?.name}
+                        onDrop={(acceptedFiles) => {
+                          field.onChange(acceptedFiles[0]);
+                          onImageFileChange(acceptedFiles[0]);
+                        }}
+                        onDropAccepted={() => setFormStage("VideoOptions")}
+                      />
+                    </div>
                   </FormControl>
                   <FormDescription>
                     Image to render the video with.
@@ -363,7 +394,7 @@ export default function CreateVideoForm({
         )}
 
         {formStage === "VideoOptions" && (
-          <div className="space-y-4">
+          <div className="w-full space-y-4">
             <Button
               type="button"
               tabIndex={0}
@@ -631,6 +662,7 @@ export default function CreateVideoForm({
               </div>
             )}
 
+            {/* We are setting isUploading files here due to async nature of the disabled state, kinda hacky*/}
             <Button
               tabIndex={1}
               type="submit"

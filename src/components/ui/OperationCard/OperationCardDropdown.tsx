@@ -19,9 +19,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "../AlertDialog/AlertDialog";
-import { DeleteOperationButton } from "../DeleteOperationButton/DeleteOperationButton";
+import { DeleteOperationButton } from "./DeleteOperationButton";
 import { Link } from "~/components/ui/Link";
-
 
 export default function OperationCardDropdown({
   operation,
@@ -85,10 +84,7 @@ export default function OperationCardDropdown({
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
               This action cannot be undone. This will delete all files
-              associated with this operation on the Playportal servers. We will
-              delete the output video file, the input audio tracks, and the
-              input images. Please make sure you download these resources before
-              deleting.
+              associated with this video on the Playportal servers.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="ml-auto">
@@ -96,7 +92,10 @@ export default function OperationCardDropdown({
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction asChild>
-              <DeleteOperationButton operationId={operation.operation_id ?? ""}>
+              <DeleteOperationButton
+                operationId={operation.operation_id ?? ""}
+                onDeleteSucess={() => setDeleteDialogOpen(false)}
+              >
                 Delete
               </DeleteOperationButton>
             </AlertDialogAction>
