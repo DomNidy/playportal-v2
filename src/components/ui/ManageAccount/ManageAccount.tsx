@@ -41,7 +41,7 @@ export default function ManageAccount({
     <Tabs
       defaultValue="account"
       className="dark mx-auto
-    mt-8 w-fit min-w-[400px]
+    mt-8 w-full
     "
     >
       {/* Change grid-cols to grid-cols-2 if we want another tab */}

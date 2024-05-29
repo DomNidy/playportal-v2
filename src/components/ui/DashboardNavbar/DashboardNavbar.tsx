@@ -31,9 +31,9 @@ export default async function DashboardNavbar({
   }
 
   return (
-    <div className="sticky top-0 z-50 m-auto mb-4 flex h-fit w-full shrink-0 flex-col border-b bg-neutral-950 px-4 pb-0 md:px-6">
+    <div className="sticky top-0 z-[44] m-auto mb-4 flex h-fit w-full shrink-0 flex-col border-b bg-neutral-950 px-4 pb-0 md:px-6">
       <div className="mt-4 flex h-12 w-full flex-row justify-between font-semibold tracking-tight">
-        <div className="flex flex-row justify-center items-center gap-2">
+        <div className="flex flex-row items-center justify-center gap-2">
           {/* eslint-disable-next-line @typescript-eslint/no-unsafe-assignment */}
           <Image priority src={PlayportalIcon} alt="" />
           <Link href="/">Playportal</Link>

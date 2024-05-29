@@ -40,7 +40,7 @@ import TagsInput from "./TagsInput";
 import posthog from "posthog-js";
 import MultiSelectFormField from "../MultiSelect/MultiSelect";
 import { Textarea } from "../Textarea/Textarea";
-import { revalidatePath } from "next/cache";
+import { revalidatePathByServerAction } from "~/utils/actions";
 
 // Hardcoded at 8MB
 const MAX_IMAGE_SIZE = 8 * 1024 * 1024;
@@ -196,7 +196,7 @@ export default function CreateVideoForm({
             return;
           } else {
             // Don't set isUploadingFiles to false as it will cause the button to be enabled again (and we're about to redirect the user anyway)
-            revalidatePath("/dashboard/account")
+            await revalidatePathByServerAction("/dashboard/account");
             router.push(`/dashboard/operation/${data?.operationId}`);
           }
         },
@@ -256,7 +256,7 @@ export default function CreateVideoForm({
   return (
     <Form {...form}>
       <form
-        className="flex flex-col items-center px-4"
+        className="flex h-auto w-auto flex-col items-center px-4"
         onSubmit={form.handleSubmit((data) => {
           const dataToSubmit = {
             audioFile: audioFile!,
@@ -277,9 +277,10 @@ export default function CreateVideoForm({
       >
         {formStage === "UploadAudio" && (
           <>
+            {" "}
             {/* Only display the continue button when we have an audio file */}
             {form.getValues().audioFile && (
-              <div className="flex w-full">
+              <div className="z-[46] mb-2 flex w-full flex-row justify-between ">
                 <Button
                   type="button"
                   className="ml-auto self-end"
@@ -299,25 +300,20 @@ export default function CreateVideoForm({
                 </Button>
               </div>
             )}
-
             <FormField
               name={"audioFile"}
               control={form.control}
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Audio File</FormLabel>
-
-                  <div className="h-80 w-80">
-                    <AudioFileDropzone
-                      audioFileName={audioFile?.name}
-                      allowedAudioFileSizeBytes={fileSizeQuotaLimitBytes}
-                      onDrop={(acceptedFiles) => {
-                        field.onChange(acceptedFiles[0]);
-                        onAudioFileChange(acceptedFiles[0]);
-                      }}
-                      onDropAccepted={() => setFormStage("UploadImage")}
-                    />
-                  </div>
+                <FormItem className="z-[47] h-[600px] w-full">
+                  <AudioFileDropzone
+                    audioFileName={audioFile?.name}
+                    allowedAudioFileSizeBytes={fileSizeQuotaLimitBytes}
+                    onDrop={(acceptedFiles) => {
+                      field.onChange(acceptedFiles[0]);
+                      onAudioFileChange(acceptedFiles[0]);
+                    }}
+                    onDropAccepted={() => setFormStage("UploadImage")}
+                  />
                   <FormDescription>
                     The audio file to create the video with.
                   </FormDescription>
@@ -333,7 +329,7 @@ export default function CreateVideoForm({
 
         {formStage === "UploadImage" && (
           <>
-            <div className="flex w-full flex-row justify-between ">
+            <div className="z-[46] mb-2 flex w-full flex-row justify-between ">
               <Button
                 type="button"
                 className="self-start"
@@ -368,21 +364,16 @@ export default function CreateVideoForm({
               name={"imageFile"}
               control={form.control}
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Image File</FormLabel>
-                  <FormControl>
-                    <div className="h-80 w-80">
-                      <ImageFileDropzone
-                        allowedImageFileSizeBytes={MAX_IMAGE_SIZE}
-                        imageFileName={imageFile?.name}
-                        onDrop={(acceptedFiles) => {
-                          field.onChange(acceptedFiles[0]);
-                          onImageFileChange(acceptedFiles[0]);
-                        }}
-                        onDropAccepted={() => setFormStage("VideoOptions")}
-                      />
-                    </div>
-                  </FormControl>
+                <FormItem className="z-[46] h-[600px] w-full">
+                  <ImageFileDropzone
+                    allowedImageFileSizeBytes={MAX_IMAGE_SIZE}
+                    imageFileName={imageFile?.name}
+                    onDrop={(acceptedFiles) => {
+                      field.onChange(acceptedFiles[0]);
+                      onImageFileChange(acceptedFiles[0]);
+                    }}
+                    onDropAccepted={() => setFormStage("VideoOptions")}
+                  />
                   <FormDescription>
                     Image to render the video with.
                   </FormDescription>
@@ -397,7 +388,7 @@ export default function CreateVideoForm({
         )}
 
         {formStage === "VideoOptions" && (
-          <div className="w-full space-y-4">
+          <div className="z-[46] w-full space-y-4 rounded-lg border-2 bg-black p-4">
             <Button
               type="button"
               tabIndex={0}

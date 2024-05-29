@@ -49,7 +49,7 @@ export default async function AccountPage() {
   );
 
   return (
-    <div>
+    <div className="flex w-full max-w-[500px]">
       <ManageAccount
         userWithProduct={userWithProduct ?? undefined}
         quotas={{

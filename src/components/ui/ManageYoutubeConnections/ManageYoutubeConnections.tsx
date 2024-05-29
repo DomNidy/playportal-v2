@@ -13,8 +13,8 @@ export default function ManageYoutubeConnections() {
   const { data, isLoading } = useLinkedYoutubeAccounts();
 
   return (
-    <div>
-      <div className="mb-2 flex flex-col space-y-2">
+    <div className="flex flex-col items-center  gap-2">
+      <div className="mb-2 flex w-full flex-col space-y-2 ">
         {!isLoading
           ? data?.map((account) => (
               <YoutubeChannelSummaryCard
@@ -28,6 +28,7 @@ export default function ManageYoutubeConnections() {
       </div>
 
       <Button
+        className="w-full"
         onClick={() =>
           void queryClient.refetchQueries({
             queryKey: [

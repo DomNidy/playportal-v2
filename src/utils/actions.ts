@@ -20,6 +20,13 @@ export type SignupToMailingListResponse = {
   text: string;
 };
 
+// Utility function that allows us to revalidate path in client components
+export async function revalidatePathByServerAction(
+  ...params: Parameters<typeof revalidatePath>
+) {
+  revalidatePath(...params);
+}
+
 export async function signupToMailingList(
   prevState: SignupToMailingListResponse | null,
   data: FormData,

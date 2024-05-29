@@ -2,6 +2,7 @@ import { useDropzone, type ErrorCode } from "react-dropzone";
 import { toast } from "../Toasts/use-toast";
 import { SupportedAudioFileExtensions } from "~/definitions/form-schemas";
 import { getFileDropErrorMessage } from "./utils";
+import { Button } from "../Button";
 
 export default function AudioFileDropzone({
   onDrop,
@@ -14,8 +15,9 @@ export default function AudioFileDropzone({
   allowedAudioFileSizeBytes: number;
   audioFileName?: string;
 }) {
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+  const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDrop,
+    noClick: true,
     onDropAccepted,
     accept: {
       "audio/mp3": [".mp3"],
@@ -43,15 +45,21 @@ export default function AudioFileDropzone({
   return (
     <div
       {...getRootProps()}
-      className={`flex w-full h-full  cursor-pointer flex-col items-center justify-center rounded-lg border-[1.5px] border-dashed border-white border-opacity-15 bg-[#0C0B0C] p-4 ${isDragActive ? "bg-[#171618]" : ""}`}
+      className={`flex h-full w-full flex-col items-center justify-center rounded-lg border-[1.5px] border-dashed border-white border-opacity-15 bg-[#0C0B0C] p-4 ${isDragActive ? "bg-[#171618]" : ""}`}
     >
       <input {...getInputProps()} />
       {audioFileName ? (
         audioFileName
       ) : isDragActive ? (
-        <p>Drop the files here ...</p>
+        <p className="animate-fade-in text-xl">Drop the audio file here!</p>
       ) : (
-        <p>Drag an audio file here (or click)</p>
+        <div className="flex flex-col items-center gap-4">
+          <p className="text-xl">Drag an audio file here </p>
+          <p className="text-sm">or...</p>
+          <Button type="button" className="w-full" onClick={() => open()}>
+            Browse files
+          </Button>
+        </div>
       )}
     </div>
   );

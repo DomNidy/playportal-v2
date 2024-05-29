@@ -18,6 +18,10 @@ import { toast } from "~/components/ui/Toasts/use-toast";
 import { UpdatePasswordFormSchema } from "~/definitions/form-schemas";
 import { createClient } from "~/utils/supabase/client";
 import { getStatusRedirect } from "~/utils/utils";
+import { Link } from "~/components/ui/Link";
+import { MoonLoader } from "react-spinners";
+import { LoaderSizeProps } from "react-spinners/helpers/props";
+import { Label } from "~/components/ui/Form/Label";
 
 export default function UpdatePasswordPage() {
   const supabase = createClient();
@@ -59,44 +63,84 @@ export default function UpdatePasswordPage() {
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
-        <FormField
-          name="password"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Password</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="Password" />
-              </FormControl>
-              <FormDescription>
-                The new password you want to use.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+    <div className="flex w-full max-w-[500px] flex-col items-center">
+      <Link variant={"button"} href={"/dashboard/account"} className="self-start mb-2">
+        Go back
+      </Link>
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="dark flex w-full flex-shrink basis-96 flex-col gap-4 rounded-lg border-[1.8px] border-white/5 bg-card p-4"
+        >
+          <h2 className="text-2xl font-semibold leading-none tracking-tight">
+            Update your password
+          </h2>
 
-        <FormField
-          name="passwordConfirmation"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Confirm password</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="Confirm password" />
-              </FormControl>
-              <FormDescription>Confirm your new password.</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            name="password"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Password</FormLabel>
+                <FormControl>
+                  <Input {...field} placeholder="Password" type="password" />
+                </FormControl>
+                <FormDescription>
+                  The new password you want to use.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <Button type="submit" disabled={form.formState.isSubmitting}>
-          Update password
-        </Button>
-      </form>
-    </Form>
+          <FormField
+            name="passwordConfirmation"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Confirm password</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    placeholder="Confirm password"
+                    type="password"
+                  />
+                </FormControl>
+                <FormDescription>Confirm your new password.</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+            <div className="flex-1"/>
+          <Button
+            type="submit"
+            disabled={form.formState.isSubmitting}
+            className="w-full self-end place-self-end"
+          >
+            <SubmitStatus
+              loaderProps={{
+                color: "#0C0B0C",
+                size: 20,
+              }}
+              isLoading={form.formState.isSubmitting}
+              text="Update Password"
+            />
+          </Button>
+        </form>
+      </Form>
+    </div>
   );
+}
+
+function SubmitStatus({
+  isLoading,
+  text,
+  loaderProps,
+}: {
+  isLoading: boolean;
+  text: string;
+  loaderProps: LoaderSizeProps;
+}) {
+  return isLoading ? <MoonLoader {...loaderProps} /> : <p>{text}</p>;
 }

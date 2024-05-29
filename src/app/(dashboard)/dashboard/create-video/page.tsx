@@ -1,4 +1,5 @@
 import CreateVideoForm from "~/components/ui/CreateVideoForm/CreateVideoForm";
+import CreateVideoTopnav from "~/components/ui/CreateVideoForm/CreateVideoTopnav";
 import PricingSection from "~/components/ui/LandingPage/PricingSection";
 import { createClient } from "~/utils/supabase/server";
 import { getFeatureFlag } from "~/utils/utils";
@@ -24,8 +25,10 @@ export default async function CreateVideoPage() {
 
   if (!quotaLimits) {
     return (
-      <div className="flex justify-center flex-col items-center max-w-[800px]">
-        <h2 className="text-3xl font-semibold">You don{"'t"} have access to this</h2>
+      <div className="flex max-w-[800px] flex-col items-center justify-center">
+        <h2 className="text-3xl font-semibold">
+          You don{"'t"} have access to this
+        </h2>
         <p className="mb-12">
           In order to provide the best service possible, we are currently
           restricting video creations to paid subscribers only. If you are
@@ -38,6 +41,8 @@ export default async function CreateVideoPage() {
 
   return (
     <div className="w-full max-w-[1050px]">
+      <CreateVideoTopnav />
+      <div className="mt-14"/>
       <CreateVideoForm
         fileSizeQuotaLimitBytes={
           quotaLimits?.file_size_limit_mb
