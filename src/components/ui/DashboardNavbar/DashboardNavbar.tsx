@@ -3,6 +3,8 @@ import UserButton from "../UserButton/UserButton";
 import { DashboardNavbarLinks } from "./DashboardNavbarLinks";
 import { createClient } from "~/utils/supabase/server";
 import { Link } from "../Link";
+import PlayportalIcon from "../../../../public/playportal.svg";
+import Image from "next/image";
 
 export type DashNavLink = {
   href: string;
@@ -31,12 +33,16 @@ export default async function DashboardNavbar({
   return (
     <div className="sticky top-0 z-50 m-auto mb-4 flex h-fit w-full shrink-0 flex-col border-b bg-neutral-950 px-4 pb-0 md:px-6">
       <div className="mt-4 flex h-12 w-full flex-row justify-between font-semibold tracking-tight">
-        <Link href="/">Playportal</Link>
+        <div className="flex flex-row justify-center items-center gap-2">
+          {/* eslint-disable-next-line @typescript-eslint/no-unsafe-assignment */}
+          <Image priority src={PlayportalIcon} alt="" />
+          <Link href="/">Playportal</Link>
+        </div>
         <div className="top-0 flex flex-row items-start justify-center gap-4">
           <UserButton user={userData} />
         </div>
       </div>
-      <div className="mt-auto flex gap-8">
+      <div className="mt-3.5 flex gap-8">
         <DashboardNavbarLinks links={links} />
       </div>
     </div>

@@ -15,6 +15,9 @@ import { getStatusRedirect } from "~/utils/utils";
 import { useRouter } from "next/navigation";
 import { Link } from "~/components/ui/Link";
 import { useUserSubscription } from "~/hooks/use-user-subscription";
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "../Dialog";
+import { useSubscriptionPlans } from "~/hooks/use-subscription-plans";
+import PricingSectionClientComponent from "../PricingSectionClientComponent/PricingSectionClientComponent";
 
 // This is a client component, but will be provided the props from server components
 export default function UserButton({
@@ -23,10 +26,16 @@ export default function UserButton({
   user: Database["public"]["Tables"]["user_data"]["Row"] | null;
 }) {
   const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
+  const [subDialogOpen, setSubDialogOpen] = useState<boolean>(false);
+
   const router = useRouter();
   const supabase = createClient();
+
+  // TODO: Should we also move this up?
+  const { data: availableSubscriptionPlans } = useSubscriptionPlans();
+
   // TODO: Should we move this user subscription hook up the component tree? Maybe context?
-  const { data: userSubData, error } = useUserSubscription();
+  const { data: userSubData } = useUserSubscription();
 
   return (
     <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
@@ -88,9 +97,35 @@ export default function UserButton({
         {/** This should trigger a modal that shows the 3 subscription cards if the user clicks it*/}
         {/** For subscribed users, we'll show them this as the options they can upgrade to */}
 
-        <div className="relative m-1 flex cursor-pointer select-none items-center rounded-sm bg-white px-2 py-1.5 text-sm text-black  outline-none transition-colors hover:bg-white/85 focus:cursor-pointer focus:bg-white/85  data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
-          {userSubData?.product_name ?? "Upgrade Now"}
-        </div>
+        <Dialog
+          modal={true}
+          onOpenChange={(state) => {
+            setSubDialogOpen(state);
+
+            // If we just closed the sub dialog, and the dropdown is open, close that
+            if (!state && dropdownOpen) {
+              setDropdownOpen(false);
+            }
+          }}
+          open={subDialogOpen}
+        >
+          <DialogTrigger onClick={() => setSubDialogOpen(!subDialogOpen)}>
+            <div className="relative m-1 flex cursor-pointer select-none items-center rounded-sm bg-white px-2 py-1.5 text-sm text-black  outline-none transition-colors hover:bg-white/85 focus:cursor-pointer focus:bg-white/85  data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
+              {userSubData?.product_name ?? "Upgrade Now"}
+            </div>
+          </DialogTrigger>
+          <DialogContent className="flex max-h-[600px] max-w-[90%] flex-col  justify-center rounded-lg md:max-w-[650px] lg:max-w-[850px] ">
+            <DialogTitle>Subscription Plans</DialogTitle>
+
+            <div className="my-2 flex h-full  flex-col items-center justify-center gap-2 overflow-y-scroll pt-[320px] sm:flex-row sm:overflow-y-auto  sm:pt-0 ">
+              <PricingSectionClientComponent
+                basicPlan={availableSubscriptionPlans?.basicPlan}
+                standardPlan={availableSubscriptionPlans?.standardPlan}
+                proPlan={availableSubscriptionPlans?.proPlan}
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
       </DropdownMenuContent>
     </DropdownMenu>
   );

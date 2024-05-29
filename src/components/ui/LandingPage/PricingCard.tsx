@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, CheckIcon } from "lucide-react";
 import React from "react";
 import { Button } from "../Button";
 import { type PricingPlan } from "./PricingSection";
@@ -17,6 +17,7 @@ export default function PricingCard({
   planDescription,
   planFeatures,
   planPrice,
+  userOwnsPlan,
 }: PricingPlan) {
   const supabase = createClient();
   const router = useRouter();
@@ -95,9 +96,20 @@ export default function PricingCard({
 
       <Button
         className="mt-auto bg-white text-black hover:bg-white/85"
-        onClick={() => void handleStripeCheckout(planData)}
+        disabled={userOwnsPlan}
+        onClick={() => {
+          if (!userOwnsPlan) {
+            void handleStripeCheckout(planData);
+          }
+        }}
       >
-        Get Started
+        {!userOwnsPlan ? (
+          "Get Started"
+        ) : (
+          <span>
+            You own this! <CheckCircle2 className="inline h-4 w-4" />
+          </span>
+        )}
       </Button>
     </div>
   );

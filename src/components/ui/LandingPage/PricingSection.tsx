@@ -12,6 +12,8 @@ export type PricingPlan = {
   // An array of <p> elements, we pass them this way because we want to apply custom styling to certain parts of each element
   planFeatures: React.ReactNode[];
   planData: Tables<"products_prices">;
+  // Whether or not the user owns the plan
+  userOwnsPlan?: boolean;
 };
 
 export default async function PricingSection({
