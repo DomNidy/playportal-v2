@@ -42,8 +42,11 @@ export default async function Page() {
         height: "calc(100vh - 126px)",
       }}
     >
-      {/* <SignUp /> */}
-      <SignupForm />
+      <div className="landing-bg-gradient pointer-events-none absolute top-0 h-[1450px] max-h-screen w-full " />
+      <div className="w-full ">
+        {/* <SignUp /> */}
+        <SignupForm />
+      </div>
     </div>
   );
 }

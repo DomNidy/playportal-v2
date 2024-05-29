@@ -14,6 +14,7 @@ const linkVariants = cva("", {
         "inline-flex items-center justify-center whitespace-nowrap rounded-md bg-primary p-2 text-sm font-medium text-black ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
       mutedHover:
         "relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm text-muted-foreground outline-none transition-colors hover:bg-white/30 hover:text-white focus:cursor-pointer focus:bg-white/30 focus:text-accent-foreground focus:text-white data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+      mutedFg: "text-muted-foreground hover:text-white",
     },
   },
   defaultVariants: { variant: "default" },

@@ -48,7 +48,10 @@ export default async function Page() {
         height: "calc(100vh - 126px)",
       }}
     >
-      <SigninForm />
+      <div className="landing-bg-gradient pointer-events-none absolute top-0 h-[1650px] max-h-screen w-full " />
+      <div className="w-full ">
+        <SigninForm />
+      </div>
     </div>
   );
 }

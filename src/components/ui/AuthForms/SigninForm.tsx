@@ -16,10 +16,10 @@ import { useState } from "react";
 import { createClient } from "~/utils/supabase/client";
 import { getURL } from "~/utils/utils";
 import { Link } from "~/components/ui/Link";
-import { IconBrandGoogle } from "@tabler/icons-react";
 import { cn } from "~/utils/utils";
 import { login } from "~/utils/actions";
 import { ClipLoader } from "react-spinners";
+import GoogleIcon from "~/components/icons/GoogleIcon";
 
 const SignInSchema = z.object({
   email: z.string().email(),
@@ -32,7 +32,7 @@ export default function SigninForm() {
 
   const form = useForm<z.infer<typeof SignInSchema>>({
     resolver: zodResolver(SignInSchema),
-    defaultValues: {
+  defaultValues: {
       email: "",
       password: "",
     },
@@ -45,7 +45,7 @@ export default function SigninForm() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-md rounded-none bg-white p-4 shadow-input dark:bg-black md:rounded-2xl md:p-8">
+    <div className="mx-auto w-fit max-w-md rounded-xl border-[1.8px] authform-bg-gradient p-4  shadow-input md:p-8 ">
       <h2 className="text-xl font-bold text-neutral-800 dark:text-neutral-200">
         Welcome to Playportal
       </h2>
@@ -129,16 +129,21 @@ export default function SigninForm() {
             })
           }
         >
-          <IconBrandGoogle className="h-4 w-4 text-neutral-800 dark:text-neutral-300" />
+          <GoogleIcon width={20} height={20} className="mr-1" />
+
           <span className="text-sm text-neutral-700 dark:text-neutral-300">
             Sign in with Google
           </span>
           <BottomGradient />
         </Button>
         <div className="flex justify-between">
-          <Link href={"/sign-up"}>Sign up instead</Link>
+          <Link variant={"mutedFg"} href={"/sign-up"}>
+            Sign up instead
+          </Link>
 
-          <Link href={"/reset-password"}>Forgot your password?</Link>
+          <Link variant={"mutedFg"} href={"/reset-password"}>
+            Forgot your password?
+          </Link>
         </div>
       </div>
     </div>

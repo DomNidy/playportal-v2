@@ -22,6 +22,7 @@ import ConfirmEmailScreen from "./ConfirmEmail";
 import posthog from "posthog-js";
 import { ClipLoader } from "react-spinners";
 import { signUp } from "~/utils/actions";
+import GoogleIcon from "~/components/icons/GoogleIcon";
 
 // Type used to track the status of the signup process
 type SignupStatus = {
@@ -96,7 +97,7 @@ export default function SignupForm() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-md rounded-none bg-white p-4 shadow-input dark:bg-black md:rounded-2xl md:p-8">
+    <div className="authform-bg-gradient mx-auto w-fit max-w-md rounded-xl border-[1.8px] p-4  shadow-input md:p-8 ">
       <h2 className="text-xl font-bold text-neutral-800 dark:text-neutral-200">
         Welcome to Playportal
       </h2>
@@ -205,13 +206,15 @@ export default function SignupForm() {
             });
           }}
         >
-          <IconBrandGoogle className="h-4 w-4 text-neutral-800 dark:text-neutral-300" />
+          <GoogleIcon width={20} height={20} className="mr-1" />
           <span className="text-sm text-neutral-700 dark:text-neutral-300">
             Sign up with Google
           </span>
           <BottomGradient />
         </Button>
-        <Link href={"/sign-in"}>Sign in instead</Link>
+        <Link href={"/sign-in"} variant={"mutedFg"}>
+          Sign in instead
+        </Link>
       </div>
     </div>
   );
@@ -220,7 +223,7 @@ export default function SignupForm() {
 const BottomGradient = () => {
   return (
     <>
-      <span className="absolute inset-x-0 -bottom-px block h-px w-full bg-gradient-to-r from-transparent via-cyan-500 to-transparent opacity-0 transition duration-500 group-hover/btn:opacity-100" />
+      <span className="absolute inset-x-0 -bottom-px block h-px w-full bg-gradient-to-r from-transparent via-ptl_accent-def to-transparent opacity-0 transition duration-500 group-hover/btn:opacity-100" />
       <span className="absolute inset-x-10 -bottom-px mx-auto block h-px w-1/2 bg-gradient-to-r from-transparent via-indigo-500 to-transparent opacity-0 blur-sm transition duration-500 group-hover/btn:opacity-100" />
     </>
   );

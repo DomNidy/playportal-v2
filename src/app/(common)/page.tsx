@@ -9,6 +9,7 @@ import { TextGenerateEffect } from "~/components/ui/LandingPage/TextGenerateEffe
 import { ContainerScroll } from "~/components/ui/LandingPage/ContainerScrollAnimation";
 import { Tabs } from "~/components/ui/LandingPage/Tabs";
 import PricingSection from "~/components/ui/LandingPage/PricingSection";
+import { Footer } from "~/components/ui/Footer";
 
 export default function Home() {
   return (
@@ -129,10 +130,13 @@ export default function Home() {
         />
       </div>
 
-      <PricingSection displayMode="landing" />
-      <div id="pricing" />
-
-      <div className=" mt-32 h-32 w-full"></div>
+      <div className="relative w-full flex flex-col items-center">
+        <div id="pricing" />
+        <PricingSection displayMode="landing" />
+        <div className="footer-bg-gradient absolute bottom-0 z-50 h-[1000px] w-full pointer-events-none"></div>
+        <div className=" mt-[5vh] h-[5vh] w-full"></div>
+        <Footer />
+      </div>
     </main>
   );
 }

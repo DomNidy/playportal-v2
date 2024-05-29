@@ -40,6 +40,7 @@ import TagsInput from "./TagsInput";
 import posthog from "posthog-js";
 import MultiSelectFormField from "../MultiSelect/MultiSelect";
 import { Textarea } from "../Textarea/Textarea";
+import { revalidatePath } from "next/cache";
 
 // Hardcoded at 8MB
 const MAX_IMAGE_SIZE = 8 * 1024 * 1024;
@@ -126,6 +127,7 @@ export default function CreateVideoForm({
       },
       {
         onError(error) {
+          setIsUploadingFiles(false);
           toast({
             title: "Error",
             description: error.message,
@@ -194,6 +196,7 @@ export default function CreateVideoForm({
             return;
           } else {
             // Don't set isUploadingFiles to false as it will cause the button to be enabled again (and we're about to redirect the user anyway)
+            revalidatePath("/dashboard/account")
             router.push(`/dashboard/operation/${data?.operationId}`);
           }
         },
