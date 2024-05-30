@@ -64,13 +64,24 @@ export default async function DownloadsPage() {
     );
 
   return (
-    <div className="flex flex-col items-center px-24">
+    <div className="flex flex-col items-center px-4">
       <div className="landing-bg-gradient pointer-events-none absolute top-0 h-[1450px] max-h-screen w-full " />
 
-      <div className="mt-24 grid justify-items-center gap-10 lg:grid-cols-2 xl:grid-cols-3">
-        {kits?.map((kit) => (
-          <MusicKit key={kit.title} {...kit} variant="default"  />
-        ))}
+      <div className="w-full max-w-[1200px]">
+        <div className="mt-10 flex w-full flex-col gap-2 text-left">
+          <h2 className="text-4xl font-bold">Free Kits</h2>
+          <p className="max-w-[1000px] text-muted">
+            Here you can find some free kits for making beats. Each kit is
+            comprised of entirely original samples, synthesizer presets, and
+            melodies created by Playportal.
+          </p>
+        </div>
+
+        <div className="mt-24 grid w-full grid-flow-row grid-cols-1 justify-items-center gap-14 md:grid-cols-2 md:justify-items-stretch lg:grid-cols-3 xl:grid-cols-4">
+          {kits?.map((kit) => (
+            <MusicKit key={kit.title} {...kit} variant="default" />
+          ))}
+        </div>
       </div>
     </div>
   );
