@@ -78,6 +78,7 @@ export default function PrivacyPolicyPage() {
             </Link>
             . Please read this privacy policy carefully. If you do not agree
             with the terms of this privacy policy, please do not access the App.
+            By accessing Playportal, you agree to these terms and conditions.
           </p>
         </div>
 
@@ -196,7 +197,10 @@ export default function PrivacyPolicyPage() {
             us and delete any stored data associated with your YouTube account.
             Additionally, you may revoke access granted to us directly through
             the{" "}
-            <Link href={"https://security.google.com/settings"}>
+            <Link
+              href={"https://security.google.com/settings"}
+              className="underline"
+            >
               Google Security Settings page.
             </Link>
           </p>
