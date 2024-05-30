@@ -61,6 +61,9 @@ export async function generateMetadata(): Promise<Metadata> {
       description: meta.description,
       images: [meta.favicon],
     },
+    verification: {
+      google: "Pw3v_VbZW-y0UMRlbaBBY5ADR5G2rRhyNUm3ar1FyuU",
+    },
   };
 }
 
