@@ -40,17 +40,19 @@ export default async function CreateVideoPage() {
   }
 
   return (
-    <div className="w-full max-w-[1050px]">
+    <>
       <CreateVideoTopnav />
-      <div className="mt-14"/>
-      <CreateVideoForm
-        fileSizeQuotaLimitBytes={
-          quotaLimits?.file_size_limit_mb
-            ? quotaLimits?.file_size_limit_mb * 1024 * 1024
-            : 0
-        }
-        uploadVideoFeature={uploadVideoFeature}
-      />
-    </div>
+      <div className="w-full max-w-[1050px]">
+        <div className="mt-10" />
+        <CreateVideoForm
+          fileSizeQuotaLimitBytes={
+            quotaLimits?.file_size_limit_mb
+              ? quotaLimits?.file_size_limit_mb * 1024 * 1024
+              : 0
+          }
+          uploadVideoFeature={uploadVideoFeature}
+        />
+      </div>
+    </>
   );
 }

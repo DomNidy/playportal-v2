@@ -17,7 +17,7 @@
     "db:gen-types": "npx supabase gen types typescript --linked > types_db.ts",
     "stripe:listen": "stripe listen --forward-to localhost:3000/api/webhooks",
     "stripe:fixtures": "stripe fixtures fixtures/stripe-fixtures.json",
-  "stripe:login": "stripe login",
+    "stripe:login": "stripe login",
     "dev": "next dev",
     "lint": "next lint",
     "start": "next start"

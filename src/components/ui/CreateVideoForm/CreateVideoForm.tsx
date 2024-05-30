@@ -41,6 +41,7 @@ import posthog from "posthog-js";
 import MultiSelectFormField from "../MultiSelect/MultiSelect";
 import { Textarea } from "../Textarea/Textarea";
 import { revalidatePathByServerAction } from "~/utils/actions";
+import { Link } from "../Link";
 
 // Hardcoded at 8MB
 const MAX_IMAGE_SIZE = 8 * 1024 * 1024;
@@ -277,10 +278,13 @@ export default function CreateVideoForm({
       >
         {formStage === "UploadAudio" && (
           <>
-            {" "}
-            {/* Only display the continue button when we have an audio file */}
-            {form.getValues().audioFile && (
-              <div className="z-[46] mb-2 flex w-full flex-row justify-between ">
+            <div className="z-[46] mb-2 flex w-full flex-row justify-between ">
+              <Button type="button" onClick={() => router.push("/dashboard")}>
+                Go back
+              </Button>
+
+              {/* Only display the continue button when we have an audio file */}
+              {form.getValues().audioFile && (
                 <Button
                   type="button"
                   className="ml-auto self-end"
@@ -298,8 +302,8 @@ export default function CreateVideoForm({
                 >
                   Next
                 </Button>
-              </div>
-            )}
+              )}
+            </div>
             <FormField
               name={"audioFile"}
               control={form.control}
