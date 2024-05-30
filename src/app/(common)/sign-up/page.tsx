@@ -43,7 +43,7 @@ export default async function Page() {
       }}
     >
       <div className="landing-bg-gradient pointer-events-none absolute top-0 h-[1450px] max-h-screen w-full " />
-      <div className="w-full ">
+      <div className="w-full px-2">
         {/* <SignUp /> */}
         <SignupForm />
       </div>

@@ -2,7 +2,6 @@
 import React, { useState } from "react";
 import { Input } from "~/components/ui/Input";
 import { cn } from "~/utils/utils";
-import { IconBrandGoogle } from "@tabler/icons-react";
 import { createClient } from "~/utils/supabase/client";
 import { Button } from "../Button";
 import { getURL } from "~/utils/utils";
@@ -23,6 +22,7 @@ import posthog from "posthog-js";
 import { ClipLoader } from "react-spinners";
 import { signUp } from "~/utils/actions";
 import GoogleIcon from "~/components/icons/GoogleIcon";
+import { Checkbox } from "../Checkbox";
 
 // Type used to track the status of the signup process
 type SignupStatus = {
@@ -37,6 +37,9 @@ const SignUpSchema = z
     confirmPassword: z
       .string()
       .min(8, "Password must contain at least 8 characters."),
+    agreesToTerms: z.boolean().refine((val) => !!val, {
+      message: "Please agree to terms and conditions.",
+    }),
   })
   .refine(
     (credentials) => credentials.password === credentials.confirmPassword,
@@ -66,6 +69,7 @@ export default function SignupForm() {
       email: "",
       password: "",
       confirmPassword: "",
+      agreesToTerms: false,
     },
   });
 
@@ -97,7 +101,7 @@ export default function SignupForm() {
   }
 
   return (
-    <div className="authform-bg-gradient mx-auto w-fit max-w-md rounded-xl border-[1.8px] p-4  shadow-input md:p-8 ">
+    <div className="authform-bg-gradient mx-auto w-fit max-w-md rounded-xl border-[1.8px] p-4 shadow-input md:p-8 ">
       <h2 className="text-xl font-bold text-neutral-800 dark:text-neutral-200">
         Welcome to Playportal
       </h2>
@@ -170,9 +174,37 @@ export default function SignupForm() {
               </FormItem>
             )}
           />
+
+          <FormField
+            control={form.control}
+            name="agreesToTerms"
+            render={({ field }) => (
+              <FormItem className="flex flex-col justify-center">
+                <FormLabel>
+                  I agree to{" "}
+                  <a className="underline" href={"/terms"} target="_blank">
+                    Playportal{"'"}s terms and conditions
+                  </a>
+                  <FormControl>
+                    <Checkbox
+                      className="relative top-[3.25px] ml-1.5"
+                      onCheckedChange={field.onChange}
+                      onBlur={field.onBlur}
+                      checked={field.value}
+                      disabled={field.disabled}
+                      ref={field.ref}
+                      name={field.name}
+                    />
+                  </FormControl>
+                </FormLabel>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <Button
             disabled={isSubmitting}
-            className={`group/btn relative block h-10 w-full rounded-md bg-gradient-to-br from-black to-neutral-600 font-medium text-white 
+            className={`group/btn relative mt-4 block h-10 w-full rounded-md bg-gradient-to-br from-black to-neutral-600 font-medium text-white 
                         shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:bg-zinc-800
                          dark:from-zinc-900 dark:to-zinc-900 dark:shadow-[0px_1px_0px_0px_var(--zinc-800)_inset,0px_-1px_0px_0px_var(--zinc-800)_inset]`}
             type="submit"

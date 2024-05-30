@@ -15,8 +15,7 @@ const navigation: {
   main: [
     { name: "Support", href: "/support" },
     { name: "Downloads", href: "/downloads" },
-    { name: "Sign In", href: "/sign-in" },
-    { name: "Sign Up", href: "/sign-up" },
+    { name: "Privacy Policy", href: "/terms" },
   ],
   social: [
     {

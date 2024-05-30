@@ -81,6 +81,15 @@ export default function LandingPageNavbar() {
                 Support
               </Link>
             </NavigationMenuLink>
+
+            <NavigationMenuLink asChild>
+              <Link
+                className="cursor-pointer text-[0.8rem] font-medium text-muted/80 hover:text-white"
+                href="/terms"
+              >
+                TOS
+              </Link>
+            </NavigationMenuLink>
           </NavigationMenuList>
         </NavigationMenu>
       </div>

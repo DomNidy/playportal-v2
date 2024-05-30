@@ -33,7 +33,7 @@ export default async function CreateVideoTopnav() {
       <div className="flex w-full max-w-[1018px] flex-col items-start mt-4 ">
         <h2 className="text-4xl font-bold tracking-tight">Create a Video</h2>
         <h3 className="text-xl font-semibold tracking-tight text-muted-foreground">
-          Throw in some audio & an image.
+          Throw in some audio and an image.
         </h3>
       </div>
     </div>
