@@ -12,6 +12,10 @@ export default function OperationDataPage({
 }) {
   const { operationId } = params;
 
+  // const supabase = createClient();
+
+  // const sub = supabase.realtime.channel("test").on("postgres_changes")
+
   const { isOperationDataLoading, videoTitle, logs, status, associatedFiles } =
     useOperationData(operationId);
 
