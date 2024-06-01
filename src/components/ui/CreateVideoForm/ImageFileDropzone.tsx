@@ -3,17 +3,20 @@ import { toast } from "../Toasts/use-toast";
 import { SupportedImageFileExtensions } from "~/definitions/form-schemas";
 import { getFileDropErrorMessage } from "./utils";
 import { Button } from "../Button";
+import Image from "next/image";
 
 export default function ImageFileDropzone({
   onDrop,
   onDropAccepted,
   allowedImageFileSizeBytes,
   imageFileName,
+  imageObjectURL,
 }: {
   onDrop: (files: File[]) => void;
   onDropAccepted: (files: File[]) => void;
   allowedImageFileSizeBytes: number;
   imageFileName?: string;
+  imageObjectURL: string | null;
 }) {
   const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDrop,
@@ -25,6 +28,7 @@ export default function ImageFileDropzone({
       "image/webp": [".webp"],
     },
     maxFiles: 1,
+
     maxSize: allowedImageFileSizeBytes,
     onDropRejected: (files) => {
       const error = getFileDropErrorMessage(
@@ -45,11 +49,27 @@ export default function ImageFileDropzone({
   return (
     <div
       {...getRootProps()}
-      className={`flex h-full w-full flex-col items-center justify-center rounded-lg border-[1.5px] border-dashed border-white border-opacity-15 bg-[#0C0B0C] p-4 ${isDragActive ? "bg-[#171618]" : ""}`}
+      className={`relative flex h-full w-full flex-col items-center justify-center rounded-lg border-[1.5px] border-dashed border-white border-opacity-15 bg-[#0C0B0C] p-4 ${isDragActive ? "bg-[#171618]" : ""}`}
     >
       <input {...getInputProps()} />
+
+      {/* {imageObjectURL && (
+        <Image
+          fill
+          className="blur-[2px] aspect-square"
+          src={imageObjectURL}
+          alt="Preview image"
+        />
+      )} */}
+
       {imageFileName ? (
-        imageFileName
+        <div className="flex flex-col items-center gap-4">
+          <p className="text-xl">Drag an image file here </p>
+          <p className="text-sm">or...</p>
+          <Button type="button" className="w-full" onClick={() => open()}>
+            Replace Image
+          </Button>
+        </div>
       ) : isDragActive ? (
         <p className="animate-fade-in text-xl">Drop the audio file here!</p>
       ) : (

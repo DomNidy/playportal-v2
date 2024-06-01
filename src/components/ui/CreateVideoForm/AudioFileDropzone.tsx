@@ -3,17 +3,20 @@ import { toast } from "../Toasts/use-toast";
 import { SupportedAudioFileExtensions } from "~/definitions/form-schemas";
 import { getFileDropErrorMessage } from "./utils";
 import { Button } from "../Button";
+import { useState } from "react";
 
 export default function AudioFileDropzone({
   onDrop,
   onDropAccepted,
   allowedAudioFileSizeBytes,
   audioFileName,
+  audioObjectURL,
 }: {
   onDrop: (files: File[]) => void;
   onDropAccepted: (files: File[]) => void;
   allowedAudioFileSizeBytes: number;
   audioFileName?: string;
+  audioObjectURL: string | null;
 }) {
   const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDrop,
@@ -48,17 +51,21 @@ export default function AudioFileDropzone({
       className={`flex h-full w-full flex-col items-center justify-center rounded-lg border-[1.5px] border-dashed border-white border-opacity-15 bg-[#0C0B0C] p-4 ${isDragActive ? "bg-[#171618]" : ""}`}
     >
       <input {...getInputProps()} />
-      {audioFileName ? (
-        audioFileName
-      ) : isDragActive ? (
+      {isDragActive ? (
         <p className="animate-fade-in text-xl">Drop the audio file here!</p>
       ) : (
         <div className="flex flex-col items-center gap-4">
           <p className="text-xl">Drag an audio file here </p>
           <p className="text-sm">or...</p>
           <Button type="button" className="w-full" onClick={() => open()}>
-            Browse files
+            {audioFileName ? "Replace audio" : "Browse files"}
           </Button>
+
+          {audioObjectURL && (
+            <audio src={audioObjectURL} controls>
+              Your audio
+            </audio>
+          )}
         </div>
       )}
     </div>

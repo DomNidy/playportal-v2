@@ -71,7 +71,7 @@ export default async function DownloadsPage() {
         <div className="mt-10 flex w-full flex-col gap-2 text-left">
           <h2 className="text-4xl font-bold">Free Kits</h2>
           <p className="max-w-[1000px] text-muted">
-            Here you can find some free kits for making beats. Each kit is
+            Here you can find free kits for making beats. Each kit is
             comprised of entirely original samples, synthesizer presets, and
             melodies created by Playportal.
           </p>
