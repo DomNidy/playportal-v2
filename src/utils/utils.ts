@@ -191,3 +191,23 @@ export function isFileExtensionInList(
     fileName.endsWith(extension.startsWith(".") ? extension : `.${extension}`),
   );
 }
+
+// Utility function which "promisifies" an xhr request
+export async function sendRequest(
+  xhr: XMLHttpRequest,
+  body: ArrayBuffer,
+): Promise<number> {
+  return new Promise((resolve, reject) => {
+    xhr.onload = () => {
+      if (xhr.status === 200) {
+        resolve(xhr.status);
+      }
+    };
+
+    xhr.onerror = () => {
+      reject(new Error("Error uploading file."));
+    };
+
+    xhr.send(body);
+  });
+}

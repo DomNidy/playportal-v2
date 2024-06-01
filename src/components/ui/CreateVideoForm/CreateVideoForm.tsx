@@ -20,7 +20,7 @@ import {
   YoutubeVideoVisibilities,
 } from "~/definitions/form-schemas";
 import { api } from "~/trpc/react";
-import { getFileExtension } from "~/utils/utils";
+import { getFileExtension, sendRequest } from "~/utils/utils";
 import { toast } from "../Toasts/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -68,10 +68,6 @@ export default function CreateVideoForm({
 
   //* We only ever set this to true and never reset it back to false since the user is supposed to be redirected
   const [isUploadingFiles, setIsUploadingFiles] = useState<boolean>(false);
-  //* Used to control which stage of the form is visible
-  const [formStage, setFormStage] = useState<
-    "UploadAudio" | "UploadImage" | "VideoOptions"
-  >("UploadAudio");
 
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -533,32 +529,41 @@ export default function CreateVideoForm({
           const presignedUrlAudio = data?.presignedUrlAudio;
           const presignedUrlImage = data?.presignedUrlImage;
 
+          // TODO: Move this request setup code into utility function
           if (presignedUrlAudio && audioFileBuffer) {
-            putRequests.push(
-              fetch(presignedUrlAudio, {
-                method: "PUT",
-                body: audioFileBuffer,
-                headers: {
-                  "Content-Type": audioFile.type,
-                },
-              }),
-            );
+            const xhr = new XMLHttpRequest();
+
+            xhr.open("PUT", presignedUrlAudio, true);
+            xhr.setRequestHeader("Content-Type", audioFile.type);
+            xhr.upload.onprogress = (ev) => {
+              if (ev.lengthComputable) {
+                const percentComplete = (ev.loaded / ev.total) * 100;
+                console.log(`%${percentComplete} audio upload`);
+              }
+            };
+
+            putRequests.push(sendRequest(xhr, audioFileBuffer));
           }
 
           if (presignedUrlImage && imageFileBuffer) {
-            putRequests.push(
-              fetch(presignedUrlImage, {
-                method: "PUT",
-                body: imageFileBuffer,
-              }),
-            );
+            const xhr = new XMLHttpRequest();
+
+            xhr.open("PUT", presignedUrlImage, true);
+            xhr.upload.onprogress = (ev) => {
+              if (ev.lengthComputable) {
+                const percentComplete = (ev.loaded / ev.total) * 100;
+                console.log(`%${percentComplete} image upload`);
+              }
+            };
+
+            putRequests.push(sendRequest(xhr, imageFileBuffer));
           }
 
           // After uploads are complete, redirect the user
           const responses = await Promise.all(putRequests);
 
           // IF any of the uploads failed, show an error
-          if (responses.some((response) => !response.ok)) {
+          if (responses.some((response) => response != 200)) {
             toast({
               title: "Error",
               description: "Failed to upload files",
