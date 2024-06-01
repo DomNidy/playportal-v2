@@ -44,6 +44,8 @@ import { Textarea } from "../Textarea/Textarea";
 import { revalidatePathByServerAction } from "~/utils/actions";
 import useMultistepForm from "~/hooks/use-multistep-form";
 import { AnimatePresence, motion } from "framer-motion";
+import { Label } from "../Label";
+import { Progress } from "../Progress";
 
 // Hardcoded at 8MB
 const MAX_IMAGE_SIZE = 8 * 1024 * 1024;
@@ -68,6 +70,12 @@ export default function CreateVideoForm({
 
   //* We only ever set this to true and never reset it back to false since the user is supposed to be redirected
   const [isUploadingFiles, setIsUploadingFiles] = useState<boolean>(false);
+  const [uploadAudioProgress, setUploadAudioProgress] = useState<number | null>(
+    null,
+  );
+  const [uploadImageProgress, setUploadImageProgress] = useState<number | null>(
+    null,
+  );
 
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -454,6 +462,23 @@ export default function CreateVideoForm({
           >
             Create video
           </Button>
+
+          {isUploadingFiles && (
+            <>
+              <div className="flex flex-col gap-4">
+                <p className="mt-2">Uploading files...</p>
+                <div className="flex flex-col gap-2">
+                  <Label>Image Upload</Label>
+                  <Progress value={uploadImageProgress} />
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <Label>Audio Upload</Label>
+                  <Progress value={uploadAudioProgress} />
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </>,
     ],
@@ -462,8 +487,6 @@ export default function CreateVideoForm({
 
   // Form submit handler
   async function onSubmit(data: z.infer<typeof CreateVideoFormSchema>) {
-    console.log("data", data);
-
     setIsUploadingFiles(true);
 
     if (!audioFile) {
@@ -538,6 +561,7 @@ export default function CreateVideoForm({
             xhr.upload.onprogress = (ev) => {
               if (ev.lengthComputable) {
                 const percentComplete = (ev.loaded / ev.total) * 100;
+                setUploadAudioProgress(percentComplete);
                 console.log(`%${percentComplete} audio upload`);
               }
             };
@@ -552,6 +576,7 @@ export default function CreateVideoForm({
             xhr.upload.onprogress = (ev) => {
               if (ev.lengthComputable) {
                 const percentComplete = (ev.loaded / ev.total) * 100;
+                setUploadImageProgress(percentComplete);
                 console.log(`%${percentComplete} image upload`);
               }
             };
@@ -670,8 +695,6 @@ export default function CreateVideoForm({
         </div>
 
         {multistep.currentStep}
-
-        {isUploadingFiles && <p className="mt-2">Uploading files...</p>}
       </form>
     </Form>
   );
