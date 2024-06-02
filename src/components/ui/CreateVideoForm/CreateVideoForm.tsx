@@ -1,6 +1,5 @@
 "use client";
-import { Controller, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { Controller } from "react-hook-form";
 import { type z } from "zod";
 import { Button } from "~/components/ui/Button";
 import {
@@ -13,7 +12,6 @@ import {
   FormMessage,
 } from "~/components/ui/Form";
 import { Input } from "~/components/ui/Input";
-import Image from "next/image";
 import React, { useCallback, useEffect, useState } from "react";
 import {
   CreateVideoFormSchema,
@@ -43,9 +41,10 @@ import MultiSelectFormField from "../MultiSelect/MultiSelect";
 import { Textarea } from "../Textarea/Textarea";
 import { revalidatePathByServerAction } from "~/utils/actions";
 import useMultistepForm from "~/hooks/use-multistep-form";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { Label } from "../Label";
 import { Progress } from "../Progress";
+import { useCreateVideoForm } from "./CreateVideoFormContext";
 
 // Hardcoded at 8MB
 const MAX_IMAGE_SIZE = 8 * 1024 * 1024;
@@ -61,21 +60,25 @@ export default function CreateVideoForm({
     posthog.capture("create_video_form_viewed");
   }, []);
 
-  const [audioFile, setAudioFile] = useState<File | null>(null);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-
-  // We use these object urls to store blob data relating to the files the user uploaded (image, audio)
-  const [imageObjectURL, setImageObjectURL] = useState<string | null>(null);
-  const [audioObjectURL, setAudioObjectURL] = useState<string | null>(null);
-
-  //* We only ever set this to true and never reset it back to false since the user is supposed to be redirected
-  const [isUploadingFiles, setIsUploadingFiles] = useState<boolean>(false);
-  const [uploadAudioProgress, setUploadAudioProgress] = useState<number | null>(
-    null,
-  );
-  const [uploadImageProgress, setUploadImageProgress] = useState<number | null>(
-    null,
-  );
+  const {
+    audioFile,
+    setAudioFile,
+    imageFile,
+    setImageFile,
+    audioObjectURL,
+    form,
+    imageObjectURL,
+    setImageObjectURL,
+    isUploadYoutubeVideoChecked,
+    setAudioObjectURL,
+    setIsUploadYoutubeVideoChecked,
+    setUploadAudioFileProgress,
+    setUploadImageFileProgress,
+    uploadAudioFileProgress,
+    uploadImageFileProgress,
+    isUploadingFiles,
+    setIsUploadingFiles,
+  } = useCreateVideoForm();
 
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -90,400 +93,427 @@ export default function CreateVideoForm({
     refetch: refetchYoutubeAccounts,
   } = useLinkedYoutubeAccounts();
 
-  const form = useForm({
-    resolver: zodResolver(CreateVideoFormSchema),
-    defaultValues: {
-      videoTitle: "My video",
-      audioFile: audioFile ?? "",
-      imageFile: imageFile ?? "",
-      videoPreset: "YouTube" as keyof typeof VideoPreset,
-    } as z.infer<typeof CreateVideoFormSchema>,
-  });
+  const validateAudioFileStep = useCallback(() => {
+    console.log("Validate audio ran");
+    return !!form.getValues("audioFile");
+  }, [form]);
 
-  // Is the upload video section toggled (with checkbox)
-  const [isUploadVideoChecked, setIsUploadVideoChecked] =
-    useState<boolean>(false);
+  const validateImageFileStep = useCallback(() => {
+    console.log("Validate image ran");
+    return !!form.getValues("imageFile");
+  }, [form]);
 
-  const multistep = useMultistepForm({
-    steps: [
-      <>
-        <FormField
-          name={"audioFile"}
-          control={form.control}
-          render={({ field }) => (
-            <motion.div
-              className="z-[47] h-full w-full"
-              initial={{ opacity: 0, x: "-20vw" }}
-              animate={{ opacity: 1, x: "0" }}
-              transition={{
-                type: "just",
-              }}
-              exit={{ opacity: 0 }}
-            >
-              <FormItem className="h-[600px]">
-                <AudioFileDropzone
-                  audioObjectURL={audioObjectURL}
-                  audioFileName={audioFile?.name}
-                  allowedAudioFileSizeBytes={fileSizeQuotaLimitBytes}
-                  onDrop={(acceptedFiles) => {
-                    field.onChange(acceptedFiles[0]);
-                    onAudioFileChange(acceptedFiles[0]);
-                  }}
-                  onDropAccepted={(audioFile) => {
-                    if (!audioFile[0]) return;
-                    const objectURL = URL.createObjectURL(audioFile[0]);
-                    setAudioObjectURL(objectURL);
-                    multistep.increment();
-                  }}
-                />
-                <FormDescription>
-                  The audio file to create the video with.
-                </FormDescription>
-                <FormMessage>
-                  {" "}
-                  {form.formState.errors?.audioFile?.message?.toString()}{" "}
-                </FormMessage>
-              </FormItem>
-            </motion.div>
-          )}
-        />
-      </>,
+  const validateFinalStep = useCallback(() => {
+    console.log("Validate final ran");
+    return true;
+  }, []);
 
-      <>
-        <FormField
-          name={"imageFile"}
-          control={form.control}
-          render={({ field }) => (
-            <motion.div
-              className="z-[47] h-full w-full"
-              initial={{ opacity: 0, x: "-20vw" }}
-              animate={{ opacity: 1, x: "0" }}
-              transition={{
-                type: "just",
-              }}
-              exit={{ opacity: 0 }}
-            >
-              <FormItem className="h-[600px]">
-                <ImageFileDropzone
-                  imageObjectURL={imageObjectURL}
-                  allowedImageFileSizeBytes={MAX_IMAGE_SIZE}
-                  imageFileName={imageFile?.name}
-                  onDrop={(acceptedFiles) => {
-                    field.onChange(acceptedFiles[0]);
-                    onImageFileChange(acceptedFiles[0]);
-                  }}
-                  onDropAccepted={(imageFile) => {
-                    const objectURL = URL.createObjectURL(imageFile[0]!);
-                    setImageObjectURL(objectURL);
-                    multistep.increment();
-                  }}
-                />
-                <FormDescription>
-                  Image to render the video with.
-                </FormDescription>
-                <FormMessage>
-                  {" "}
-                  {form.formState.errors?.imageFile?.message?.toString()}{" "}
-                </FormMessage>
-              </FormItem>
-            </motion.div>
-          )}
-        />
-      </>,
-
-      <>
-        <div className="z-[46] mb-8 w-full space-y-4 rounded-lg border-2 bg-black p-4">
-          <FormField
-            control={form.control}
-            name="videoTitle"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Video Title</FormLabel>
-                <FormControl>
-                  <Input placeholder="My video" {...field} />
-                </FormControl>
-                <FormDescription>
-                  Name of the video, this will not be the final title on
-                  youtube, it is just used for internal organization
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/** Preset selection */}
-          <div>
-            <FormLabel>Video preset</FormLabel>
-            <Select
-              defaultValue="YouTube"
-              onValueChange={(value) => {
-                // Check if the value is a valid preset
-                if (value in CreateVideoFormSchema.shape.videoPreset.enum) {
-                  form.setValue("videoPreset", value as VideoPreset);
-                }
-              }}
-            >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Video preset" />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.values(
-                  CreateVideoFormSchema.shape.videoPreset.enum,
-                ).map((preset) => (
-                  <SelectItem key={preset} value={preset}>
-                    {preset}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/** Upload video section */}
-          {/** For now we are just supporting youtube here, we will need to change how this form works to support more*/}
-          {uploadVideoFeature && (
-            <div className="flex flex-col space-y-4">
-              <div className="flex flex-row gap-4">
-                <FormLabel>Upload video to YouTube?</FormLabel>
-                <Checkbox
-                  onCheckedChange={() =>
-                    setIsUploadVideoChecked(!isUploadVideoChecked)
-                  }
-                />
-              </div>
-
-              {/** Select account to upload to */}
-
-              {isUploadVideoChecked && (
-                <>
-                  <div className="flex flex-col space-y-2">
-                    <FormLabel>Upload to this YouTube Channel</FormLabel>
-
-                    <div className="dark flex flex-row gap-2">
-                      <Controller
-                        control={form.control}
-                        shouldUnregister={true}
-                        defaultValue={undefined}
-                        name="uploadVideoOptions.youtube.uploadToChannels"
-                        render={({ field }) => (
-                          <>
-                            <MultiSelectFormField
-                              isDataLoading={isLoadingYoutubeAccounts}
-                              loadingPlaceholder={
-                                <p className="text-center text-white">
-                                  Loading...
-                                </p>
-                              }
-                              onValueChange={field.onChange}
-                              options={
-                                connectedYoutubeAccounts?.map(
-                                  (youtubeAccount) => ({
-                                    label: youtubeAccount.channelTitle,
-                                    value: youtubeAccount.channelId,
-                                    icon: () => (
-                                      <Avatar className="mr-2 h-[16px] w-[16px] ">
-                                        <AvatarImage
-                                          src={
-                                            youtubeAccount.channelAvatar ?? ""
-                                          }
-                                          alt="Youtube channel thumbnail"
-                                          width={16}
-                                          height={16}
-                                          className="rounded-full"
-                                        />
-                                        <AvatarFallback>
-                                          {youtubeAccount.channelTitle}
-                                        </AvatarFallback>
-                                      </Avatar>
-                                    ),
-                                  }),
-                                ) ?? []
-                              }
-                              defaultValue={field.value}
-                              placeholder="Select a channel"
-                            />
-                          </>
-                        )}
-                      />
-
-                      <Button
-                        className="w-fit"
-                        type="button"
-                        disabled={isFetchingYoutubeAccounts}
-                        onClick={() => {
-                          void refetchYoutubeAccounts();
+  const { currentStep, decrement, increment, index, hasNext } =
+    useMultistepForm({
+      steps: [
+        {
+          reactNode: (
+            <>
+              <FormField
+                name={"audioFile"}
+                control={form.control}
+                render={({ field }) => (
+                  <motion.div
+                    className="z-[47] h-full w-full"
+                    initial={{ opacity: 0, x: "-20vw" }}
+                    animate={{ opacity: 1, x: "0" }}
+                    transition={{
+                      type: "just",
+                    }}
+                    exit={{ opacity: 0 }}
+                  >
+                    <FormItem className="h-[600px]">
+                      <AudioFileDropzone
+                        audioObjectURL={audioObjectURL}
+                        audioFileName={audioFile?.name}
+                        allowedAudioFileSizeBytes={fileSizeQuotaLimitBytes}
+                        onDrop={(acceptedFiles) => {
+                          field.onChange(acceptedFiles[0]);
+                          onAudioFileChange(acceptedFiles[0]);
                         }}
-                      >
-                        Refresh linked accounts
-                      </Button>
+                        onDropAccepted={(audioFile) => {
+                          if (!audioFile[0]) return;
+                          const objectURL = URL.createObjectURL(audioFile[0]);
+                          setAudioObjectURL(objectURL);
+                          increment();
+                        }}
+                      />
+                      <FormDescription>
+                        The audio file to create the video with.
+                      </FormDescription>
+                      <FormMessage>
+                        {" "}
+                        {form.formState?.errors?.audioFile?.message?.toString()}{" "}
+                      </FormMessage>
+                    </FormItem>
+                  </motion.div>
+                )}
+              />
+            </>
+          ),
+          validateStep: validateAudioFileStep,
+        },
+
+        {
+          reactNode: (
+            <>
+              <FormField
+                name={"imageFile"}
+                control={form.control}
+                render={({ field }) => (
+                  <motion.div
+                    className="z-[47] h-full w-full"
+                    initial={{ opacity: 0, x: "-20vw" }}
+                    animate={{ opacity: 1, x: "0" }}
+                    transition={{
+                      type: "just",
+                    }}
+                    exit={{ opacity: 0 }}
+                  >
+                    <FormItem className="h-[600px]">
+                      <ImageFileDropzone
+                        imageObjectURL={imageObjectURL}
+                        allowedImageFileSizeBytes={MAX_IMAGE_SIZE}
+                        imageFileName={imageFile?.name}
+                        onDrop={(acceptedFiles) => {
+                          field.onChange(acceptedFiles[0]);
+                          onImageFileChange(acceptedFiles[0]);
+                        }}
+                        onDropAccepted={(imageFile) => {
+                          const objectURL = URL.createObjectURL(imageFile[0]!);
+                          setImageObjectURL(objectURL);
+                          increment();
+                        }}
+                      />
+                      <FormDescription>
+                        Image to render the video with.
+                      </FormDescription>
+                      <FormMessage>
+                        {" "}
+                        {form.formState.errors?.imageFile?.message?.toString()}{" "}
+                      </FormMessage>
+                    </FormItem>
+                  </motion.div>
+                )}
+              />
+            </>
+          ),
+          validateStep: validateImageFileStep,
+        },
+
+        {
+          reactNode: (
+            <>
+              <div className="z-[46] mb-8 w-full space-y-4 rounded-lg border-2 bg-black p-4">
+                <FormField
+                  control={form.control}
+                  name="videoTitle"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Video Title</FormLabel>
+                      <FormControl>
+                        <Input placeholder="My video" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        Name of the video, this will not be the final title on
+                        youtube, it is just used for internal organization
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/** Preset selection */}
+                <div>
+                  <FormLabel>Video preset</FormLabel>
+                  <Select
+                    defaultValue="YouTube"
+                    onValueChange={(value) => {
+                      // Check if the value is a valid preset
+                      if (
+                        value in CreateVideoFormSchema.shape.videoPreset.enum
+                      ) {
+                        form.setValue("videoPreset", value as VideoPreset);
+                      }
+                    }}
+                  >
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Video preset" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.values(
+                        CreateVideoFormSchema.shape.videoPreset.enum,
+                      ).map((preset) => (
+                        <SelectItem key={preset} value={preset}>
+                          {preset}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/** Upload video section */}
+                {/** For now we are just supporting youtube here, we will need to change how this form works to support more*/}
+                {uploadVideoFeature && (
+                  <div className="flex flex-col space-y-4">
+                    <div className="flex flex-row gap-4">
+                      <FormLabel>Upload video to YouTube?</FormLabel>
+                      <Checkbox
+                        onCheckedChange={() =>
+                          setIsUploadYoutubeVideoChecked(
+                            !isUploadYoutubeVideoChecked,
+                          )
+                        }
+                      />
                     </div>
 
-                    <FormMessage>
-                      {" "}
-                      {form?.formState?.errors?.uploadVideoOptions?.youtube?.uploadToChannels?.message?.toString()}{" "}
-                    </FormMessage>
+                    {/** Select account to upload to */}
+
+                    {isUploadYoutubeVideoChecked && (
+                      <>
+                        <div className="flex flex-col space-y-2">
+                          <FormLabel>Upload to this YouTube Channel</FormLabel>
+
+                          <div className="dark flex flex-row gap-2">
+                            <Controller
+                              control={form.control}
+                              shouldUnregister={true}
+                              defaultValue={undefined}
+                              name="uploadVideoOptions.youtube.uploadToChannels"
+                              render={({ field }) => (
+                                <>
+                                  <MultiSelectFormField
+                                    isDataLoading={isLoadingYoutubeAccounts}
+                                    loadingPlaceholder={
+                                      <p className="text-center text-white">
+                                        Loading...
+                                      </p>
+                                    }
+                                    onValueChange={field.onChange}
+                                    options={
+                                      connectedYoutubeAccounts?.map(
+                                        (youtubeAccount) => ({
+                                          label: youtubeAccount.channelTitle,
+                                          value: youtubeAccount.channelId,
+                                          icon: () => (
+                                            <Avatar className="mr-2 h-[16px] w-[16px] ">
+                                              <AvatarImage
+                                                src={
+                                                  youtubeAccount.channelAvatar ??
+                                                  ""
+                                                }
+                                                alt="Youtube channel thumbnail"
+                                                width={16}
+                                                height={16}
+                                                className="rounded-full"
+                                              />
+                                              <AvatarFallback>
+                                                {youtubeAccount.channelTitle}
+                                              </AvatarFallback>
+                                            </Avatar>
+                                          ),
+                                        }),
+                                      ) ?? []
+                                    }
+                                    defaultValue={field.value}
+                                    placeholder="Select a channel"
+                                  />
+                                </>
+                              )}
+                            />
+
+                            <Button
+                              className="w-fit"
+                              type="button"
+                              disabled={isFetchingYoutubeAccounts}
+                              onClick={() => {
+                                void refetchYoutubeAccounts();
+                              }}
+                            >
+                              Refresh linked accounts
+                            </Button>
+                          </div>
+
+                          <FormMessage>
+                            {" "}
+                            {form?.formState?.errors?.uploadVideoOptions?.youtube?.uploadToChannels?.message?.toString()}{" "}
+                          </FormMessage>
+                        </div>
+
+                        <FormField
+                          control={form.control}
+                          defaultValue=""
+                          shouldUnregister={true}
+                          name="uploadVideoOptions.youtube.videoTitle"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>YouTube Video Title</FormLabel>
+                              <FormControl>
+                                <Input placeholder="My video" {...field} />
+                              </FormControl>
+                              <FormDescription>
+                                The title of the video on YouTube
+                              </FormDescription>
+                              <FormMessage>
+                                {form.formState.errors?.uploadVideoOptions?.youtube?.videoTitle?.message?.toString()}
+                              </FormMessage>
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          shouldUnregister={true}
+                          defaultValue=""
+                          name="uploadVideoOptions.youtube.videoDescription"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>YouTube Video Description</FormLabel>
+                              <FormControl>
+                                <Textarea
+                                  maxLength={5000}
+                                  placeholder="My video description"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormDescription>
+                                The description of the video on YouTube
+                              </FormDescription>
+                              <FormMessage>
+                                {form.formState.errors?.uploadVideoOptions?.youtube?.videoDescription?.message?.toString()}
+                              </FormMessage>
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          shouldUnregister={true}
+                          name="uploadVideoOptions.youtube.videoTags"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>YouTube Video Tags</FormLabel>
+                              <FormControl>
+                                <TagsInput
+                                  controllerRenderProps={{
+                                    name: field.name,
+                                    ref: field.ref,
+                                    onBlur: field.onBlur,
+                                    onChange: field.onChange,
+                                    disabled: field.disabled,
+                                    // We don't need to set the value here since the TagsInput component will handle that
+                                    value: null,
+                                  }}
+                                  onKeywordsChange={(keywords) => {
+                                    field.onChange(keywords);
+                                  }}
+                                />
+                              </FormControl>
+                              <FormDescription>
+                                Comma separated list of tags for the video on
+                                YouTube
+                              </FormDescription>
+                              <FormMessage>
+                                {form.formState.errors?.uploadVideoOptions?.youtube?.videoTags?.message?.toString()}
+                              </FormMessage>
+                            </FormItem>
+                          )}
+                        />
+
+                        <Controller
+                          control={form.control}
+                          shouldUnregister={true}
+                          name="uploadVideoOptions.youtube.videoVisibility"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Video Visibility</FormLabel>
+                              <Select
+                                value={field.value}
+                                onValueChange={(value) => {
+                                  field.onChange(value);
+                                }}
+                              >
+                                <SelectTrigger
+                                  className="w-[180px]"
+                                  ref={field.ref}
+                                  onBlur={field.onBlur}
+                                >
+                                  <SelectValue placeholder="Video visibility" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {Object.values(YoutubeVideoVisibilities).map(
+                                    (visibility) => (
+                                      <SelectItem
+                                        key={visibility}
+                                        value={visibility}
+                                      >
+                                        {visibility}
+                                      </SelectItem>
+                                    ),
+                                  )}
+                                </SelectContent>
+                              </Select>
+
+                              <FormDescription>
+                                The visibility of the video on YouTube, you can
+                                change this on YouTube later
+                              </FormDescription>
+
+                              <FormMessage>
+                                {form.formState.errors?.uploadVideoOptions?.youtube?.videoVisibility?.message?.toString()}
+                              </FormMessage>
+                            </FormItem>
+                          )}
+                        />
+                      </>
+                    )}
                   </div>
+                )}
 
-                  <FormField
-                    control={form.control}
-                    defaultValue=""
-                    shouldUnregister={true}
-                    name="uploadVideoOptions.youtube.videoTitle"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>YouTube Video Title</FormLabel>
-                        <FormControl>
-                          <Input placeholder="My video" {...field} />
-                        </FormControl>
-                        <FormDescription>
-                          The title of the video on YouTube
-                        </FormDescription>
-                        <FormMessage>
-                          {form.formState.errors?.uploadVideoOptions?.youtube?.videoTitle?.message?.toString()}
-                        </FormMessage>
-                      </FormItem>
-                    )}
-                  />
+                {/* We are setting isUploading files here due to async nature of the disabled state, kinda hacky*/}
+                <Button
+                  tabIndex={1}
+                  type="submit"
+                  className="mb-4 text-black"
+                  disabled={
+                    isUploadingFiles ||
+                    genUploadURL.isPending ||
+                    form.formState.isSubmitting
+                  }
+                >
+                  Create video
+                </Button>
 
-                  <FormField
-                    control={form.control}
-                    shouldUnregister={true}
-                    defaultValue=""
-                    name="uploadVideoOptions.youtube.videoDescription"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>YouTube Video Description</FormLabel>
-                        <FormControl>
-                          <Textarea
-                            maxLength={5000}
-                            placeholder="My video description"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormDescription>
-                          The description of the video on YouTube
-                        </FormDescription>
-                        <FormMessage>
-                          {form.formState.errors?.uploadVideoOptions?.youtube?.videoDescription?.message?.toString()}
-                        </FormMessage>
-                      </FormItem>
-                    )}
-                  />
+                {isUploadingFiles && (
+                  <>
+                    <div className="flex flex-col gap-4">
+                      <p className="mt-2">Uploading files...</p>
+                      <div className="flex flex-col gap-2">
+                        <Label>Image Upload</Label>
+                        <Progress value={uploadImageFileProgress} />
+                      </div>
 
-                  <FormField
-                    control={form.control}
-                    shouldUnregister={true}
-                    name="uploadVideoOptions.youtube.videoTags"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>YouTube Video Tags</FormLabel>
-                        <FormControl>
-                          <TagsInput
-                            controllerRenderProps={{
-                              name: field.name,
-                              ref: field.ref,
-                              onBlur: field.onBlur,
-                              onChange: field.onChange,
-                              disabled: field.disabled,
-                              // We don't need to set the value here since the TagsInput component will handle that
-                              value: null,
-                            }}
-                            onKeywordsChange={(keywords) => {
-                              field.onChange(keywords);
-                            }}
-                          />
-                        </FormControl>
-                        <FormDescription>
-                          Comma separated list of tags for the video on YouTube
-                        </FormDescription>
-                        <FormMessage>
-                          {form.formState.errors?.uploadVideoOptions?.youtube?.videoTags?.message?.toString()}
-                        </FormMessage>
-                      </FormItem>
-                    )}
-                  />
-
-                  <Controller
-                    control={form.control}
-                    shouldUnregister={true}
-                    name="uploadVideoOptions.youtube.videoVisibility"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Video Visibility</FormLabel>
-                        <Select
-                          value={field.value}
-                          onValueChange={(value) => {
-                            field.onChange(value);
-                          }}
-                        >
-                          <SelectTrigger
-                            className="w-[180px]"
-                            ref={field.ref}
-                            onBlur={field.onBlur}
-                          >
-                            <SelectValue placeholder="Video visibility" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {Object.values(YoutubeVideoVisibilities).map(
-                              (visibility) => (
-                                <SelectItem key={visibility} value={visibility}>
-                                  {visibility}
-                                </SelectItem>
-                              ),
-                            )}
-                          </SelectContent>
-                        </Select>
-
-                        <FormDescription>
-                          The visibility of the video on YouTube, you can change
-                          this on YouTube later
-                        </FormDescription>
-
-                        <FormMessage>
-                          {form.formState.errors?.uploadVideoOptions?.youtube?.videoVisibility?.message?.toString()}
-                        </FormMessage>
-                      </FormItem>
-                    )}
-                  />
-                </>
-              )}
-            </div>
-          )}
-
-          {/* We are setting isUploading files here due to async nature of the disabled state, kinda hacky*/}
-          <Button
-            tabIndex={1}
-            type="submit"
-            className="mb-4 text-black"
-            disabled={
-              isUploadingFiles ||
-              genUploadURL.isPending ||
-              form.formState.isSubmitting
-            }
-          >
-            Create video
-          </Button>
-
-          {isUploadingFiles && (
-            <>
-              <div className="flex flex-col gap-4">
-                <p className="mt-2">Uploading files...</p>
-                <div className="flex flex-col gap-2">
-                  <Label>Image Upload</Label>
-                  <Progress value={uploadImageProgress} />
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <Label>Audio Upload</Label>
-                  <Progress value={uploadAudioProgress} />
-                </div>
+                      <div className="flex flex-col gap-2">
+                        <Label>Audio Upload</Label>
+                        <Progress value={uploadAudioFileProgress} />
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             </>
-          )}
-        </div>
-      </>,
-    ],
-    returnToUrlOnFormExit: "/dashboard",
-  });
+          ),
+          // Since this is the final step, we don't need to validate it as react hook form will do this
+          validateStep: validateFinalStep,
+        },
+      ],
+      returnToUrlOnFormExit: "/dashboard",
+    });
 
   // Form submit handler
   async function onSubmit(data: z.infer<typeof CreateVideoFormSchema>) {
@@ -561,7 +591,7 @@ export default function CreateVideoForm({
             xhr.upload.onprogress = (ev) => {
               if (ev.lengthComputable) {
                 const percentComplete = (ev.loaded / ev.total) * 100;
-                setUploadAudioProgress(percentComplete);
+                setUploadAudioFileProgress(percentComplete);
                 console.log(`%${percentComplete} audio upload`);
               }
             };
@@ -576,7 +606,7 @@ export default function CreateVideoForm({
             xhr.upload.onprogress = (ev) => {
               if (ev.lengthComputable) {
                 const percentComplete = (ev.loaded / ev.total) * 100;
-                setUploadImageProgress(percentComplete);
+                setUploadImageFileProgress(percentComplete);
                 console.log(`%${percentComplete} image upload`);
               }
             };
@@ -628,7 +658,7 @@ export default function CreateVideoForm({
 
       setAudioFile(file);
     },
-    [fileSizeQuotaLimitBytes, form],
+    [fileSizeQuotaLimitBytes, form, setAudioFile],
   );
 
   const onImageFileChange = useCallback(
@@ -652,8 +682,34 @@ export default function CreateVideoForm({
       }
       setImageFile(file);
     },
-    [fileSizeQuotaLimitBytes, form],
+    [fileSizeQuotaLimitBytes, form, setImageFile],
   );
+
+  const [currentStepValid, setCurrentStepValid] = useState(false);
+
+  useEffect(() => {
+    console.log("RE-render");
+    // Trugger the validation here (when each step changes)
+    if (currentStep?.validateStep) {
+      setCurrentStepValid(currentStep.validateStep());
+    }
+
+    const subscription = form.watch((vals) => {
+      console.log(vals, "watched");
+      if (currentStep?.validateStep) {
+        // TODO: It doesn't seem like our currentStep validate step function is returning false when it should be
+        // It runs, but it doesn't seem to be returning the correct value, pretty much just true all the time
+        const currentStepValid = currentStep?.validateStep();
+
+        console.log("Valid", currentStepValid);
+        setCurrentStepValid(currentStepValid);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [currentStep, form, form.watch, index]);
 
   return (
     <Form {...form}>
@@ -667,7 +723,7 @@ export default function CreateVideoForm({
 
             // Only include the upload video options if the user has checked the box
             videoPreset: data.videoPreset,
-            ...(isUploadVideoChecked
+            ...(isUploadYoutubeVideoChecked
               ? { uploadVideoOptions: data.uploadVideoOptions }
               : {}),
           };
@@ -678,7 +734,7 @@ export default function CreateVideoForm({
         })}
       >
         <div className="z-[50] mb-2 mt-10 flex w-full justify-between">
-          <Button type="button" onClick={() => multistep.decrement()}>
+          <Button type="button" onClick={() => decrement()}>
             Back
           </Button>
 
@@ -687,14 +743,14 @@ export default function CreateVideoForm({
           {/* Be disabled unless the current step has been correctly filled out */}
           <Button
             type="button"
-            disabled={!multistep.hasNext}
-            onClick={() => multistep.increment()}
+            disabled={!currentStepValid || !hasNext}
+            onClick={() => increment()}
           >
             Next
           </Button>
         </div>
 
-        {multistep.currentStep}
+        {currentStep?.reactNode ?? <></>}
       </form>
     </Form>
   );

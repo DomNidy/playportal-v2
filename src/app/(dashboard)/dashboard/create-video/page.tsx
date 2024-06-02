@@ -1,4 +1,5 @@
 import CreateVideoForm from "~/components/ui/CreateVideoForm/CreateVideoForm";
+import { CreateVideoFormProvider } from "~/components/ui/CreateVideoForm/CreateVideoFormContext";
 import CreateVideoTopnav from "~/components/ui/CreateVideoForm/CreateVideoTopnav";
 import PricingSection from "~/components/ui/LandingPage/PricingSection";
 import { createClient } from "~/utils/supabase/server";
@@ -41,18 +42,20 @@ export default async function CreateVideoPage() {
 
   return (
     <>
-      <CreateVideoTopnav />
-      <div className="w-full max-w-[1050px]">
-        <div className="mt-10" />
-        <CreateVideoForm
-          fileSizeQuotaLimitBytes={
-            quotaLimits?.file_size_limit_mb
-              ? quotaLimits?.file_size_limit_mb * 1024 * 1024
-              : 0
-          }
-          uploadVideoFeature={uploadVideoFeature}
-        />
-      </div>
+      <CreateVideoFormProvider>
+        <CreateVideoTopnav />
+        <div className="w-full max-w-[1050px]">
+          <div className="mt-10" />
+          <CreateVideoForm
+            fileSizeQuotaLimitBytes={
+              quotaLimits?.file_size_limit_mb
+                ? quotaLimits?.file_size_limit_mb * 1024 * 1024
+                : 0
+            }
+            uploadVideoFeature={uploadVideoFeature}
+          />
+        </div>
+      </CreateVideoFormProvider>
     </>
   );
 }
