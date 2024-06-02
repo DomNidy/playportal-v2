@@ -38,7 +38,6 @@ export default async function AccountPage() {
     .from("user_products")
     .select("*")
     .eq("user_id", user?.id ?? "")
-    .in("sub_status", ["active", "trialing"])
     .limit(1)
     .maybeSingle();
 

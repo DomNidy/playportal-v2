@@ -161,11 +161,17 @@ export async function signUp(
     },
   });
 
-  console.log("Sign up response", error, email);
+  console.log("Sign up response", error, email, password, data);
 
   if (error) {
+    console.error(error);
+
     return redirect(
-      getErrorRedirect("/sign-up", "Failed sign-up", error.message),
+      getErrorRedirect(
+        "/sign-up",
+        "Failed sign-up",
+        "An error occured while trying to sign up. Please try again later.",
+      ),
     );
   } else if (data.session) {
     return redirect(
