@@ -62,7 +62,6 @@ export default function PrivacyPolicyPage() {
     <div className="flex  flex-col items-center leading-7">
       <div className="landing-bg-gradient pointer-events-none absolute top-0 h-[2450px] w-full " />
 
-
       <div className="mt-10 flex max-w-[650px] flex-col items-center space-y-12 px-[18px] py-10">
         <div className="text-left" id="privacy-policy">
           <h2 className="mb-4 text-4xl font-bold">Privacy Policy</h2>
@@ -144,7 +143,9 @@ export default function PrivacyPolicyPage() {
               <strong>Service Providers:</strong> We may share your information
               with third-party vendors, service providers, contractors, or
               agents who perform services for us or on our behalf and require
-              access to such information to do that work.
+              access to such information to do that work. We will never
+              deliberately sell your information or otherwise use it for
+              purposes other than providing and improving our service.
             </li>
           </ul>
 
@@ -249,10 +250,14 @@ export default function PrivacyPolicyPage() {
           <p>
             We will retain your information for as long as your account is
             active or as needed to provide you services. You may request to
-            delete your account or specific data by contacting us. For
-            instructions on how users can revoke our access to their data via
-            the Google security settings page, visit{" "}
-            <Link href={"https://security.google.com/settings"}>
+            delete your account or specific data by contacting us at{" "}
+            <strong>support@playportal.app</strong>. For instructions on how
+            users can revoke our access to their data via the Google security
+            settings page, visit{" "}
+            <Link
+              href={"https://security.google.com/settings"}
+              className="underline"
+            >
               Google Security Settings.
             </Link>
           </p>

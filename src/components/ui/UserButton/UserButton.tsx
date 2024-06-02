@@ -98,7 +98,6 @@ export default function UserButton({
         {/** For subscribed users, we'll show them this as the options they can upgrade to */}
 
         <Dialog
-          modal={true}
           onOpenChange={(state) => {
             setSubDialogOpen(state);
 
