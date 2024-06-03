@@ -120,12 +120,13 @@ export default function CreateVideoForm({
                 render={({ field }) => (
                   <motion.div
                     className="z-[47] h-full w-full"
-                    initial={{ opacity: 0, x: "-20vw" }}
+                    initial={{ opacity: 0, x: "-12vw" }}
                     animate={{ opacity: 1, x: "0" }}
                     transition={{
                       type: "just",
                     }}
                     exit={{ opacity: 0 }}
+                    key="1"
                   >
                     <FormItem className="h-[600px]">
                       <AudioFileDropzone
@@ -168,12 +169,13 @@ export default function CreateVideoForm({
                 render={({ field }) => (
                   <motion.div
                     className="z-[47] h-full w-full"
-                    initial={{ opacity: 0, x: "-20vw" }}
+                    initial={{ opacity: 0, x: "-12vw" }}
                     animate={{ opacity: 1, x: "0" }}
                     transition={{
                       type: "just",
                     }}
                     exit={{ opacity: 0 }}
+                    key="2"
                   >
                     <FormItem className="h-[600px]">
                       <ImageFileDropzone
@@ -214,22 +216,42 @@ export default function CreateVideoForm({
                   control={form.control}
                   name="videoTitle"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Video Title</FormLabel>
-                      <FormControl>
-                        <Input placeholder="My video" {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        Name of the video, this will not be the final title on
-                        youtube, it is just used for internal organization
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
+                    <motion.div
+                      className="z-[47] h-full w-full"
+                      initial={{ opacity: 0, x: "-8vw" }}
+                      animate={{ opacity: 1, x: "0" }}
+                      transition={{
+                        type: "just",
+                      }}
+                      exit={{ opacity: 0 }}
+                      key="3"
+                    >
+                      <FormItem>
+                        <FormLabel>Video Title</FormLabel>
+                        <FormControl>
+                          <Input placeholder="My video" {...field} />
+                        </FormControl>
+                        <FormDescription>
+                          Name of the video, this will not be the final title on
+                          youtube, it is just used for internal organization
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    </motion.div>
                   )}
                 />
 
                 {/** Preset selection */}
-                <div>
+                <motion.div
+                  className="z-[47] h-full w-full"
+                  initial={{ opacity: 0, x: "-8vw" }}
+                  animate={{ opacity: 1, x: "0" }}
+                  transition={{
+                    type: "just",
+                  }}
+                  exit={{ opacity: 0 }}
+                  key="4"
+                >
                   <FormLabel>Video preset</FormLabel>
                   <Select
                     defaultValue="YouTube"
@@ -255,12 +277,21 @@ export default function CreateVideoForm({
                       ))}
                     </SelectContent>
                   </Select>
-                </div>
+                </motion.div>
 
                 {/** Upload video section */}
                 {/** For now we are just supporting youtube here, we will need to change how this form works to support more*/}
                 {uploadVideoFeature && (
-                  <div className="flex flex-col space-y-4">
+                  <motion.div
+                    className="flex flex-col space-y-4"
+                    initial={{ opacity: 0, x: "-6vw" }}
+                    animate={{ opacity: 1, x: "0" }}
+                    transition={{
+                      type: "just",
+                    }}
+                    exit={{ opacity: 0 }}
+                    key="5"
+                  >
                     <div className="flex flex-row gap-4">
                       <FormLabel>Upload video to YouTube?</FormLabel>
                       <Checkbox
@@ -472,7 +503,7 @@ export default function CreateVideoForm({
                         />
                       </>
                     )}
-                  </div>
+                  </motion.div>
                 )}
 
                 {/* We are setting isUploading files here due to async nature of the disabled state, kinda hacky*/}
