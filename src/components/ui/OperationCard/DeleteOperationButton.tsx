@@ -59,7 +59,7 @@ export function DeleteOperationButton({
 
       toast({
         title: "Success",
-        description: "Operation deleted successfully.",
+        description: "Video deleted successfully.",
         variant: "default",
       });
     },

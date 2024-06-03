@@ -79,15 +79,15 @@ export default function OperationCardDropdown({
       </DropdownMenu>
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent className="bg-colors-background-950">
-          <AlertDialogHeader>
+        <AlertDialogContent className="flex flex-col  bg-colors-background-950">
+          <AlertDialogHeader className="text-left">
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
               This action cannot be undone. This will delete all files
               associated with this video on the Playportal servers.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="ml-auto">
+          <AlertDialogFooter className="ml-auto flex-row items-end gap-2 ">
             <AlertDialogCancel className="hover:text-white">
               Cancel
             </AlertDialogCancel>
