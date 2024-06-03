@@ -1,6 +1,7 @@
 import { type VariantProps, cva } from "class-variance-authority";
 import type { OperationLog } from "./OperationLogDisplay";
-import { cn } from "~/utils/utils";
+import { cn, convertOperationLogToMSG } from "~/utils/utils";
+import { Database } from "types_db";
 
 const operationLogVariants = cva("text-medium", {
   variants: {
@@ -33,14 +34,22 @@ export interface OperationLogMessageProps
   operationLog: OperationLog;
 }
 
+// TODO: We want to know the upload target accounts in props here (when applicable) so we can use the convertOperationLogToMSG function to display the correct message
+// TODO: Also want to style the message based on the log type returned by convertOperationLogToMSG
 export function OperationLogMessage({
   operationLog,
   variant,
   className,
 }: OperationLogMessageProps) {
+  const msg = operationLog.message
+    ? convertOperationLogToMSG(
+        operationLog?.message as Database["public"]["Enums"]["operation_logs_enum"],
+      )
+    : { message: "" };
+
   return (
     <p className={cn(operationLogVariants({ variant, className }))}>
-      {operationLog.message}
+      {msg.message}
     </p>
   );
 }

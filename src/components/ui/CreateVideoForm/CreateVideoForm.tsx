@@ -719,7 +719,6 @@ export default function CreateVideoForm({
   const [currentStepValid, setCurrentStepValid] = useState(false);
 
   useEffect(() => {
-    console.log("RE-render");
     // Trugger the validation here (when each step changes)
     if (currentStep?.validateStep) {
       setCurrentStepValid(currentStep.validateStep());
@@ -732,7 +731,6 @@ export default function CreateVideoForm({
         // It runs, but it doesn't seem to be returning the correct value, pretty much just true all the time
         const currentStepValid = currentStep?.validateStep();
 
-        console.log("Valid", currentStepValid);
         setCurrentStepValid(currentStepValid);
       }
     });

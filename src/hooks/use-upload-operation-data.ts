@@ -14,7 +14,7 @@ export type UploadOperationsData = {
 
 // Contains metadata about the account this video is to be uploaded to
 // For example, things like youtube channel id, channel title, avatar url
-type UploadTargetAccount = {
+export type UploadTargetAccount = {
   avatarUrl?: string | null;
   name?: string | null;
   // The service account id

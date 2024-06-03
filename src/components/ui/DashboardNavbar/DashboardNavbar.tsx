@@ -5,7 +5,6 @@ import { createClient } from "~/utils/supabase/server";
 import { Link } from "../Link";
 import PlayportalIcon from "../../../../public/playportal.svg";
 import Image from "next/image";
-import { headers } from "next/headers";
 
 export type DashNavLink = {
   href: string;
@@ -20,8 +19,6 @@ export default async function DashboardNavbar({
   user: User | null;
 }) {
   const supabase = createClient();
-  const reqHeaders = headers();
-  console.log("Re-render", reqHeaders.get("x-current-path"));
 
   // Fetch user data
   const { data: userData, error: fetchUserDataError } = await supabase
