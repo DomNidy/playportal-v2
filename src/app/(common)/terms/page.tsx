@@ -157,6 +157,22 @@ export default function PrivacyPolicyPage() {
               or a portion of our business to another company.
             </li>
           </ul>
+
+          <ul className="list-disc space-y-2 px-4">
+            <li>
+              <strong>Relating to information obtained from Google APIs</strong>
+              : Playportal
+              {"'s"} use and transfer of information received from Google APIs
+              to any other app will adhere to{" "}
+              <Link
+                className="underline"
+                href="https://developers.google.com/terms/api-services-user-data-policy#additional_requirements_for_specific_api_scopes"
+              >
+                Google API Services User Data Policy
+              </Link>{" "}
+              including the Limited Use requirements.
+            </li>
+          </ul>
         </div>
 
         <div className="w-full space-y-4 text-left" id="youtube-api">
