@@ -7,8 +7,8 @@ import {
 } from "@supabase/supabase-js";
 import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
 import { type Database } from "types_db";
+import { type OperationStatus } from "~/definitions/db-type-aliases";
 import { createClient } from "~/utils/supabase/client";
-import { type OperationStatus } from "./use-operation-data";
 
 type OperationLog = Database["public"]["Tables"]["operation_logs"]["Row"];
 type Operation = Database["public"]["Tables"]["operations"]["Row"];
@@ -19,7 +19,7 @@ export type UseOperationChannelProps = {
   // Callback executed when a new operation log is created
   setOperationLogs: Dispatch<SetStateAction<OperationLog[]>>;
   // Callback executed when operation record is updated
-  setOperationStatus: Dispatch<SetStateAction<OperationStatus>>;
+  setOperationStatus: Dispatch<SetStateAction<OperationStatus | null>>;
 };
 
 export function useOperationChannel({ ...props }: UseOperationChannelProps) {
