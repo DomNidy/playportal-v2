@@ -1,14 +1,15 @@
 import { type VariantProps, cva } from "class-variance-authority";
 import type { OperationLog } from "./OperationLogDisplay";
 import { cn, convertOperationLogToMSG } from "~/utils/utils";
-import { Database } from "types_db";
+import { type OperationLogCode } from "~/definitions/db-type-aliases";
+import { CheckCircle } from "lucide-react";
 
 const operationLogVariants = cva("text-medium", {
   variants: {
     variant: {
-      default: "bg-primary text-black hover:bg-primary/90 ",
-      destructive:
-        "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+      default: "text-muted-foreground",
+      destructive: "text-destructive-foreground hover:bg-destructive/90",
+      success: "text-green-500",
       outline:
         "border border-input bg-background hover:bg-accent hover:text-foreground",
       secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
@@ -38,18 +39,33 @@ export interface OperationLogMessageProps
 // TODO: Also want to style the message based on the log type returned by convertOperationLogToMSG
 export function OperationLogMessage({
   operationLog,
-  variant,
   className,
 }: OperationLogMessageProps) {
   const msg = operationLog.message
-    ? convertOperationLogToMSG(
-        operationLog?.message as Database["public"]["Enums"]["operation_logs_enum"],
-      )
-    : { message: "" };
+    ? convertOperationLogToMSG(operationLog?.message as OperationLogCode)
+    : undefined;
+
+  let logVariant: "destructive" | "success" | "default" | undefined;
+
+  if (!msg) {
+    return <></>;
+  }
+
+  switch (msg.type) {
+    case "error":
+      logVariant = "destructive";
+      break;
+    case "success":
+      logVariant = "success";
+      break;
+    default:
+      logVariant = "default";
+  }
 
   return (
-    <p className={cn(operationLogVariants({ variant, className }))}>
-      {msg.message}
+    <p className={cn(operationLogVariants({ variant: logVariant, className }))}>
+      {msg.type === "success" ? <CheckCircle className="mr-2 inline w-[16px] h-[16px]" /> : null}
+      {msg.message}{" "}
     </p>
   );
 }

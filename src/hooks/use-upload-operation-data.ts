@@ -1,10 +1,11 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
-import type { Json, Database } from "types_db";
+import type { Json } from "types_db";
+import type {
+  UploadPlatforms,
+  UploadStatus,
+} from "~/definitions/db-type-aliases";
 import { createClient } from "~/utils/supabase/client";
-
-type UploadPlatforms = Database["public"]["Enums"]["upload_platform"];
-type UploadStatus = Database["public"]["Enums"]["upload_video_status"];
 
 export type UploadOperationsData = {
   // Whether or not we are fetching our initial data (only true when we first fetch)

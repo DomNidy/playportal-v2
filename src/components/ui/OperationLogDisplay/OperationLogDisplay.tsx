@@ -3,6 +3,7 @@
 import { type Database } from "types_db";
 import { OperationLogMessage } from "./OperationLogMessage";
 import { Card, CardContent, CardHeader, CardTitle } from "../Card/Card";
+import { type OperationStatus } from "~/definitions/db-type-aliases";
 
 export type OperationLog =
   Database["public"]["Tables"]["operation_logs"]["Row"];
@@ -13,12 +14,12 @@ export default function OperationLogDisplay({
   operationLogs,
 }: {
   operationLogs: OperationLog[];
-  operationStatus: Database["public"]["Enums"]["operation_status"];
+  operationStatus: OperationStatus;
   videoTitle: string;
 }) {
   return (
     <Card className="dark">
-      <CardHeader>
+      <CardHeader className="p-4 pb-0">
         <CardTitle>
           {operationStatus === "Ongoing"
             ? "Creating your video"
@@ -28,7 +29,7 @@ export default function OperationLogDisplay({
         </CardTitle>
       </CardHeader>
 
-      <CardContent>
+      <CardContent className="mt-0 p-4">
         {operationLogs.map((operationLog) => (
           <OperationLogMessage
             key={operationLog.id}

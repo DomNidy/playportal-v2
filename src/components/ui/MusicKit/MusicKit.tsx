@@ -3,8 +3,8 @@ import { getURL } from "~/utils/utils";
 import { Link } from "~/components/ui/Link";
 import MusicKitDownloadButton from "./MusicKitDownloadButton";
 import { getBlurData } from "~/utils/blur-data-generator";
-import { Database } from "types_db";
 import { Badge } from "../Badge";
+import type { KitType } from "~/definitions/db-type-aliases";
 
 export type KitData = {
   title: string;
@@ -12,12 +12,10 @@ export type KitData = {
   downloadURL: string;
   imageSrc?: string | null;
   variant?: "default" | "large";
-  type: Database["public"]["Enums"]["kit_type"];
+  type: KitType;
 };
 
-function getBadgeColorFromKitType(
-  kitType: Database["public"]["Enums"]["kit_type"],
-): {
+function getBadgeColorFromKitType(kitType: KitType): {
   badgeColor: string;
   badgeHoverColor: string;
 } {

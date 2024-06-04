@@ -2,11 +2,10 @@ import { useEffect, useState } from "react";
 import { type Database } from "types_db";
 import { createClient } from "~/utils/supabase/client";
 import { useOperationChannel } from "./use-operation-channel";
+import { type OperationStatus } from "~/definitions/db-type-aliases";
 
 // We are allowing for null here, we init this state as null while data is loading
-export type OperationStatus =
-  | Database["public"]["Enums"]["operation_status"]
-  | null;
+
 export type OperationLog =
   Database["public"]["Tables"]["operation_logs"]["Row"];
 export type Operation = Database["public"]["Tables"]["operations"]["Row"];
@@ -36,7 +35,8 @@ export default function useOperationData(operationId: string | null): {
     useState<boolean>(true);
 
   // We will initialize our operation status as null
-  const [operationStatus, setOperationStatus] = useState<OperationStatus>(null);
+  const [operationStatus, setOperationStatus] =
+    useState<OperationStatus | null>(null);
   const [logs, setLogs] = useState<OperationLog[]>([]);
 
   // Subscribe to a realtime channel & listen for updates on this operations logs & status
@@ -50,7 +50,6 @@ export default function useOperationData(operationId: string | null): {
 
   // When operation status is changed to completed, unsub
   useEffect(() => {
-    console.log("Re8");
     if (operationStatus === "Completed") {
       void realtimeChannel.unsubscribeChannel();
     }

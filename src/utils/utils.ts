@@ -3,7 +3,11 @@ import { twMerge } from "tailwind-merge";
 import { env } from "~/env";
 import { type createClient } from "./supabase/server";
 import { type Database } from "types_db";
-import { UploadTargetAccount } from "~/hooks/use-upload-operation-data";
+import type { UploadTargetAccount } from "~/hooks/use-upload-operation-data";
+import type {
+  FeatureFlag,
+  OperationLogCode,
+} from "~/definitions/db-type-aliases";
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -153,7 +157,7 @@ export function toIsoStringOrNull(timestamp: number | null) {
 // Pass this a supabase server client, it works on the server side
 export async function getFeatureFlag(
   supabase: ReturnType<typeof createClient>,
-  feature: Database["public"]["Enums"]["feature"],
+  feature: FeatureFlag,
   userId: string,
 ) {
   const { data: featureFlag } = await supabase
@@ -218,8 +222,6 @@ type OperationLogMessage = {
   type: "info" | "error" | "success";
 };
 
-type OperationLogCode = Database["public"]["Enums"]["operation_logs_enum"];
-
 /**
  * When provided with a log code, returns the associated message to show to the user
  * @param {any} logCode:OperationLogCode - The log code to convert to a message
@@ -229,7 +231,7 @@ type OperationLogCode = Database["public"]["Enums"]["operation_logs_enum"];
 export function convertOperationLogToMSG(
   logCode: OperationLogCode,
   uploadTargetAccount?: UploadTargetAccount & { platform: string },
-): OperationLogMessage {
+): OperationLogMessage | undefined {
   switch (logCode) {
     case "cv_unexpected_error":
       return {
@@ -348,4 +350,6 @@ export function convertOperationLogToMSG(
         type: "error",
       };
   }
+
+  return undefined;
 }
