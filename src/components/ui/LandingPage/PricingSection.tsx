@@ -47,7 +47,7 @@ export default async function PricingSection({
 
   return (
     <div
-      className={`${displayMode === "landing" ? "mt-[400px] md:mt-[440px] lg:mt-[600px]" : ""} flex max-w-[800px] flex-col items-center`}
+      className={`${displayMode === "landing" ? "mt-[470px] md:mt-[480px] lg:mt-[600px]" : ""} flex max-w-[800px] flex-col items-center`}
     >
       <h2 className="text-center text-3xl font-semibold tracking-tighter text-white md:text-4xl">
         Our Plans

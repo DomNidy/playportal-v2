@@ -57,83 +57,94 @@ export default function Home() {
         />
       </ContainerScroll>
 
-      <div className="flex flex-col items-center gap-3 lg:w-[900px]">
-        <h2 className="max-w-[400px] text-center text-3xl font-semibold tracking-tighter text-white md:max-w-[600px] md:text-4xl">
-          Focus on the music only, Create SEO{" "}
-          <span className="text-ptl_accent-def">optimized</span> videos in
-          seconds
-          <Image
-            src={clockIcon}
-            alt="clock icon"
-            className="mb-1 ml-2 inline"
+      <div className="space-y-20 px-4">
+        <div className="flex flex-col items-center gap-3 lg:w-[900px]">
+          <h2 className="max-w-[400px] text-center text-3xl font-semibold tracking-tighter text-white md:max-w-[600px] md:text-4xl">
+            Focus on the music only, Create SEO{" "}
+            <span className="text-ptl_accent-def">optimized</span> videos in
+            seconds
+            <Image
+              src={clockIcon}
+              alt="clock icon"
+              className="mb-1 ml-2 inline"
+            />
+          </h2>
+
+          <p className="mt-6 text-left leading-7 text-[#F3F3F3] sm:w-2/3 lg:text-justify">
+            Creating videos for music can be a time-consuming process, and as
+            music producers, it{"'"}s not always where we want to focus our
+            efforts. Platforms like YouTube and TikTok are incredibly powerful
+            for marketing beats online, so we often feel compelled to post
+            content on them. However, this additional overhead can lead to
+            burnout, taking away from our true passion- creating music.
+          </p>
+        </div>
+
+        <div id="features" />
+        <div className="flex flex-col items-center gap-3 lg:w-[900px]">
+          <h2 className=" text-center text-3xl font-semibold tracking-tighter text-white md:text-4xl">
+            What can <span className="text-ptl_accent-def">Playportal</span>{" "}
+            offer you?
+          </h2>
+
+          <Tabs
+            containerClassName="mt-6"
+            activeTabClassName="text-black "
+            contentClassName="flex flex-col items-center"
+            tabs={[
+              {
+                title: "Create Videos",
+                value: "videos",
+                content: (
+                  <div className="flex max-w-[600px] flex-col items-center">
+                    <h2 className="mb-2 self-start text-xl font-semibold">
+                      Create Videos
+                    </h2>
+                    <p className="text-left leading-7 text-[#F3F3F3] lg:text-justify ">
+                      Drag and drop your audio, an image, and we{"'"}ll render
+                      them into a high quality video in seconds.
+                    </p>
+                    <Image
+                      src={dashboardPreview}
+                      alt="Create video preview"
+                      className="mt-2"
+                      quality={100}
+                    />
+                  </div>
+                ),
+              },
+              {
+                title: "Video Presets",
+                value: "videoPresets",
+                content: (
+                  <div className="flex max-w-[600px] flex-col items-center">
+                    <h2 className="mb-2 self-start text-xl font-semibold">
+                      Video Presets
+                    </h2>
+                    <p className="text-left leading-7 text-[#F3F3F3] lg:text-justify ">
+                      Want to upload content to Platforms such as TikTok with
+                      the correct aspect ratio? We have presets which create the
+                      video with the optimal aspect ratio for short-form video
+                      content. Post your music anywhere!
+                    </p>
+                    <Image
+                      src={dashboardPresetPreview}
+                      alt="Video preset preview"
+                      className="mt-2"
+                      quality={100}
+                    />
+                  </div>
+                ),
+              },
+            ]}
           />
-        </h2>
-
-        <p className="mt-8 px-8 text-left leading-7 text-[#F3F3F3] sm:w-2/3 sm:px-0 lg:text-justify">
-          Creating videos for music can be a time-consuming process, and as
-          music producers, it{"'"}s not always where we want to focus our
-          efforts. Platforms like YouTube and TikTok are incredibly powerful for
-          marketing beats online, so we often feel compelled to post content on
-          them. However, this additional overhead can lead to burnout, taking
-          away from our true passion- creating music.
-        </p>
+        </div>
       </div>
 
-      <div id="features" />
-      <div className="mt-44 flex flex-col items-center gap-3 lg:w-[900px]">
-        <h2 className="w-2/3 text-center text-3xl font-semibold tracking-tighter text-white md:text-4xl">
-          What can <span className="text-ptl_accent-def">Playportal</span> offer
-          you?
-        </h2>
-
-        <Tabs
-          containerClassName="mt-8"
-          activeTabClassName="text-black"
-          tabs={[
-            {
-              title: "Create Videos",
-              value: "videos",
-              content: (
-                <div className="flex flex-col items-center">
-                  <p className="max-w-[600px] text-center leading-7 text-[#F3F3F3] lg:text-justify">
-                    Upload an audio file & image file, click a button, and your
-                    editing process is done!
-                  </p>
-                  <Image
-                    src={dashboardPreview}
-                    alt=""
-                    className="w-[600px] lg:w-[700px] "
-                  />
-                </div>
-              ),
-            },
-            {
-              title: "Video Presets",
-              value: "videoPresets",
-              content: (
-                <div className="flex flex-col items-center">
-                  <p className="max-w-[600px] text-center leading-7 text-[#F3F3F3] lg:text-justify ">
-                    Want to upload content to Platforms such as TikTok with the
-                    correct aspect ratio? We have presets which create the video
-                    with the optimal aspect ratio for short-form video content.
-                  </p>
-                  <Image
-                    src={dashboardPresetPreview}
-                    alt=""
-                    className="w-[600px] lg:w-[700px] "
-                    quality={100}
-                  />
-                </div>
-              ),
-            },
-          ]}
-        />
-      </div>
-
-      <div className="relative w-full flex flex-col items-center">
+      <div className="relative px-4 flex w-full flex-col items-center">
         <div id="pricing" />
         <PricingSection displayMode="landing" />
-        <div className="footer-bg-gradient absolute bottom-0 z-50 h-[1000px] w-full pointer-events-none"></div>
+        <div className="footer-bg-gradient pointer-events-none absolute bottom-0 z-50 h-[1000px] w-full"></div>
         <div className=" mt-[5vh] h-[5vh] w-full"></div>
         <Footer />
       </div>

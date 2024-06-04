@@ -81,7 +81,7 @@ export const Card = ({
         rotateX: rotate,
         scale,
       }}
-      className="mx-auto h-[22rem] w-full max-w-5xl p-2 md:h-[40rem] md:p-6 "
+      className="mx-auto h-[21rem] w-full max-w-5xl p-2 md:h-[40rem] md:p-6 "
     >
       {children}
     </motion.div>
