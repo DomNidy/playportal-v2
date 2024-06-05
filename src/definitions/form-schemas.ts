@@ -39,7 +39,7 @@ export const CreateVideoFormSchema = z.object({
       return isFileExtensionInList(file.name, SupportedAudioFileExtensions);
     },
     {
-      message: "Audio file must be a .mp3 or .wav file",
+      message: "Audio file must be a .mp3, .wav, or .ogg file",
     },
   ),
   imageFile: z
@@ -54,11 +54,87 @@ export const CreateVideoFormSchema = z.object({
         return isFileExtensionInList(filePath, SupportedImageFileExtensions);
       },
       {
-        message: "Must be a file with a valid image extension",
+        message: "Image file must be a .png, .jpg, .jpeg, or .webp file",
       },
     )
     .optional()
     .nullish(),
+  videoPreset: z.nativeEnum(VideoPreset),
+  uploadVideoOptions: z
+    .object({
+      youtube: z
+        .object({
+          videoTitle: z
+            .string()
+            .min(1)
+            .max(100, "Title must be at most 100 characters long"),
+          videoDescription: z
+            .string()
+            .max(5000, "Description may be no longer than 5000 characters.")
+            .optional(),
+          videoTags: z
+            .array(z.string())
+            .refine((tags) => {
+              console.log(tags.join("").length);
+              return tags.join("").length <= 500;
+            }, "Tags must be at most 500 characters long.")
+            .optional(),
+          // An array of the channel ids that the video should be uploaded to
+          // We will use this as a mapping to the oauth tokens in the db
+          uploadToChannels: z
+            .array(z.string(), {
+              message: "Please select at least one channel to upload to.",
+            })
+            .min(1, {
+              message: "Please select at least one channel to upload to.",
+            }),
+          videoVisibility: z.nativeEnum(YoutubeVideoVisibilities, {
+            message: "Please select a visibility setting for the video.",
+          }),
+        })
+        .optional(),
+    })
+    .optional(),
+});
+
+// Schema for the first step in the create video form
+export const CreateVideoFormUploadAudioSchema = z.object({
+  audioFile: z.any().refine(
+    (file: File) => {
+      if (!file) {
+        return false;
+      }
+      return isFileExtensionInList(file.name, SupportedAudioFileExtensions);
+    },
+    {
+      message: "Audio file must be a .mp3, .wav, or .ogg file",
+    },
+  ),
+});
+
+// Schema for the second step in the create video form
+export const CreateVideoFormUploadImageSchema = z.object({
+  imageFile: z.any().refine(
+    (file: File) => {
+      const filePath = file?.name;
+      if (!filePath) {
+        return false;
+      }
+
+      return isFileExtensionInList(filePath, SupportedImageFileExtensions);
+    },
+    {
+      message: "Image file must be a .png, .jpg, .jpeg, or .webp file",
+    },
+  ),
+});
+
+// Schema for the third step in the create video form
+export const CreateVideoFormUploadOptionsSchema = z.object({
+  videoTitle: z
+    .string()
+    .min(1, "Title must be at least 1 character long")
+    .max(100, "Title must be at most 100 characters long"),
   videoPreset: z.nativeEnum(VideoPreset),
   uploadVideoOptions: z
     .object({

@@ -1,10 +1,11 @@
 "use client";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useState, createContext, useContext, useEffect } from "react";
-import { type UseFormReturn, useForm } from "react-hook-form";
+import { useState, createContext, useContext } from "react";
 import { type z } from "zod";
-import { type VideoPreset } from "~/definitions/api-schemas";
-import { CreateVideoFormSchema } from "~/definitions/form-schemas";
+import type {
+  CreateVideoFormUploadAudioSchema,
+  CreateVideoFormUploadImageSchema,
+  CreateVideoFormUploadOptionsSchema,
+} from "~/definitions/form-schemas";
 
 export type CreateVideoFormCTX = {
   audioFile: File | null;
@@ -31,7 +32,25 @@ export type CreateVideoFormCTX = {
   isUploadingFiles: boolean;
   setIsUploadingFiles: (isUploading: boolean) => void;
 
-  form: UseFormReturn<z.infer<typeof CreateVideoFormSchema>>;
+  // Stores the state of the upload audio form step
+  uploadAudioFormStep: z.infer<typeof CreateVideoFormUploadAudioSchema> | null;
+  setUploadAudioFormStep: (
+    step: z.infer<typeof CreateVideoFormUploadAudioSchema> | null,
+  ) => void;
+
+  // Stores the state of the upload image form step
+  uploadImageFormStep: z.infer<typeof CreateVideoFormUploadImageSchema> | null;
+  setUploadImageFormStep: (
+    step: z.infer<typeof CreateVideoFormUploadImageSchema> | null,
+  ) => void;
+
+  // Stores the state of the upload video options form step
+  uploadVideoOptionsFormStep: z.infer<
+    typeof CreateVideoFormUploadOptionsSchema
+  > | null;
+  setUploadVideoOptionsFormStep: (
+    step: z.infer<typeof CreateVideoFormUploadOptionsSchema> | null,
+  ) => void;
 };
 
 const CreateVideoFormContext = createContext<CreateVideoFormCTX | undefined>(
@@ -60,19 +79,28 @@ export function CreateVideoFormProvider({
   const [isUploadYoutubeVideoChecked, setIsUploadYoutubeVideoChecked] =
     useState<boolean>(false);
 
-  const form = useForm({
-    resolver: zodResolver(CreateVideoFormSchema),
-    defaultValues: {
-      videoTitle: "My video",
-      audioFile: audioFile ?? "",
-      imageFile: imageFile ?? "",
-      videoPreset: "YouTube" as keyof typeof VideoPreset,
-    } as z.infer<typeof CreateVideoFormSchema>,
-  });
+  // Form step states:
+
+  const [uploadAudioFormStep, setUploadAudioFormStep] = useState<z.infer<
+    typeof CreateVideoFormUploadAudioSchema
+  > | null>(null);
+
+  const [uploadImageFormStep, setUploadImageFormStep] = useState<z.infer<
+    typeof CreateVideoFormUploadImageSchema
+  > | null>(null);
+
+  const [uploadVideoOptionsFormStep, setUploadVideoOptionsFormStep] =
+    useState<z.infer<typeof CreateVideoFormUploadOptionsSchema> | null>(null);
 
   return (
     <CreateVideoFormContext.Provider
       value={{
+        uploadVideoOptionsFormStep,
+        setUploadVideoOptionsFormStep,
+        uploadImageFormStep,
+        setUploadImageFormStep,
+        uploadAudioFormStep,
+        setUploadAudioFormStep,
         audioFile,
         setAudioFile,
         setImageObjectURL,
@@ -89,7 +117,6 @@ export function CreateVideoFormProvider({
         setUploadImageFileProgress,
         isUploadingFiles,
         setIsUploadingFiles,
-        form,
       }}
     >
       {children}

@@ -44,7 +44,7 @@ export default async function PricingSection({
     (product) =>
       product.product_id == env.NEXT_PUBLIC_STRIPE_PRODUCT_ID_PRO_PLAN,
   );
-
+  
   return (
     <div
       className={`${displayMode === "landing" ? "mt-[470px] md:mt-[480px] lg:mt-[600px]" : ""} flex max-w-[800px] flex-col items-center`}
