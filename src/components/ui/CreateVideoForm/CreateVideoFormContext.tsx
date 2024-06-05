@@ -6,6 +6,12 @@ import type {
   CreateVideoFormUploadImageSchema,
   CreateVideoFormUploadOptionsSchema,
 } from "~/definitions/form-schemas";
+import { api } from "~/trpc/react";
+import { toast } from "../Toasts/use-toast";
+import { useQueryClient } from "@tanstack/react-query";
+import { revalidatePathByServerAction } from "~/utils/actions";
+import { sendRequest } from "~/utils/utils";
+import { useRouter } from "next/navigation";
 
 export type CreateVideoFormCTX = {
   audioFile: File | null;
@@ -51,6 +57,10 @@ export type CreateVideoFormCTX = {
   setUploadVideoOptionsFormStep: (
     step: z.infer<typeof CreateVideoFormUploadOptionsSchema> | null,
   ) => void;
+
+  genUploadURLMutation: ReturnType<
+    typeof api.upload.generateUploadURL.useMutation
+  >;
 };
 
 const CreateVideoFormContext = createContext<CreateVideoFormCTX | undefined>(
@@ -62,6 +72,9 @@ export function CreateVideoFormProvider({
 }: {
   children: React.ReactNode;
 }) {
+  const queryClient = useQueryClient();
+
+  const router = useRouter();
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [audioObjectURL, setAudioObjectURL] = useState<string | null>(null);
@@ -92,9 +105,110 @@ export function CreateVideoFormProvider({
   const [uploadVideoOptionsFormStep, setUploadVideoOptionsFormStep] =
     useState<z.infer<typeof CreateVideoFormUploadOptionsSchema> | null>(null);
 
+  // Query used to generate presigned urls for file uploaad
+  const genUploadURL = api.upload.generateUploadURL.useMutation({
+    onError(error) {
+      setIsUploadingFiles(false);
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+
+    onSettled: () => {
+      void queryClient.invalidateQueries({
+        queryKey: ["userData"],
+      });
+
+      // Remove the recent operations query so that the new operation is shown
+      // We do this because there is an edge case where the first operation created by a user
+      // will result in the dummy operation card showing for a few moments before the new data is fetched
+      void queryClient.removeQueries({
+        queryKey: ["recentOperations"],
+      });
+
+      void queryClient.invalidateQueries({
+        queryKey: ["transactions", "getTransaction"],
+      });
+    },
+
+    async onSuccess(data) {
+      if (!audioFile) {
+        toast({
+          title: "Error",
+          description: "No audio file was entered.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Read file data into buffer
+      const audioFileBuffer = await audioFile.arrayBuffer();
+      const imageFileBuffer = await imageFile?.arrayBuffer();
+      // Array of the upload requests
+      const putRequests = [];
+
+      // Read urls from the response
+      const presignedUrlAudio = data?.presignedUrlAudio;
+      const presignedUrlImage = data?.presignedUrlImage;
+
+      // TODO: Move this request setup code into utility function
+      if (presignedUrlAudio && audioFileBuffer) {
+        const xhr = new XMLHttpRequest();
+
+        xhr.open("PUT", presignedUrlAudio, true);
+        xhr.setRequestHeader("Content-Type", audioFile.type);
+        xhr.upload.onprogress = (ev) => {
+          if (ev.lengthComputable) {
+            const percentComplete = (ev.loaded / ev.total) * 100;
+            setUploadAudioFileProgress(percentComplete);
+            console.log(`%${percentComplete} audio upload`);
+          }
+        };
+
+        putRequests.push(sendRequest(xhr, audioFileBuffer));
+      }
+
+      if (presignedUrlImage && imageFileBuffer) {
+        const xhr = new XMLHttpRequest();
+
+        xhr.open("PUT", presignedUrlImage, true);
+        xhr.upload.onprogress = (ev) => {
+          if (ev.lengthComputable) {
+            const percentComplete = (ev.loaded / ev.total) * 100;
+            setUploadImageFileProgress(percentComplete);
+            console.log(`%${percentComplete} image upload`);
+          }
+        };
+
+        putRequests.push(sendRequest(xhr, imageFileBuffer));
+      }
+
+      // After uploads are complete, redirect the user
+      const responses = await Promise.all(putRequests);
+
+      // IF any of the uploads failed, show an error
+      if (responses.some((response) => response != 200)) {
+        toast({
+          title: "Error",
+          description: "Failed to upload files",
+          variant: "destructive",
+        });
+        setIsUploadingFiles(false);
+        return;
+      } else {
+        // Don't set isUploadingFiles to false as it will cause the button to be enabled again (and we're about to redirect the user anyway)
+        await revalidatePathByServerAction("/dashboard/account");
+        router.push(`/dashboard/operation/${data?.operationId}`);
+      }
+    },
+  });
+
   return (
     <CreateVideoFormContext.Provider
       value={{
+        genUploadURLMutation: genUploadURL,
         uploadVideoOptionsFormStep,
         setUploadVideoOptionsFormStep,
         uploadImageFormStep,

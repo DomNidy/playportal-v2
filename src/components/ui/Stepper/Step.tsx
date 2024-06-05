@@ -57,6 +57,8 @@ const Step = React.forwardRef<HTMLLIElement, StepProps>(
       onClickStep,
     };
 
+    // TODO: This likely causes the state to be dropped when we resize the window
+    // TODO: Solution: Infer the state from context?
     const renderStep = () => {
       switch (isVertical) {
         case true:

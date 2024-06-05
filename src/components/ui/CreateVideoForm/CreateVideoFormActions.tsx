@@ -1,6 +1,7 @@
 import React from "react";
 import { useStepper } from "../Stepper";
 import { Button } from "../Button";
+import { useCreateVideoForm } from "./CreateVideoFormContext";
 
 export default function CreateVideoFormActions() {
   const {
@@ -11,6 +12,8 @@ export default function CreateVideoFormActions() {
     isLastStep,
   } = useStepper();
 
+  const { isUploadingFiles } = useCreateVideoForm();
+
   return (
     <div className="dark z-[50] mt-2 flex w-full justify-end gap-2">
       {hasCompletedAllSteps ? (
@@ -20,7 +23,7 @@ export default function CreateVideoFormActions() {
       ) : (
         <>
           <Button
-            disabled={isDisabledStep}
+            disabled={isDisabledStep || isUploadingFiles}
             onClick={prevStep}
             size="sm"
             variant="secondary"

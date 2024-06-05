@@ -11,38 +11,25 @@ import { type z } from "zod";
 import { Button } from "../../Button";
 import CreateVideoFormActions from "../CreateVideoFormActions";
 import { toast } from "../../Toasts/use-toast";
-import { api } from "~/trpc/react";
-import { getFileExtension, sendRequest } from "~/utils/utils";
-import { useQueryClient } from "@tanstack/react-query";
-import { revalidatePathByServerAction } from "~/utils/actions";
-import { useRouter } from "next/navigation";
+import { getFileExtension } from "~/utils/utils";
 import { Label } from "../../Label";
 import { Progress } from "../../Progress";
 import LoaderStatus from "../../LoaderStatus/LoaderStatus";
 import { CirclePlay } from "lucide-react";
 
 export default function CreateVideoFormSubmitStep() {
-  const router = useRouter();
-
   const {
     uploadAudioFormStep,
     uploadImageFormStep,
     uploadVideoOptionsFormStep,
     audioFile,
+    isUploadingFiles,
+    setIsUploadingFiles,
+    uploadAudioFileProgress,
+    uploadImageFileProgress,
     imageFile,
+    genUploadURLMutation,
   } = useCreateVideoForm();
-
-  const queryClient = useQueryClient();
-
-  // Query used to generate presigned urls for file uploaad
-  const genUploadURL = api.upload.generateUploadURL.useMutation();
-
-  // These states are used to show the progress of the file uploads
-  const [isUploadingFiles, setIsUploadingFiles] = React.useState(false);
-  const [uploadAudioFileProgress, setUploadAudioFileProgress] =
-    React.useState(0);
-  const [uploadImageFileProgress, setUploadImageFileProgress] =
-    React.useState(0);
 
   // Used to store errors with submitting if any occur
   const [submitError, setSubmitError] = React.useState<string | null>(null);
@@ -82,7 +69,7 @@ export default function CreateVideoFormSubmitStep() {
     if (!audioFile) {
       toast({
         title: "Error",
-        description: "No audio file was entered.",
+        description: "Could not find audio file to upload, please try again.",
         variant: "destructive",
       });
       return;
@@ -94,106 +81,17 @@ export default function CreateVideoFormSubmitStep() {
       : null;
 
     // Send request to api to generate a presigned-url so that we can upload the files
-    genUploadURL.mutate(
-      {
-        videoTitle: data.videoTitle,
-        audioFileContentType: audioFile.type,
-        audioFileExtension: audioFileExtension,
-        audioFileSize: audioFile.size,
-        imageFileContentType: imageFile?.type,
-        imageFileExtension: imageFileExtension,
-        imageFileSize: imageFile?.size,
-        videoPreset: data.videoPreset,
-        uploadVideoOptions: data.uploadVideoOptions,
-      },
-      {
-        onError(error) {
-          setIsUploadingFiles(false);
-          toast({
-            title: "Error",
-            description: error.message,
-            variant: "destructive",
-          });
-        },
-        onSettled: () => {
-          void queryClient.invalidateQueries({
-            queryKey: ["userData"],
-          });
-
-          // Remove the recent operations query so that the new operation is shown
-          // We do this because there is an edge case where the first operation created by a user
-          // will result in the dummy operation card showing for a few moments before the new data is fetched
-          void queryClient.removeQueries({
-            queryKey: ["recentOperations"],
-          });
-
-          void queryClient.invalidateQueries({
-            queryKey: ["transactions", "getTransaction"],
-          });
-        },
-        async onSuccess(data) {
-          // Read file data into buffer
-          const audioFileBuffer = await audioFile.arrayBuffer();
-          const imageFileBuffer = await imageFile?.arrayBuffer();
-          // Array of the upload requests
-          const putRequests = [];
-
-          // Read urls from the response
-          const presignedUrlAudio = data?.presignedUrlAudio;
-          const presignedUrlImage = data?.presignedUrlImage;
-
-          // TODO: Move this request setup code into utility function
-          if (presignedUrlAudio && audioFileBuffer) {
-            const xhr = new XMLHttpRequest();
-
-            xhr.open("PUT", presignedUrlAudio, true);
-            xhr.setRequestHeader("Content-Type", audioFile.type);
-            xhr.upload.onprogress = (ev) => {
-              if (ev.lengthComputable) {
-                const percentComplete = (ev.loaded / ev.total) * 100;
-                setUploadAudioFileProgress(percentComplete);
-                console.log(`%${percentComplete} audio upload`);
-              }
-            };
-
-            putRequests.push(sendRequest(xhr, audioFileBuffer));
-          }
-
-          if (presignedUrlImage && imageFileBuffer) {
-            const xhr = new XMLHttpRequest();
-
-            xhr.open("PUT", presignedUrlImage, true);
-            xhr.upload.onprogress = (ev) => {
-              if (ev.lengthComputable) {
-                const percentComplete = (ev.loaded / ev.total) * 100;
-                setUploadImageFileProgress(percentComplete);
-                console.log(`%${percentComplete} image upload`);
-              }
-            };
-
-            putRequests.push(sendRequest(xhr, imageFileBuffer));
-          }
-
-          // After uploads are complete, redirect the user
-          const responses = await Promise.all(putRequests);
-
-          // IF any of the uploads failed, show an error
-          if (responses.some((response) => response != 200)) {
-            toast({
-              title: "Error",
-              description: "Failed to upload files",
-              variant: "destructive",
-            });
-            setIsUploadingFiles(false);
-            return;
-          } else {
-            // Don't set isUploadingFiles to false as it will cause the button to be enabled again (and we're about to redirect the user anyway)
-            await revalidatePathByServerAction("/dashboard/account");
-            router.push(`/dashboard/operation/${data?.operationId}`);
-          }
-        },
-      },
-    );
+    genUploadURLMutation.mutate({
+      videoTitle: data.videoTitle,
+      audioFileContentType: audioFile.type,
+      audioFileExtension: audioFileExtension,
+      audioFileSize: audioFile.size,
+      imageFileContentType: imageFile?.type,
+      imageFileExtension: imageFileExtension,
+      imageFileSize: imageFile?.size,
+      videoPreset: data.videoPreset,
+      uploadVideoOptions: data.uploadVideoOptions,
+    });
   }
 
   // TODO: In the future, if the schema does not parse correctly, we should direct the user to the first step that has an error
@@ -233,7 +131,7 @@ export default function CreateVideoFormSubmitStep() {
         </p>
         <Button
           className="mt-2"
-          disabled={isUploadingFiles || genUploadURL.isPending}
+          disabled={isUploadingFiles || genUploadURLMutation.isPending}
           onClick={async () => {
             const concatedSchema = getConcatenatedFormSteps(
               uploadAudioFormStep!,
@@ -245,7 +143,7 @@ export default function CreateVideoFormSubmitStep() {
         >
           <LoaderStatus
             text="Create Video"
-            isLoading={isUploadingFiles || genUploadURL.isPending}
+            isLoading={isUploadingFiles || genUploadURLMutation.isPending}
             loaderProps={{
               color: "#0C0B0C",
               size: 20,
