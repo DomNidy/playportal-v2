@@ -19,6 +19,7 @@ import { useRouter } from "next/navigation";
 import { Label } from "../../Label";
 import { Progress } from "../../Progress";
 import LoaderStatus from "../../LoaderStatus/LoaderStatus";
+import { CirclePlay } from "lucide-react";
 
 export default function CreateVideoFormSubmitStep() {
   const router = useRouter();
@@ -217,26 +218,41 @@ export default function CreateVideoFormSubmitStep() {
 
   return (
     <div className="relative z-[50] flex h-full w-full flex-col items-center justify-center rounded-lg border-[1.5px] border-opacity-5 bg-[#0C0B0C] p-4">
-      <Button
-        disabled={isUploadingFiles || genUploadURL.isPending}
-        onClick={async () => {
-          const concatedSchema = getConcatenatedFormSteps(
-            uploadAudioFormStep!,
-            uploadImageFormStep!,
-            uploadVideoOptionsFormStep!,
-          );
-          await onSubmit(concatedSchema);
-        }}
-      >
-        <LoaderStatus
-          text="Create Video"
-          isLoading={isUploadingFiles || genUploadURL.isPending}
-          loaderProps={{
-            color: "#0C0B0C",
-            size: 20,
+      <div className="flex flex-col items-center gap-1 p-4">
+        <div className="rounded-full border border-dashed p-3">
+          <CirclePlay
+            className="size-7 text-muted-foreground"
+            aria-hidden="true"
+          />
+        </div>
+        <h2 className="mt-2 text-lg font-semibold text-white">
+          Ready to create?
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          Click the button below and we will begin creating your video!
+        </p>
+        <Button
+          className="mt-2"
+          disabled={isUploadingFiles || genUploadURL.isPending}
+          onClick={async () => {
+            const concatedSchema = getConcatenatedFormSteps(
+              uploadAudioFormStep!,
+              uploadImageFormStep!,
+              uploadVideoOptionsFormStep!,
+            );
+            await onSubmit(concatedSchema);
           }}
-        />
-      </Button>
+        >
+          <LoaderStatus
+            text="Create Video"
+            isLoading={isUploadingFiles || genUploadURL.isPending}
+            loaderProps={{
+              color: "#0C0B0C",
+              size: 20,
+            }}
+          />
+        </Button>
+      </div>
 
       {submitError && <p>{submitError}</p>}
 

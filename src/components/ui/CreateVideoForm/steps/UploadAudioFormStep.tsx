@@ -83,7 +83,7 @@ export default function UploadAudioFormStep({
               exit={{ opacity: 0 }}
               key="1"
             >
-              <FormItem className="h-[600px]">
+              <FormItem >
                 <AudioFileDropzone
                   audioObjectURL={audioObjectURL}
                   audioFileName={audioFile?.name}

@@ -3,7 +3,7 @@ import { toast } from "../Toasts/use-toast";
 import { SupportedAudioFileExtensions } from "~/definitions/form-schemas";
 import { getFileDropErrorMessage } from "./utils";
 import { Button } from "../Button";
-import { Music2Icon, MusicIcon, UploadIcon } from "lucide-react";
+import { AudioLines, UploadIcon } from "lucide-react";
 import { Label } from "../Label";
 
 export default function AudioFileDropzone({
@@ -133,7 +133,7 @@ export default function AudioFileDropzone({
           ) : (
             <div className="flex flex-col items-center gap-1 p-4">
               <div className="rounded-full border border-dashed p-3">
-                <MusicIcon
+                <AudioLines
                   className="size-7 text-muted-foreground"
                   aria-hidden="true"
                 />

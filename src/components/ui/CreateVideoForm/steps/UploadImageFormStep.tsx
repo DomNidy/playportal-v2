@@ -30,6 +30,9 @@ export default function UploadImageFormStep({
     defaultValues: {
       imageFile: imageFile ?? null,
     },
+    values: {
+      imageFile: imageFile ?? null,
+    },
   });
 
   const onImageFileChange = useCallback(
@@ -79,7 +82,7 @@ export default function UploadImageFormStep({
               exit={{ opacity: 0 }}
               key="1"
             >
-              <FormItem className="h-[600px]">
+              <FormItem>
                 <ImageFileDropzone
                   imageObjectURL={imageObjectURL}
                   imageFileName={imageFile?.name}
@@ -95,6 +98,12 @@ export default function UploadImageFormStep({
 
                     // Calling this here to automatically submit this form step when the user drops a file
                     void form.handleSubmit(onSubmit)();
+                  }}
+                  onImageFileRemoved={() => {
+                    if (imageObjectURL) URL.revokeObjectURL(imageObjectURL);
+                    setUploadImageFormStep(null);
+                    setImageFile(null);
+                    setImageObjectURL(null);
                   }}
                 />
               </FormItem>
