@@ -17,6 +17,8 @@ import { type User } from "@supabase/supabase-js";
 export default function LandingPageNavbar() {
   const supabase = createClient();
 
+  const [sheetOpen, setSheetOpen] = useState<boolean>(false);
+
   const [user, setUser] = useState<User>();
   useEffect(() => {
     const fetchUser = async () => {
@@ -94,7 +96,7 @@ export default function LandingPageNavbar() {
         </NavigationMenu>
       </div>
 
-      <Sheet>
+      <Sheet onOpenChange={setSheetOpen} open={sheetOpen}>
         <SheetTrigger>
           {/* TODO: This button causes hydration error */}
           <Button
@@ -113,12 +115,14 @@ export default function LandingPageNavbar() {
           </Link>
           <div className="grid gap-2 py-6">
             <Link
+              onClick={() => setSheetOpen(false)}
               className="flex w-full items-center py-2 text-lg font-semibold"
               href="/"
             >
               Home
             </Link>
             <Link
+              onClick={() => setSheetOpen(false)}
               className="flex w-full items-center py-2 text-lg font-semibold"
               href="/downloads"
             >
@@ -131,6 +135,7 @@ export default function LandingPageNavbar() {
               Pricing
             </Link>
             <Link
+              onClick={() => setSheetOpen(false)}
               className="flex w-full items-center py-2 text-lg font-semibold"
               href="/support"
             >
@@ -139,6 +144,7 @@ export default function LandingPageNavbar() {
             {!user ? (
               <>
                 <Link
+                  onClick={() => setSheetOpen(false)}
                   className="flex w-full items-center py-2 text-lg font-semibold"
                   href="/sign-in"
                 >
@@ -146,6 +152,7 @@ export default function LandingPageNavbar() {
                 </Link>
 
                 <Link
+                  onClick={() => setSheetOpen(false)}
                   className="flex w-full items-center py-2 text-lg font-semibold"
                   href="/sign-up"
                 >
@@ -154,6 +161,7 @@ export default function LandingPageNavbar() {
               </>
             ) : (
               <Link
+                onClick={() => setSheetOpen(false)}
                 className="flex w-full items-center py-2 text-lg font-semibold"
                 href="/dashboard"
               >

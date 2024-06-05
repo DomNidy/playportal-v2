@@ -52,7 +52,7 @@ export default function CreateVideoForm({
         {steps.map((stepProps, index) => {
           if (index === 0) {
             return (
-              <Step key={index} {...stepProps} className="z-[50] mt-16">
+              <Step key={index} {...stepProps} className="z-[50]">
                 <UploadAudioFormStep
                   maxAudioFileSizeBytes={fileSizeQuotaLimitBytes}
                   key={stepProps.label}

@@ -97,15 +97,14 @@ export default function UploadImageFormStep({
                     void form.handleSubmit(onSubmit)();
                   }}
                 />
-
-                <FormMessage>
-                  {" "}
-                  {form.formState?.errors?.imageFile?.message?.toString()}{" "}
-                </FormMessage>
               </FormItem>
             </motion.div>
           )}
         />
+        <FormMessage>
+          {" "}
+          {form.formState?.errors?.imageFile?.message?.toString()}{" "}
+        </FormMessage>
         <CreateVideoFormActions />
       </form>
     </Form>

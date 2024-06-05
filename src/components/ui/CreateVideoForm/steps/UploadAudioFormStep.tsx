@@ -98,14 +98,14 @@ export default function UploadAudioFormStep({
                     void form.handleSubmit(onSubmit)();
                   }}
                 />
-                <FormMessage>
-                  {" "}
-                  {form.formState?.errors?.audioFile?.message?.toString()}{" "}
-                </FormMessage>
               </FormItem>
             </motion.div>
           )}
         />
+        <FormMessage>
+          {" "}
+          {form.formState?.errors?.audioFile?.message?.toString()}{" "}
+        </FormMessage>
         <CreateVideoFormActions />
       </form>
     </Form>
