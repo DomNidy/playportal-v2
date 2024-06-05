@@ -30,6 +30,9 @@ export default function UploadAudioFormStep({
     defaultValues: {
       audioFile: audioFile ?? null,
     },
+    values: {
+      audioFile: audioFile ?? null,
+    },
   });
 
   const onAudioFileChange = useCallback(
@@ -96,6 +99,17 @@ export default function UploadAudioFormStep({
 
                     // Calling this here to automatically submit this form step when the user drops a file
                     void form.handleSubmit(onSubmit)();
+                  }}
+                  onAudioFileRemoved={() => {
+                    console.log("Removing");
+                    // Free up memory allocated for the audio file
+                    if (audioObjectURL) URL.revokeObjectURL(audioObjectURL);
+                    // Set this form state to null since the only thing stored here is the file
+                    setUploadAudioFormStep(null);
+                    // Set the audio file to null
+                    setAudioFile(null);
+                    // Set the audio object URL to null
+                    setAudioObjectURL(null);
                   }}
                 />
               </FormItem>
