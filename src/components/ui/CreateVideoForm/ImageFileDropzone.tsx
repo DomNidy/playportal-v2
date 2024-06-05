@@ -3,7 +3,6 @@ import { toast } from "../Toasts/use-toast";
 import { SupportedImageFileExtensions } from "~/definitions/form-schemas";
 import { getFileDropErrorMessage } from "./utils";
 import { Button } from "../Button";
-import Image from "next/image";
 
 export default function ImageFileDropzone({
   onDrop,

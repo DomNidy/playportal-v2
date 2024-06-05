@@ -58,9 +58,9 @@ export default function UploadAudioFormStep({
   );
 
   const onSubmit = (data: z.infer<typeof CreateVideoFormUploadAudioSchema>) => {
+    console.log("First step submitted", data);
     setUploadAudioFormStep(data);
     nextStep();
-    console.log("First step submitted", data);
   };
 
   return (
@@ -94,7 +94,8 @@ export default function UploadAudioFormStep({
                     const objectURL = URL.createObjectURL(audioFile[0]);
                     setAudioObjectURL(objectURL);
 
-                    // TODO: Increment the step with useStepper
+                    // Calling this here to automatically submit this form step when the user drops a file
+                    void form.handleSubmit(onSubmit)();
                   }}
                 />
                 <FormMessage>

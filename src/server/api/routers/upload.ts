@@ -370,6 +370,7 @@ export const uploadRouter = createTRPCRouter({
         if (error instanceof TRPCClientError) {
           throw error;
         }
+        console.error(error);
         throw new TRPCClientError("Something went wrong");
       }
     }),

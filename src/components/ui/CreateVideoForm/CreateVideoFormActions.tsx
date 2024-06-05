@@ -12,7 +12,7 @@ export default function CreateVideoFormActions() {
   } = useStepper();
 
   return (
-    <div className="flex w-full justify-end gap-2 z-[50] dark">
+    <div className="dark z-[50] mt-2 flex w-full justify-end gap-2">
       {hasCompletedAllSteps ? (
         <Button size="sm" type="button" onClick={resetSteps}>
           Reset
@@ -28,9 +28,11 @@ export default function CreateVideoFormActions() {
           >
             Prev
           </Button>
-          <Button size="sm" type="submit">
-            {isLastStep ? "Finish" : "Next"}
-          </Button>
+          {!isLastStep && (
+            <Button size="sm" type="submit">
+              Next
+            </Button>
+          )}
         </>
       )}
     </div>

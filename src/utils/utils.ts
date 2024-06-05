@@ -2,7 +2,6 @@ import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { env } from "~/env";
 import { type createClient } from "./supabase/server";
-import { type Database } from "types_db";
 import type { UploadTargetAccount } from "~/hooks/use-upload-operation-data";
 import type {
   FeatureFlag,

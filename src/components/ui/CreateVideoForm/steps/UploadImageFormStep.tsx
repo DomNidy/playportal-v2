@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import React, { useCallback, useState } from "react";
+import React, { useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { type z } from "zod";
 import { CreateVideoFormUploadImageSchema } from "~/definitions/form-schemas";
@@ -15,8 +15,13 @@ export default function UploadImageFormStep({
 }: {
   maxImageFileSizeBytes: number;
 }) {
-  const { imageFile, imageObjectURL, setImageFile, setImageObjectURL } =
-    useCreateVideoForm();
+  const {
+    imageFile,
+    imageObjectURL,
+    setImageFile,
+    setImageObjectURL,
+    setUploadImageFormStep,
+  } = useCreateVideoForm();
 
   const { nextStep } = useStepper();
 
@@ -52,8 +57,9 @@ export default function UploadImageFormStep({
   );
 
   const onSubmit = (data: z.infer<typeof CreateVideoFormUploadImageSchema>) => {
+    console.log("Second step submitted", data);
+    setUploadImageFormStep(data);
     nextStep();
-    console.log("First step submitted", data);
   };
 
   return (
@@ -87,7 +93,8 @@ export default function UploadImageFormStep({
                     const objectURL = URL.createObjectURL(imageFile[0]);
                     setImageObjectURL(objectURL);
 
-                    // TODO: Increment the step with useStepper
+                    // Calling this here to automatically submit this form step when the user drops a file
+                    void form.handleSubmit(onSubmit)();
                   }}
                 />
 

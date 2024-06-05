@@ -364,37 +364,6 @@ export default function UploadOptionsFormStep({
           </motion.div>
         )}
 
-        {/* We are setting isUploading files here due to async nature of the disabled state, kinda hacky
-        <Button
-          tabIndex={1}
-          type="submit"
-          className="mb-4 text-black"
-          disabled={
-            isUploadingFiles ||
-            genUploadURLRequestIsPending ||
-            formStateIsSubmitting
-          }
-        >
-          Create video
-        </Button>
-
-        {isUploadingFiles && (
-          <>
-            <div className="flex flex-col gap-4">
-              <p className="mt-2">Uploading files...</p>
-              <div className="flex flex-col gap-2">
-                <Label>Image Upload</Label>
-                <Progress value={uploadImageFileProgress} />
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <Label>Audio Upload</Label>
-                <Progress value={uploadAudioFileProgress} />
-              </div>
-            </div>
-          </>
-        )} */}
-
         <CreateVideoFormActions />
       </form>
     </Form>

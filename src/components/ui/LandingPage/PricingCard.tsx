@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle2, CheckIcon } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import React from "react";
 import { Button } from "../Button";
 import { type PricingPlan } from "./PricingSection";

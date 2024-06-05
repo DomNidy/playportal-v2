@@ -19,9 +19,7 @@ import { UpdatePasswordFormSchema } from "~/definitions/form-schemas";
 import { createClient } from "~/utils/supabase/client";
 import { getStatusRedirect } from "~/utils/utils";
 import { Link } from "~/components/ui/Link";
-import { MoonLoader } from "react-spinners";
-import { LoaderSizeProps } from "react-spinners/helpers/props";
-import { Label } from "~/components/ui/Form/Label";
+import LoaderStatus from "~/components/ui/LoaderStatus/LoaderStatus";
 
 export default function UpdatePasswordPage() {
   const supabase = createClient();
@@ -64,7 +62,11 @@ export default function UpdatePasswordPage() {
 
   return (
     <div className="flex w-full max-w-[500px] flex-col items-center">
-      <Link variant={"button"} href={"/dashboard/account"} className="self-start mb-2">
+      <Link
+        variant={"button"}
+        href={"/dashboard/account"}
+        className="mb-2 self-start"
+      >
         Go back
       </Link>
       <Form {...form}>
@@ -112,13 +114,13 @@ export default function UpdatePasswordPage() {
             )}
           />
 
-            <div className="flex-1"/>
+          <div className="flex-1" />
           <Button
             type="submit"
             disabled={form.formState.isSubmitting}
-            className="w-full self-end place-self-end"
+            className="w-full place-self-end self-end"
           >
-            <SubmitStatus
+            <LoaderStatus
               loaderProps={{
                 color: "#0C0B0C",
                 size: 20,
@@ -131,16 +133,4 @@ export default function UpdatePasswordPage() {
       </Form>
     </div>
   );
-}
-
-function SubmitStatus({
-  isLoading,
-  text,
-  loaderProps,
-}: {
-  isLoading: boolean;
-  text: string;
-  loaderProps: LoaderSizeProps;
-}) {
-  return isLoading ? <MoonLoader {...loaderProps} /> : <p>{text}</p>;
 }

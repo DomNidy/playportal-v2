@@ -44,8 +44,8 @@ const StepButtonContainer = ({
         "h-[var(--step-icon-size)] w-[var(--step-icon-size)]",
         "flex items-center justify-center rounded-full border-2",
         "data-[clickable=true]:pointer-events-auto",
-        "data-[active=true]:border-primary data-[active=true]:bg-primary data-[active=true]:text-primary-foreground",
-        "data-[current=true]:border-primary data-[current=true]:bg-secondary",
+        "data-[active=true]:border-primary data-[active=true]:bg-black data-[active=true]:text-primary-foreground",
+        "data-[current=true]:border-primary data-[current=true]:bg-black",
         "data-[invalid=true]:border-destructive data-[invalid=true]:bg-destructive data-[invalid=true]:text-destructive-foreground",
         styles?.["step-button-container"],
       )}
