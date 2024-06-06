@@ -4,6 +4,8 @@ import { type Database } from "types_db";
 import { type RouterInputs } from "~/trpc/react";
 import { supabaseAdmin } from "~/utils/supabase/admin";
 import { type NonNullableProperties } from "~/utils/utils";
+import { z } from "zod";
+import { YoutubeUploadOptions } from "~/definitions/api-schemas";
 
 // Alias for the type of the context that is passed to the tRPC API
 type TRPCContext = Awaited<ReturnType<typeof createTRPCContext>>;
@@ -221,22 +223,17 @@ export async function createYoutubeUploadOperation(
   relatedCreateVideoOperationId: string,
   // The primary key used in oauth creds table, we'll use this to get the oauth creds we need to upload the video
   oAuthCredsId: string,
+  // The options to upload youtube video with (description, tags, etc.)
+  youtubeUploadOptions: z.infer<typeof YoutubeUploadOptions>,
 ) {
   // It might be bad if this function throws an error, because we won't be able to refund other upload video operations
 
   return await supabaseAdmin
     .rpc("create_upload_video_operation", {
-      user_id: ctx?.user?.id ?? "",
-      created_from_operation_id: relatedCreateVideoOperationId,
-      using_oauth_creds_id: oAuthCredsId,
-      metadata: {
-        video_title: userInput?.uploadVideoOptions?.youtube?.videoTitle,
-        video_description:
-          userInput?.uploadVideoOptions?.youtube?.videoDescription,
-        video_tags: userInput?.uploadVideoOptions?.youtube?.videoTags,
-        video_visibility:
-          userInput?.uploadVideoOptions?.youtube?.videoVisibility,
-      },
+      p_user_id: ctx?.user?.id ?? "",
+      p_created_from_operation_id: relatedCreateVideoOperationId,
+      p_using_oauth_creds_id: oAuthCredsId,
+      p_upload_video_options: youtubeUploadOptions,
     })
     .single();
 }

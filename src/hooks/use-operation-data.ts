@@ -56,8 +56,7 @@ export default function useOperationData(operationId: string | null): {
   }, [operationStatus, realtimeChannel]);
 
   // We want this effect to do the following:
-  // Fetch our initial operation data (if any can be found)
-  // Based off that initial data, we can decide if we need to open up socket connections
+  // Fetch our initial operation data (if any can be found) Based off that initial data, we can decide if we need to open up socket connections
   // Should only run once when the component mounts
   useEffect(() => {
     if (operationId === null) {

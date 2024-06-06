@@ -6,6 +6,20 @@ export enum VideoPreset {
   TikTok = "TikTok",
 }
 
+export const YoutubeUploadOptions = z.object({
+  kind: z.literal("YoutubeUploadOptions"),
+  video_title: z
+    .string()
+    .min(1)
+    .max(100, "Title must be at most 100 characters long"),
+  video_description: z
+    .string()
+    .max(5000, "Description may be no longer than 5000 characters.")
+    .optional(),
+  video_tags: z.array(z.string()).optional(),
+  video_visibility: z.nativeEnum(YoutubeVideoVisibilities),
+});
+
 export const CreateVideoOptionsSchema = z.object({
   kind: z.literal("CreateVideoOptions"),
   user_id: z.string(),
@@ -21,19 +35,12 @@ export const CreateVideoOptionsSchema = z.object({
               z.object({
                 upload_video_operation_id: z.string(),
                 upload_video_transaction_id: z.string(),
+                // The primary key of a row in the `upload_video_options` table
+                // This will row will contain metadata about the video, such as description, tags, etc.
+                upload_video_options_id: z.string(),
               }),
             )
             .min(1, "Must provide at least one upload video operation"),
-          video_title: z
-            .string()
-            .min(1)
-            .max(100, "Title must be at most 100 characters long"),
-          video_description: z
-            .string()
-            .max(5000, "Description may be no longer than 5000 characters.")
-            .optional(),
-          video_tags: z.array(z.string()).optional(),
-          video_visibility: z.nativeEnum(YoutubeVideoVisibilities),
         })
         .optional(),
     })
@@ -60,8 +67,11 @@ export const CreateVideoOptionsSchema = z.object({
 export const UploadVideoOptionsSchema = z.object({
   kind: z.literal("UploadVideoOptions"),
   user_id: z.string(),
-  // Once we add support for other platforms, we will need to update this schema to be a union that includes the other platforms
-  upload_platform: z.enum(["YouTube"]),
+  // Id of an upload options row in the "upload_video_options" table
+  upload_options_id: z.enum(["YouTube"]),
+  // The service account id (things like youtube channel ids) that will be used to upload the video
+  // We will use this to look up the users oauth credentials
+  service_account_id: z.string(),
   // This is associated with an "UploadVideo" transaction from the "transactions" table
   associated_transaction_id: z.string(),
   operation: z.object({

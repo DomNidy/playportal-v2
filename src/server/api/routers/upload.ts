@@ -7,7 +7,10 @@ import { env } from "~/env";
 import { supabaseAdmin } from "~/utils/supabase/admin";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { s3Client, sqsClient } from "~/server/aws-clients";
-import { type CreateVideoOptionsSchema } from "~/definitions/api-schemas";
+import {
+  YoutubeUploadOptions,
+  type CreateVideoOptionsSchema,
+} from "~/definitions/api-schemas";
 import { headers } from "next/headers";
 import { VideoPreset } from "~/definitions/api-schemas";
 import { getFeatureFlag } from "~/utils/utils";
@@ -144,6 +147,30 @@ export const uploadRouter = createTRPCRouter({
               "Failed to authenticate one or more of your connected youtube channels. Please try re-connecting your accounts.",
             );
           try {
+            // Ensure the youtube upload options are valid
+            const {
+              success: parseYoutubeUploadOptionsSuccess,
+              data: youtubeUploadOptions,
+              error: youtubeUploadOptionsError,
+            } = YoutubeUploadOptions.safeParse({
+              kind: "YoutubeUploadOptions",
+              video_title: input.uploadVideoOptions.youtube.videoTitle,
+              video_visibility:
+                input.uploadVideoOptions.youtube.videoVisibility,
+              video_description:
+                input.uploadVideoOptions.youtube.videoDescription ?? "",
+              video_tags: input.uploadVideoOptions.youtube.videoTags ?? [],
+            } as z.infer<typeof YoutubeUploadOptions>);
+
+            if (!parseYoutubeUploadOptionsSuccess) {
+              console.error(
+                `Invalid youtube upload options: ${JSON.stringify(youtubeUploadOptionsError)}`,
+              );
+              throw new TRPCClientError(
+                "Invalid youtube upload options, please check your title, description, tags, etc, and try again. If the problem persists, please contact support.",
+              );
+            }
+
             // Charge the user for the upload
             // For each channel, run the upload cost rpc
             // This will return an array of upload operation ids, and their transaction ids
@@ -157,6 +184,13 @@ export const uploadRouter = createTRPCRouter({
                   input,
                   createVideoOperation.operation_id,
                   credsId,
+                  {
+                    kind: "YoutubeUploadOptions",
+                    video_title: youtubeUploadOptions.video_title,
+                    video_visibility: youtubeUploadOptions.video_visibility,
+                    video_description: youtubeUploadOptions.video_description,
+                    video_tags: youtubeUploadOptions.video_tags,
+                  },
                 );
               }),
             );
@@ -208,7 +242,7 @@ export const uploadRouter = createTRPCRouter({
                 uploadOperationAndTransactionIds.map(async (transaction) => {
                   if (transaction.data) {
                     await refundFailedUploadVideoOperation(
-                      transaction.data.upload_op_id,
+                      transaction.data.upload_operation_id,
                       transaction.data.trans_id,
                     );
                   } else {
@@ -277,19 +311,16 @@ export const uploadRouter = createTRPCRouter({
                           // This is just to shut up the typescript compiler
                           op: PostgrestResponseSuccess<{
                             trans_id: string;
-                            upload_op_id: string;
+                            upload_operation_id: string;
+                            upload_options_id: string;
                           }>,
                         ) => ({
                           upload_video_transaction_id: op.data.trans_id,
-                          upload_video_operation_id: op.data.upload_op_id,
+                          upload_video_operation_id:
+                            op.data.upload_operation_id,
+                          upload_video_options_id: op.data.upload_options_id,
                         }),
                       ),
-                    video_title: input.uploadVideoOptions.youtube.videoTitle,
-                    video_description:
-                      input.uploadVideoOptions.youtube.videoDescription,
-                    video_tags: input.uploadVideoOptions.youtube.videoTags,
-                    video_visibility:
-                      input.uploadVideoOptions.youtube.videoVisibility,
                   },
                 }
               : undefined,
@@ -317,7 +348,10 @@ export const uploadRouter = createTRPCRouter({
             },
           };
 
-          console.log("createVideoMessage constructed:", createVideoMessage);
+          console.log(
+            "createVideoMessage constructed:",
+            JSON.stringify(createVideoMessage),
+          );
           // Post the message to sqs queue
           const sendMsgResult = await sqsClient.send(
             new SendMessageCommand({
@@ -345,13 +379,14 @@ export const uploadRouter = createTRPCRouter({
             uploadOperationAndTransactionIds.map(
               async (
                 transaction: PostgrestResponseSuccess<{
-                  upload_op_id: string;
+                  upload_operation_id: string;
+                  upload_options_id: string;
                   trans_id: string;
                 }>,
               ) => {
                 if (transaction.data) {
                   await refundFailedUploadVideoOperation(
-                    transaction.data.upload_op_id,
+                    transaction.data.upload_operation_id,
                     transaction.data.trans_id,
                   );
                 } else {
