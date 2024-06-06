@@ -42,7 +42,7 @@ export function OperationLogMessage({
   className,
 }: OperationLogMessageProps) {
   const msg = operationLog.message
-    ? convertOperationLogToMSG(operationLog?.message as OperationLogCode)
+    ? convertOperationLogToMSG(operationLog?.message)
     : undefined;
 
   let logVariant: "destructive" | "success" | "default" | undefined;
@@ -64,7 +64,9 @@ export function OperationLogMessage({
 
   return (
     <p className={cn(operationLogVariants({ variant: logVariant, className }))}>
-      {msg.type === "success" ? <CheckCircle className="mr-2 inline w-[16px] h-[16px]" /> : null}
+      {msg.type === "success" ? (
+        <CheckCircle className="mr-2 inline h-[16px] w-[16px]" />
+      ) : null}
       {msg.message}{" "}
     </p>
   );
