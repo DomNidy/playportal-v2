@@ -35,14 +35,21 @@ import { Textarea } from "../../Textarea";
 import TagsInput from "../TagsInput";
 import { useStepper } from "../../Stepper";
 import { useCreateVideoForm } from "../CreateVideoFormContext";
+import SubmitStatus from "../../LoaderStatus/LoaderStatus";
+import { Link } from "~/components/ui/Link";
+import { Link2Icon } from "lucide-react";
 
 export default function UploadOptionsFormStep({
   hasUploadVideoFeature,
 }: {
   hasUploadVideoFeature: boolean;
 }) {
-  const { setUploadVideoOptionsFormStep, uploadVideoOptionsFormStep } =
-    useCreateVideoForm();
+  const {
+    setUploadVideoOptionsFormStep,
+    uploadVideoOptionsFormStep,
+    isUploadYoutubeVideoChecked,
+    setIsUploadYoutubeVideoChecked,
+  } = useCreateVideoForm();
 
   const form = useForm<z.infer<typeof CreateVideoFormUploadOptionsSchema>>({
     resolver: zodResolver(CreateVideoFormUploadOptionsSchema),
@@ -50,6 +57,9 @@ export default function UploadOptionsFormStep({
       videoTitle: uploadVideoOptionsFormStep?.videoTitle ?? "",
       videoPreset:
         uploadVideoOptionsFormStep?.videoPreset ?? VideoPreset.YouTube,
+      uploadVideoOptions: uploadVideoOptionsFormStep?.uploadVideoOptions
+        ? { ...uploadVideoOptionsFormStep?.uploadVideoOptions }
+        : {},
     },
   });
   const { nextStep } = useStepper();
@@ -60,9 +70,6 @@ export default function UploadOptionsFormStep({
     isFetching: isFetchingYoutubeAccounts,
     refetch: refetchYoutubeAccounts,
   } = useLinkedYoutubeAccounts();
-
-  const [isUploadYoutubeVideoChecked, setIsUploadYoutubeVideoChecked] =
-    React.useState(false);
 
   const onSubmit = (
     data: z.infer<typeof CreateVideoFormUploadOptionsSchema>,
@@ -162,6 +169,7 @@ export default function UploadOptionsFormStep({
             <div className="flex flex-row gap-4">
               <FormLabel>Upload video to YouTube?</FormLabel>
               <Checkbox
+                checked={isUploadYoutubeVideoChecked}
                 onCheckedChange={() =>
                   setIsUploadYoutubeVideoChecked(!isUploadYoutubeVideoChecked)
                 }
@@ -220,6 +228,23 @@ export default function UploadOptionsFormStep({
                       )}
                     />
 
+                    <Link
+                      className="w-fit"
+                      href="/dashboard/account"
+                      variant={"button"}
+                      passHref
+                      legacyBehavior
+                    >
+                      <a
+                        target="_blank"
+                        className={
+                          "inline-flex items-center justify-center gap-1 whitespace-nowrap rounded-md bg-primary p-2 text-sm font-medium text-black ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+                        }
+                      >
+                        <Link2Icon size={20} /> Link a YouTube Channel
+                      </a>
+                    </Link>
+
                     <Button
                       className="w-fit"
                       type="button"
@@ -228,7 +253,11 @@ export default function UploadOptionsFormStep({
                         void refetchYoutubeAccounts();
                       }}
                     >
-                      Refresh linked accounts
+                      <SubmitStatus
+                        text="Refresh linked channels"
+                        isLoading={isFetchingYoutubeAccounts}
+                        loaderProps={{ size: 12 }}
+                      />
                     </Button>
                   </div>
 
@@ -240,8 +269,11 @@ export default function UploadOptionsFormStep({
 
                 <FormField
                   control={form.control}
-                  defaultValue=""
                   shouldUnregister={true}
+                  defaultValue={
+                    uploadVideoOptionsFormStep?.uploadVideoOptions?.youtube
+                      ?.videoTitle
+                  }
                   name="uploadVideoOptions.youtube.videoTitle"
                   render={({ field }) => (
                     <FormItem>
@@ -262,7 +294,10 @@ export default function UploadOptionsFormStep({
                 <FormField
                   control={form.control}
                   shouldUnregister={true}
-                  defaultValue=""
+                  defaultValue={
+                    uploadVideoOptionsFormStep?.uploadVideoOptions?.youtube
+                      ?.videoDescription
+                  }
                   name="uploadVideoOptions.youtube.videoDescription"
                   render={({ field }) => (
                     <FormItem>
@@ -287,6 +322,10 @@ export default function UploadOptionsFormStep({
                 <FormField
                   control={form.control}
                   shouldUnregister={true}
+                  defaultValue={
+                    uploadVideoOptionsFormStep?.uploadVideoOptions?.youtube
+                      ?.videoTags
+                  }
                   name="uploadVideoOptions.youtube.videoTags"
                   render={({ field }) => (
                     <FormItem>
@@ -320,6 +359,10 @@ export default function UploadOptionsFormStep({
                 <Controller
                   control={form.control}
                   shouldUnregister={true}
+                  defaultValue={
+                    uploadVideoOptionsFormStep?.uploadVideoOptions?.youtube
+                      ?.videoVisibility
+                  }
                   name="uploadVideoOptions.youtube.videoVisibility"
                   render={({ field }) => (
                     <FormItem>
@@ -364,7 +407,13 @@ export default function UploadOptionsFormStep({
           </motion.div>
         )}
 
-        <CreateVideoFormActions />
+        <CreateVideoFormActions
+          beforePreviousCallback={() => {
+            console.log(form.getValues());
+            // Save the upload options to the context before navigating back
+            setUploadVideoOptionsFormStep(form.getValues());
+          }}
+        />
       </form>
     </Form>
   );

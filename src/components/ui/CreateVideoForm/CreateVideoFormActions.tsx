@@ -3,7 +3,15 @@ import { useStepper } from "../Stepper";
 import { Button } from "../Button";
 import { useCreateVideoForm } from "./CreateVideoFormContext";
 
-export default function CreateVideoFormActions() {
+export default function CreateVideoFormActions({
+  // Callback executed before the previous step is shown, useful for cleanup
+  beforePreviousCallback,
+  // Callback executed before the next step is shown
+  beforeNextCallback,
+}: {
+  beforePreviousCallback?: () => void;
+  beforeNextCallback?: () => void;
+}) {
   const {
     prevStep,
     resetSteps,
@@ -24,7 +32,10 @@ export default function CreateVideoFormActions() {
         <>
           <Button
             disabled={isDisabledStep || isUploadingFiles}
-            onClick={prevStep}
+            onClick={() => {
+              beforePreviousCallback?.();
+              prevStep();
+            }}
             size="sm"
             variant="secondary"
             type="button"
@@ -32,7 +43,13 @@ export default function CreateVideoFormActions() {
             Prev
           </Button>
           {!isLastStep && (
-            <Button size="sm" type="submit">
+            <Button
+              size="sm"
+              type="submit"
+              onClick={() => {
+                beforeNextCallback?.();
+              }}
+            >
               Next
             </Button>
           )}
