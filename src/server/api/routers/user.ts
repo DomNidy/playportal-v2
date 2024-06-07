@@ -111,7 +111,7 @@ export const userRouter = createTRPCRouter({
       const headersList = headers();
       const ipIdentifier = headersList.get("x-real-ip");
       const result = await getPresignedUrlForFileRatelimit.limit(
-        ipIdentifier ?? "",
+        ipIdentifier ?? ctx.user.id,
       );
 
       if (!result.success) {

@@ -24,7 +24,7 @@ export const deleteRouter = createTRPCRouter({
         const headersList = headers();
         const ipIdentifier = headersList.get("x-real-ip");
         const result = await deleteOperationRatelimiter.limit(
-          ipIdentifier ?? "",
+          ipIdentifier ?? ctx.user.id,
         );
 
         if (!result.success) {
@@ -142,6 +142,7 @@ export const deleteRouter = createTRPCRouter({
           message: "Successfully deleted your files.",
         };
       } catch (err) {
+        console.error(err);
         if (err instanceof TRPCClientError) {
           throw err;
         }

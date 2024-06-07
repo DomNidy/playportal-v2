@@ -39,6 +39,10 @@ import SubmitStatus from "../../LoaderStatus/LoaderStatus";
 import { Link } from "~/components/ui/Link";
 import { Link2Icon } from "lucide-react";
 
+function isString(v: unknown): v is string {
+  return typeof v === "string";
+}
+
 export default function UploadOptionsFormStep({
   hasUploadVideoFeature,
 }: {
@@ -57,9 +61,33 @@ export default function UploadOptionsFormStep({
       videoTitle: uploadVideoOptionsFormStep?.videoTitle ?? "",
       videoPreset:
         uploadVideoOptionsFormStep?.videoPreset ?? VideoPreset.YouTube,
-      uploadVideoOptions: uploadVideoOptionsFormStep?.uploadVideoOptions
-        ? { ...uploadVideoOptionsFormStep?.uploadVideoOptions }
-        : {},
+    },
+    values: {
+      videoTitle: uploadVideoOptionsFormStep?.videoTitle ?? "",
+      videoPreset:
+        uploadVideoOptionsFormStep?.videoPreset ?? VideoPreset.YouTube,
+      uploadVideoOptions: {
+        ...uploadVideoOptionsFormStep?.uploadVideoOptions,
+        youtube: {
+          videoTitle:
+            uploadVideoOptionsFormStep?.uploadVideoOptions?.youtube
+              ?.videoTitle ?? "",
+          videoDescription:
+            uploadVideoOptionsFormStep?.uploadVideoOptions?.youtube
+              ?.videoDescription ?? "",
+          videoVisibility:
+            uploadVideoOptionsFormStep?.uploadVideoOptions?.youtube
+              ?.videoVisibility ?? YoutubeVideoVisibilities.Unlisted,
+          uploadToChannels:
+            uploadVideoOptionsFormStep?.uploadVideoOptions?.youtube?.uploadToChannels?.filter(
+              isString,
+            ) ?? [],
+          videoTags:
+            uploadVideoOptionsFormStep?.uploadVideoOptions?.youtube?.videoTags?.filter(
+              isString,
+            ) ?? [],
+        },
+      },
     },
   });
   const { nextStep } = useStepper();
@@ -128,6 +156,7 @@ export default function UploadOptionsFormStep({
           <FormLabel>Video preset</FormLabel>
           <Select
             defaultValue="YouTube"
+            value={uploadVideoOptionsFormStep?.videoPreset ?? "YouTube"}
             onValueChange={(value) => {
               // Check if the value is a valid preset
               if (
@@ -135,6 +164,10 @@ export default function UploadOptionsFormStep({
                 CreateVideoFormUploadOptionsSchema.shape.videoPreset.enum
               ) {
                 form.setValue("videoPreset", value as VideoPreset);
+                setUploadVideoOptionsFormStep((prev) => ({
+                  ...prev,
+                  videoPreset: value as VideoPreset,
+                }));
               }
             }}
           >
@@ -187,18 +220,35 @@ export default function UploadOptionsFormStep({
                     <Controller
                       control={form.control}
                       shouldUnregister={true}
-                      defaultValue={undefined}
                       name="uploadVideoOptions.youtube.uploadToChannels"
+                      defaultValue={
+                        uploadVideoOptionsFormStep?.uploadVideoOptions?.youtube?.uploadToChannels?.filter(
+                          isString,
+                        ) ?? []
+                      }
                       render={({ field }) => (
                         <>
                           <MultiSelectFormField
+                            value={field.value}
                             isDataLoading={isLoadingYoutubeAccounts}
                             loadingPlaceholder={
                               <p className="text-center text-white">
                                 Loading...
                               </p>
                             }
-                            onValueChange={field.onChange}
+                            onValueChange={(v) => {
+                              setUploadVideoOptionsFormStep((prev) => ({
+                                ...prev,
+                                uploadVideoOptions: {
+                                  ...prev?.uploadVideoOptions,
+                                  youtube: {
+                                    ...prev?.uploadVideoOptions?.youtube,
+                                    uploadToChannels: v,
+                                  },
+                                },
+                              }));
+                              field.onChange(v);
+                            }}
                             options={
                               connectedYoutubeAccounts?.map(
                                 (youtubeAccount) => ({
@@ -279,7 +329,23 @@ export default function UploadOptionsFormStep({
                     <FormItem>
                       <FormLabel>YouTube Video Title</FormLabel>
                       <FormControl>
-                        <Input placeholder="My video" {...field} />
+                        <Input
+                          placeholder="My video"
+                          {...field}
+                          onChange={(v) => {
+                            field.onChange(v);
+                            setUploadVideoOptionsFormStep((prev) => ({
+                              ...prev,
+                              uploadVideoOptions: {
+                                ...prev?.uploadVideoOptions,
+                                youtube: {
+                                  ...prev?.uploadVideoOptions?.youtube,
+                                  videoTitle: v.target.value,
+                                },
+                              },
+                            }));
+                          }}
+                        />
                       </FormControl>
                       <FormDescription>
                         The title of the video on YouTube
@@ -323,8 +389,9 @@ export default function UploadOptionsFormStep({
                   control={form.control}
                   shouldUnregister={true}
                   defaultValue={
-                    uploadVideoOptionsFormStep?.uploadVideoOptions?.youtube
-                      ?.videoTags
+                    uploadVideoOptionsFormStep?.uploadVideoOptions?.youtube?.videoTags?.filter(
+                      isString,
+                    ) ?? []
                   }
                   name="uploadVideoOptions.youtube.videoTags"
                   render={({ field }) => (
@@ -407,13 +474,7 @@ export default function UploadOptionsFormStep({
           </motion.div>
         )}
 
-        <CreateVideoFormActions
-          beforePreviousCallback={() => {
-            console.log(form.getValues());
-            // Save the upload options to the context before navigating back
-            setUploadVideoOptionsFormStep(form.getValues());
-          }}
-        />
+        <CreateVideoFormActions />
       </form>
     </Form>
   );

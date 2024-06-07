@@ -1,5 +1,10 @@
 "use client";
-import { useState, createContext, useContext } from "react";
+import React, {
+  useState,
+  createContext,
+  useContext,
+  type SetStateAction,
+} from "react";
 import { type z } from "zod";
 import type {
   CreateVideoFormUploadAudioSchema,
@@ -12,6 +17,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { revalidatePathByServerAction } from "~/utils/actions";
 import { sendRequest } from "~/utils/utils";
 import { useRouter } from "next/navigation";
+import { type DeepPartial } from "react-hook-form";
 
 export type CreateVideoFormCTX = {
   audioFile: File | null;
@@ -40,23 +46,26 @@ export type CreateVideoFormCTX = {
 
   // Stores the state of the upload audio form step
   uploadAudioFormStep: z.infer<typeof CreateVideoFormUploadAudioSchema> | null;
-  setUploadAudioFormStep: (
-    step: z.infer<typeof CreateVideoFormUploadAudioSchema> | null,
-  ) => void;
+  setUploadAudioFormStep: React.Dispatch<
+    SetStateAction<z.infer<typeof CreateVideoFormUploadAudioSchema> | null>
+  >;
 
   // Stores the state of the upload image form step
   uploadImageFormStep: z.infer<typeof CreateVideoFormUploadImageSchema> | null;
-  setUploadImageFormStep: (
-    step: z.infer<typeof CreateVideoFormUploadImageSchema> | null,
-  ) => void;
+  setUploadImageFormStep: React.Dispatch<
+    SetStateAction<z.infer<typeof CreateVideoFormUploadImageSchema> | null>
+  >;
 
+  // These are marked with partial because some fields like youtube related fields are optional
   // Stores the state of the upload video options form step
-  uploadVideoOptionsFormStep: z.infer<
-    typeof CreateVideoFormUploadOptionsSchema
+  uploadVideoOptionsFormStep: DeepPartial<
+    z.infer<typeof CreateVideoFormUploadOptionsSchema>
   > | null;
-  setUploadVideoOptionsFormStep: (
-    step: z.infer<typeof CreateVideoFormUploadOptionsSchema> | null,
-  ) => void;
+  setUploadVideoOptionsFormStep: React.Dispatch<
+    SetStateAction<DeepPartial<
+      z.infer<typeof CreateVideoFormUploadOptionsSchema>
+    > | null>
+  >;
 
   genUploadURLMutation: ReturnType<
     typeof api.upload.generateUploadURL.useMutation
@@ -103,7 +112,9 @@ export function CreateVideoFormProvider({
   > | null>(null);
 
   const [uploadVideoOptionsFormStep, setUploadVideoOptionsFormStep] =
-    useState<z.infer<typeof CreateVideoFormUploadOptionsSchema> | null>(null);
+    useState<DeepPartial<
+      z.infer<typeof CreateVideoFormUploadOptionsSchema>
+    > | null>(null);
 
   // Query used to generate presigned urls for file uploaad
   const genUploadURL = api.upload.generateUploadURL.useMutation({

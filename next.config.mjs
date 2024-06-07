@@ -13,22 +13,22 @@ const withMDX = createMDX();
 
 /** @type {import("next").NextConfig} */
 const config = {
-    pageExtensions: ["js", "jsx", "ts", "tsx", "md", "mdx"],
-    images:
-    {
-        remotePatterns: [
-            {
-                protocol: "https",
-                port: '',
-                hostname: "playportal.app",
-            },
-            {
-                protocol: "http",
-                port: '3000',
-                hostname: "localhost",
-            }
-        ]
-    }
+  pageExtensions: ["js", "jsx", "ts", "tsx", "md", "mdx"],
+  images:
+  {
+    remotePatterns: [
+      {
+        protocol: "https",
+        port: '',
+        hostname: "playportal.app",
+      },
+      {
+        protocol: "http",
+        port: '3000',
+        hostname: "localhost",
+      }
+    ]
+  }
 };
 
 export default withPlaiceholder(withMDX(config));

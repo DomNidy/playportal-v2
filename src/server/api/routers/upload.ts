@@ -64,7 +64,7 @@ export const uploadRouter = createTRPCRouter({
         const headersList = headers();
         const ipIdentifier = headersList.get("x-real-ip");
         const result = await generateUploadURLRatelimiter.limit(
-          ipIdentifier ?? "",
+          ipIdentifier ?? ctx.user.id,
         );
 
         if (!result.success) {

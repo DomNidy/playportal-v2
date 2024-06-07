@@ -41,24 +41,28 @@ export default function RecentOperationsDisplay() {
 
   return (
     <div className="mt-2 grid  grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-      {recentOperations?.pages
-        ? recentOperations.pages
+      {recentOperations?.pages ? (
+        <>
+          {...recentOperations.pages
             .flat(1)
             ?.map((operation) => (
               <OperationCard
                 operation={operation}
                 key={operation.operation_id}
-                ref={lastOperationCardRef}
               />
-            ))
-        : isLoading && (
-            <>
-              <OperationCardSkeleton />
-              <OperationCardSkeleton />
-              <OperationCardSkeleton />
-              <OperationCardSkeleton />
-            </>
-          )}
+            ))}
+          <div ref={lastOperationCardRef} />
+        </>
+      ) : (
+        isLoading && (
+          <>
+            <OperationCardSkeleton />
+            <OperationCardSkeleton />
+            <OperationCardSkeleton />
+            <OperationCardSkeleton />
+          </>
+        )
+      )}
 
       {hasNoOperations && isFetched && <OperationCardDummy />}
     </div>

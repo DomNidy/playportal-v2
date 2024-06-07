@@ -34,7 +34,9 @@ export async function signupToMailingList(
   try {
     const headersList = headers();
     const ipIdentifier = headersList.get("x-real-ip");
-    const result = await signupToMailingListRatelimit.limit(ipIdentifier ?? "");
+    const result = await signupToMailingListRatelimit.limit(
+      ipIdentifier ?? "cant-get-ip",
+    );
 
     const email = data.get("email") as string | undefined;
 
@@ -89,7 +91,7 @@ export async function signupToMailingList(
 export async function login(email: string, password: string) {
   const headersList = headers();
   const ipIdentifier = headersList.get("x-real-ip");
-  const result = await loginRatelimit.limit(ipIdentifier ?? "");
+  const result = await loginRatelimit.limit(ipIdentifier ?? "cant-get-ip");
 
   if (!result.success) {
     console.warn(ipIdentifier, "ip was rate limited at login server action.");
@@ -141,7 +143,7 @@ export async function signUp(
 ): Promise<SignUpResponse | void> {
   const headersList = headers();
   const ipIdentifier = headersList.get("x-real-ip");
-  const result = await signUpRatelimit.limit(ipIdentifier ?? "");
+  const result = await signUpRatelimit.limit(ipIdentifier ?? "cant-get-ip");
 
   // If the ip has exceeded their ratelimit, return
   if (!result.success) {
@@ -218,7 +220,7 @@ export async function resetPasswordForEmail(
     const headersList = headers();
     const ipIdentifier = headersList.get("x-real-ip");
     const result = await resetPasswordForEmailRatelimit.limit(
-      ipIdentifier ?? "",
+      ipIdentifier ?? "cant-get-ip",
     );
 
     console.log(ipIdentifier, "requested");
