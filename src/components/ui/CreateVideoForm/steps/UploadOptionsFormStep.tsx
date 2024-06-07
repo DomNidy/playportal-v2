@@ -66,28 +66,30 @@ export default function UploadOptionsFormStep({
       videoTitle: uploadVideoOptionsFormStep?.videoTitle ?? "",
       videoPreset:
         uploadVideoOptionsFormStep?.videoPreset ?? VideoPreset.YouTube,
-      uploadVideoOptions: {
-        ...uploadVideoOptionsFormStep?.uploadVideoOptions,
-        youtube: {
-          videoTitle:
-            uploadVideoOptionsFormStep?.uploadVideoOptions?.youtube
-              ?.videoTitle ?? "",
-          videoDescription:
-            uploadVideoOptionsFormStep?.uploadVideoOptions?.youtube
-              ?.videoDescription ?? "",
-          videoVisibility:
-            uploadVideoOptionsFormStep?.uploadVideoOptions?.youtube
-              ?.videoVisibility ?? YoutubeVideoVisibilities.Unlisted,
-          uploadToChannels:
-            uploadVideoOptionsFormStep?.uploadVideoOptions?.youtube?.uploadToChannels?.filter(
-              isString,
-            ) ?? [],
-          videoTags:
-            uploadVideoOptionsFormStep?.uploadVideoOptions?.youtube?.videoTags?.filter(
-              isString,
-            ) ?? [],
-        },
-      },
+      uploadVideoOptions: isUploadYoutubeVideoChecked
+        ? {
+            ...uploadVideoOptionsFormStep?.uploadVideoOptions,
+            youtube: {
+              videoTitle:
+                uploadVideoOptionsFormStep?.uploadVideoOptions?.youtube
+                  ?.videoTitle ?? "",
+              videoDescription:
+                uploadVideoOptionsFormStep?.uploadVideoOptions?.youtube
+                  ?.videoDescription ?? "",
+              videoVisibility:
+                uploadVideoOptionsFormStep?.uploadVideoOptions?.youtube
+                  ?.videoVisibility ?? YoutubeVideoVisibilities.Unlisted,
+              uploadToChannels:
+                uploadVideoOptionsFormStep?.uploadVideoOptions?.youtube?.uploadToChannels?.filter(
+                  isString,
+                ) ?? [],
+              videoTags:
+                uploadVideoOptionsFormStep?.uploadVideoOptions?.youtube?.videoTags?.filter(
+                  isString,
+                ) ?? [],
+            },
+          }
+        : undefined,
     },
   });
   const { nextStep } = useStepper();
@@ -130,7 +132,18 @@ export default function UploadOptionsFormStep({
               <FormItem>
                 <FormLabel>Video Title</FormLabel>
                 <FormControl>
-                  <Input placeholder="My video" {...field} />
+                  <Input
+                    placeholder="My video"
+                    {...field}
+                    onChange={(v) => {
+                      field.onChange(v);
+
+                      setUploadVideoOptionsFormStep((prev) => ({
+                        ...prev,
+                        videoTitle: v.target.value,
+                      }));
+                    }}
+                  />
                 </FormControl>
                 <FormDescription>
                   Name of the video, this will not be the final title on
@@ -221,11 +234,6 @@ export default function UploadOptionsFormStep({
                       control={form.control}
                       shouldUnregister={true}
                       name="uploadVideoOptions.youtube.uploadToChannels"
-                      defaultValue={
-                        uploadVideoOptionsFormStep?.uploadVideoOptions?.youtube?.uploadToChannels?.filter(
-                          isString,
-                        ) ?? []
-                      }
                       render={({ field }) => (
                         <>
                           <MultiSelectFormField
@@ -320,10 +328,6 @@ export default function UploadOptionsFormStep({
                 <FormField
                   control={form.control}
                   shouldUnregister={true}
-                  defaultValue={
-                    uploadVideoOptionsFormStep?.uploadVideoOptions?.youtube
-                      ?.videoTitle
-                  }
                   name="uploadVideoOptions.youtube.videoTitle"
                   render={({ field }) => (
                     <FormItem>
@@ -360,10 +364,6 @@ export default function UploadOptionsFormStep({
                 <FormField
                   control={form.control}
                   shouldUnregister={true}
-                  defaultValue={
-                    uploadVideoOptionsFormStep?.uploadVideoOptions?.youtube
-                      ?.videoDescription
-                  }
                   name="uploadVideoOptions.youtube.videoDescription"
                   render={({ field }) => (
                     <FormItem>
@@ -373,6 +373,19 @@ export default function UploadOptionsFormStep({
                           maxLength={5000}
                           placeholder="My video description"
                           {...field}
+                          onChange={(v) => {
+                            field.onChange(v);
+                            setUploadVideoOptionsFormStep((prev) => ({
+                              ...prev,
+                              uploadVideoOptions: {
+                                ...prev?.uploadVideoOptions,
+                                youtube: {
+                                  ...prev?.uploadVideoOptions?.youtube,
+                                  videoDescription: v.target.value,
+                                },
+                              },
+                            }));
+                          }}
                         />
                       </FormControl>
                       <FormDescription>
@@ -399,17 +412,33 @@ export default function UploadOptionsFormStep({
                       <FormLabel>YouTube Video Tags</FormLabel>
                       <FormControl>
                         <TagsInput
+                          initialKeywords={
+                            uploadVideoOptionsFormStep?.uploadVideoOptions?.youtube?.videoTags?.filter(
+                              isString,
+                            ) ?? []
+                          }
                           controllerRenderProps={{
                             name: field.name,
                             ref: field.ref,
                             onBlur: field.onBlur,
-                            onChange: field.onChange,
+                            onChange: () => null,
                             disabled: field.disabled,
                             // We don't need to set the value here since the TagsInput component will handle that
-                            value: null,
+                            value: field.value,
                           }}
                           onKeywordsChange={(keywords) => {
                             field.onChange(keywords);
+
+                            setUploadVideoOptionsFormStep((prev) => ({
+                              ...prev,
+                              uploadVideoOptions: {
+                                ...prev?.uploadVideoOptions,
+                                youtube: {
+                                  ...prev?.uploadVideoOptions?.youtube,
+                                  videoTags: keywords,
+                                },
+                              },
+                            }));
                           }}
                         />
                       </FormControl>
@@ -438,6 +467,23 @@ export default function UploadOptionsFormStep({
                         value={field.value}
                         onValueChange={(value) => {
                           field.onChange(value);
+
+                          // Ensure that the value is a valid visibility
+                          const valToVis =
+                            value in YoutubeVideoVisibilities
+                              ? (value as YoutubeVideoVisibilities)
+                              : YoutubeVideoVisibilities.Unlisted;
+
+                          setUploadVideoOptionsFormStep((prev) => ({
+                            ...prev,
+                            uploadVideoOptions: {
+                              ...prev?.uploadVideoOptions,
+                              youtube: {
+                                ...prev?.uploadVideoOptions?.youtube,
+                                videoVisibility: valToVis,
+                              },
+                            },
+                          }));
                         }}
                       >
                         <SelectTrigger

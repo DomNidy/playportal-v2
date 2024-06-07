@@ -1,12 +1,7 @@
 "use client";
 import React from "react";
 import { useCreateVideoForm } from "../CreateVideoFormContext";
-import {
-  CreateVideoFormSchema,
-  type CreateVideoFormUploadAudioSchema,
-  type CreateVideoFormUploadImageSchema,
-  type CreateVideoFormUploadOptionsSchema,
-} from "~/definitions/form-schemas";
+import { CreateVideoFormSchema } from "~/definitions/form-schemas";
 import { type z } from "zod";
 import { Button } from "../../Button";
 import CreateVideoFormActions from "../CreateVideoFormActions";
@@ -36,12 +31,10 @@ export default function CreateVideoFormSubmitStep() {
 
   // Utility function that concatenates the form steps into a single object so we can submit the form
   const getConcatenatedFormSteps = (
-    uploadAudioFormStep: z.infer<typeof CreateVideoFormUploadAudioSchema>,
-    uploadImageFormStep: z.infer<typeof CreateVideoFormUploadImageSchema>,
-    uploadVideoOptionsFormStep: z.infer<
-      typeof CreateVideoFormUploadOptionsSchema
-    >,
-  ): z.infer<typeof CreateVideoFormSchema> => {
+    uploadAudioFormStep: unknown,
+    uploadImageFormStep: unknown,
+    uploadVideoOptionsFormStep: unknown,
+  ): unknown => {
     if (
       !uploadAudioFormStep ||
       !uploadImageFormStep ||
@@ -138,7 +131,27 @@ export default function CreateVideoFormSubmitStep() {
               uploadImageFormStep!,
               uploadVideoOptionsFormStep!,
             );
-            await onSubmit(concatedSchema);
+
+            const validateSchema =
+              CreateVideoFormSchema.safeParse(concatedSchema);
+
+            if (!validateSchema.success) {
+              setSubmitError(
+                "Invalid video settings, please try again or contact support.",
+              );
+              console.error(
+                "Create video form schema is invalid",
+                validateSchema.error,
+              );
+              return;
+            }
+
+            console.log(
+              "Create video form schema is valid:",
+              validateSchema.data,
+            );
+
+            await onSubmit(validateSchema.data);
           }}
         >
           <LoaderStatus
