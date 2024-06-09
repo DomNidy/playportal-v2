@@ -97,6 +97,15 @@ type UseTimelineProps<EventIDS> = {
    */
   expectedTimeline: ExpectedTimelineEvent<EventIDS>[];
   /**
+   * These are events which when received, will error out the rest of the timeline.
+   *
+   * This is useful for events that have no corresponding success state, and are exclusively indicative of errors. For example, an unexpected error
+   */
+  errorOnlyEvents: Pick<
+    ExpectedTimelineEvent<EventIDS>,
+    "errorCode" | "errorDisplayMessage"
+  >[];
+  /**
    * Function called when our timeline receives an event id that is not in the `expectedTimeline`
    *
    * This might happen when you don't define an `ExpectedTimelineEvent` for all events in your `EventIDS`.

@@ -5,7 +5,7 @@ import OperationLogDisplay from "~/components/ui/OperationLogDisplay/OperationLo
 import useOperationData from "~/hooks/use-operation-data";
 import { useUploadOperationsData } from "~/hooks/use-upload-operation-data";
 import useTimeline from "~/hooks/use-timeline";
-import { OperationLogCode } from "~/definitions/db-type-aliases";
+import { type OperationLogCode } from "~/definitions/db-type-aliases";
 
 export default function OperationDataPage({
   params,
@@ -26,9 +26,23 @@ export default function OperationDataPage({
       {
         errorCode: "cv_dl_input_fail",
         successCode: "cv_dl_input_success",
-        errorDisplayMessage: "Failed to download input",
+        errorDisplayMessage: "Failed to download input.",
         pendingDisplayMessage: "Downloading your files...",
         successDisplayMessage: "Successfully downloaded your files!",
+      },
+      {
+        errorCode: "cv_render_fail",
+        successCode: "cv_render_success",
+        errorDisplayMessage: "Failed to render your video.",
+        pendingDisplayMessage: "Rendering your video...",
+        successDisplayMessage: "Successfully rendered your video!",
+      },
+    ],
+    errorOnlyEvents: [
+      {
+        errorCode: "cv_unexpected_error",
+        errorDisplayMessage:
+          "An unexpected error occured while creating your video.",
       },
     ],
   });

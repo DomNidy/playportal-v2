@@ -117,3 +117,24 @@ export function isReceivedEventIDOutOfOrder<T>(
   }
   return false;
 }
+
+/**
+ * Returns a new array with the status of all pending events in the expectedEvents array to changed cancelled
+ *
+ * Useful when we receive an error event and want to mark all events thereafter as cancelled.
+ * @param {any} expectedEvents:ExpectedTimelineEvent<T>[]
+ * @returns {any}
+ */
+export function cancelAllPendingEvents(
+  timelineEvents: TimelineEvent[],
+): TimelineEvent[] {
+  return timelineEvents.map((timelineEvent) => {
+    if (timelineEvent.state === "pending") {
+      return {
+        state: "cancelled",
+        displayMessage: timelineEvent.displayMessage,
+      };
+    }
+    return timelineEvent;
+  });
+}

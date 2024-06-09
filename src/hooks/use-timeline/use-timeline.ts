@@ -6,6 +6,7 @@ import {
   type TimelineEvent,
 } from "./types";
 import {
+  cancelAllPendingEvents,
   getDisplayMessageForStatus,
   hasMatchingStatusCode,
   isCorrespondingEvents,
@@ -20,6 +21,7 @@ import {
  */
 export default function useTimeline<EventIDS>({
   expectedTimeline,
+  errorOnlyEvents,
   onUnexpectedEventReceived,
 }: UseTimelineProps<EventIDS>): UseTimelineReturn<EventIDS> {
   // This is used to store the initial expected timeline events passed in props
@@ -46,6 +48,15 @@ export default function useTimeline<EventIDS>({
 
     // Handle the case where we were not expecting to receive the provided event
     if (!relevantExpectedEvent) {
+      // If the received event was not in our expected events array, check the errorOnlyEvents array
+      if (
+        errorOnlyEvents.find((errEv) => receivedEventID === errEv.errorCode)
+      ) {
+        // If we received an error only event, cancel all remaining pending events
+        const newTimeline = cancelAllPendingEvents(timeline);
+        setTimeline(newTimeline);
+      }
+
       onUnexpectedEventReceived?.(receivedEventID);
       return;
     }
@@ -64,8 +75,8 @@ export default function useTimeline<EventIDS>({
       relevantExpectedEvent,
     );
 
-    // Update the timeline
-    const newTimeline: TimelineEvent[] = timeline.map((timelineEvent) => {
+    // Create new timeline with updated state
+    let newTimeline: TimelineEvent[] = timeline.map((timelineEvent) => {
       if (isCorrespondingEvents(relevantExpectedEvent, timelineEvent)) {
         return {
           displayMessage: getDisplayMessageForStatus(
@@ -79,18 +90,27 @@ export default function useTimeline<EventIDS>({
       return timelineEvent;
     });
 
-    setTimeline(newTimeline);
+    // If the event status we received indicated an error occured,
+    // cancel all pending events and remove all expected events
+    if (newTimelineEventStatus === "error") {
+      console.debug(
+        "Timeline received an error event, cancelling all pending events and clearing expected events.",
+      );
+      newTimeline = cancelAllPendingEvents(newTimeline);
+      setExpectedTimelineEvents([]);
+    } else {
+      // Remove the relevantExpectedEvent from the expected events array as we no longer care about it after we've received its status once
+      //* Note: This logic relies on the assumption that the user did not pass in multiple events with the same status code
+      // We might want to refactor the ExpectedTimelineEvents to have a constructor that generates some unique id
+      setExpectedTimelineEvents(
+        expectedTimelineEvents.filter(
+          (expectedEv) =>
+            expectedEv.successCode !== relevantExpectedEvent.successCode,
+        ),
+      );
+    }
 
-    // Remove the relevantExpectedEvent from the expected events array as we no longer care about it after we've received its status
-    // We do this by removing all elements that match the successCode of the relevantExpectedEvent
-    //* Note: This logic relies on the assumption that the user did not pass in multiple events with the same status code
-    // We might want to refactor the ExpectedTimelineEvents to have a constructor that generates some unique id
-    setExpectedTimelineEvents(
-      expectedTimelineEvents.filter(
-        (expectedEv) =>
-          expectedEv.successCode !== relevantExpectedEvent.successCode,
-      ),
-    );
+    setTimeline(newTimeline);
   };
 
   return { timeline, updateWithEvent };
