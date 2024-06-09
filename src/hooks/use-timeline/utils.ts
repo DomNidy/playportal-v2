@@ -2,6 +2,7 @@ import {
   type TimelineEvent,
   type ExpectedTimelineEvent,
   type TimelineEventStatuses,
+  type OutOfOrderEvent,
 } from "./types";
 
 export function hasMatchingStatusCode<T extends string>(
@@ -170,4 +171,83 @@ export function getInitialTimelineEvents<T extends string>(
       },
     },
   }));
+}
+
+export function processOutOfOrderEvents<T extends string>(
+  nextExpectedEvent: ExpectedTimelineEvent<T> | undefined,
+  outOfOrderEvents: OutOfOrderEvent<T>[],
+  timeline: TimelineEvent[],
+) {
+  let newTimeline: TimelineEvent[] = timeline;
+
+  const newOutOfOrderEvents = outOfOrderEvents.filter((outOfOrderEvent) => {
+    // If we are expecting no more events, and we still have out of order events, we'll drop these out of order events
+    if (!nextExpectedEvent) {
+      console.debug(`Tried to process out of order event ${String(outOfOrderEvent)} but we aren't expecting to receive anymore events
+        , we will update the timeline with this event if we can find a matching event in the timeline)`);
+
+      // Find the timeline event corresponding to the out of order event, and update it if it can be found
+
+      newTimeline = timeline.map((timelineEvent) => {
+        console.log(
+          timelineEvent.metadata._relevantEventIDS,
+          outOfOrderEvent.eventID,
+        );
+        if (
+          timelineEvent.metadata._relevantEventIDS.has(outOfOrderEvent.eventID)
+        ) {
+          console.log(
+            `Found matching TimelineEvent with a matching relevant event id for out of order event ${String(outOfOrderEvent)}`,
+          );
+
+          return {
+            metadata: {
+              _updatedByEventID: String(outOfOrderEvent),
+              _relevantEventIDS: timelineEvent.metadata._relevantEventIDS,
+              _displayMessagesMap: timelineEvent.metadata._displayMessagesMap,
+            },
+            displayMessage:
+              timelineEvent.metadata._displayMessagesMap[
+                outOfOrderEvent.indicatesState
+              ],
+            state: outOfOrderEvent.indicatesState,
+          };
+        }
+        return timelineEvent;
+      });
+
+      console.log(newTimeline, "updated");
+    }
+    // If the next event we are expecting matches this out of order event, move this event back to the expectedTimelineEvents
+    else if (
+      hasMatchingStatusCode(nextExpectedEvent, outOfOrderEvent.eventID) &&
+      newTimeline[0]
+    ) {
+      console.log("Next event matches");
+      newTimeline[0] = {
+        displayMessage:
+          newTimeline[0].metadata._displayMessagesMap[
+            outOfOrderEvent.indicatesState
+          ],
+        state: outOfOrderEvent.indicatesState,
+        metadata: {
+          _displayMessagesMap: newTimeline[0].metadata._displayMessagesMap,
+          _relevantEventIDS: newTimeline[0].metadata._relevantEventIDS,
+          _updatedByEventID: newTimeline[0].metadata._updatedByEventID,
+        },
+      };
+      return false;
+    }
+
+    console.log(
+      `Event ${String(outOfOrderEvent.eventID)} is still out of order.`,
+    );
+    // If this event is still out of order, leave it in here
+    return true;
+  });
+
+  return {
+    newTimeline,
+    newOutOfOrderEvents,
+  };
 }

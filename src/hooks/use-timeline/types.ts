@@ -42,7 +42,7 @@ type ExpectedTimelineEvent<EventIDS extends string> = {
  * When we receive an out of order event, we will remove the related ExpectedEvent from the expected events array,
  * then we will add an `OutOfOrderEvent` to a seperate buffer that will be processed later.
  */
-type OutOfOrderEvent<EventIDS> = {
+type OutOfOrderEvent<EventIDS extends string> = {
   /**
    * This field specifies what status the received event id indicates
    *
@@ -55,6 +55,15 @@ type OutOfOrderEvent<EventIDS> = {
    * The actual event id that was received out of order
    */
   eventID: EventIDS;
+  /**
+   * Internal metadata
+   */
+  metadata: {
+    /**
+     * The `ExpectedTimelineEvent` that we removed when we received this out of order event
+     */
+    _originalExpectedEvent?: ExpectedTimelineEvent<EventIDS>;
+  };
 };
 
 /**

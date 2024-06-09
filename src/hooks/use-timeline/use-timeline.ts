@@ -14,6 +14,7 @@ import {
   isCorrespondingEvents,
   isReceivedEventIDOutOfOrder,
   mapEventIDToStatus,
+  processOutOfOrderEvents,
 } from "./utils";
 
 /**
@@ -66,6 +67,7 @@ export default function useTimeline<EventIDS extends string>({
         }
 
         onUnexpectedEventReceived?.(receivedEventID);
+        console.warn("Received unexpected event", receivedEventID);
         return;
       }
 
@@ -81,15 +83,24 @@ export default function useTimeline<EventIDS extends string>({
         relevantExpectedEvent,
       );
 
+      let newOutOfOrderEvents: OutOfOrderEvent<EventIDS>[] | null = null;
+
       // If we received an event out of order, (if the received event is not the first element in the expectedTimelineEvents)
       // Then we will add it to an array which we will try to re-process later
       if (isEventOutOfOrder) {
         console.warn("Received out of order event", receivedEventID);
-        setOutOfOrderEvents((prev) => [
-          ...prev,
-          { eventID: receivedEventID, indicatesState: newTimelineEventStatus },
-        ]);
+        newOutOfOrderEvents = [
+          ...outOfOrderEvents,
+          {
+            eventID: receivedEventID,
+            indicatesState: newTimelineEventStatus,
+            metadata: { _originalExpectedEvent: { ...relevantExpectedEvent } },
+          },
+        ];
       }
+
+      // Create new expected events timeline
+      let newExpectedTimelineEvents = [...expectedTimelineEvents];
 
       // Create new timeline with updated state
       let newTimeline: TimelineEvent[] = timeline.map((timelineEvent) => {
@@ -123,126 +134,40 @@ export default function useTimeline<EventIDS extends string>({
           "Timeline received an error event, cancelling all pending events and clearing expected events.",
         );
         newTimeline = cancelAllPendingEvents(newTimeline);
-        setExpectedTimelineEvents([]);
+        newExpectedTimelineEvents = [];
       } else {
         console.log("Updating timeline");
         // Remove the relevantExpectedEvent from the expected events array as we no longer care about it after we've received its status once
         //* Note: This logic relies on the assumption that the user did not pass in multiple events with the same status code
         // We might want to refactor the ExpectedTimelineEvents to have a constructor that generates some unique id
-
-        setExpectedTimelineEvents(
-          expectedTimelineEvents.filter(
-            (expectedEv) =>
-              expectedEv.successCode !== relevantExpectedEvent.successCode,
-          ),
+        newExpectedTimelineEvents = expectedTimelineEvents.filter(
+          (expectedEv) =>
+            expectedEv.successCode !== relevantExpectedEvent.successCode,
         );
       }
 
-      // FIXME: This function does not receive the most recent expectedTimelineEvents array, it is outdated
-      // FIXME: We can either pass the expectedTimelineEvents array as a parameter in here, or refactor the
-      // FIXME: expectedTimelineEvents to use useRef hook
-      const processOutOfOrderEvents = () => {
-        console.log("Processing out of order events");
+      // Create new arrays with the out of order events processed
+      const {
+        newTimeline: newTimelineFinal,
+        newOutOfOrderEvents: newOutOfOrderEventsFinal,
+      } = processOutOfOrderEvents(
+        newExpectedTimelineEvents[0],
+        newOutOfOrderEvents ?? [],
+        newTimeline,
+      );
 
-        setOutOfOrderEvents((prevOutOfOrderEvents) => {
-          console.log(
-            `setOutOfOrderEvents has expectedTimeline scope ${String(JSON.stringify(expectedTimelineEvents))}`,
-          );
-          const remainingOutOfOrderEvents = prevOutOfOrderEvents.filter(
-            (outOfOrderEvent) => {
-              const nextExpectedEvent = expectedTimelineEvents[0];
+      console.log(newTimelineFinal);
 
-              // If we are expecting no more events, and we still have out of order events, we'll drop these out of order events
-              if (!nextExpectedEvent) {
-                console.debug(`Tried to process out of order event ${String(outOfOrderEvent)} but we aren't expecting to receive anymore events
-                , we will update the timeline with this event if we can find a matching event in the timeline)`);
-
-                // Find the timeline event corresponding to the out of order event, and update it if it can be found
-                setTimeline((prevTimeline) => {
-                  const newTimeline: TimelineEvent[] = prevTimeline.map(
-                    (timelineEvent) => {
-                      console.log(
-                        timelineEvent.metadata._relevantEventIDS,
-                        outOfOrderEvent.eventID,
-                      );
-                      if (
-                        timelineEvent.metadata._relevantEventIDS.has(
-                          outOfOrderEvent.eventID,
-                        )
-                      ) {
-                        console.log(
-                          `Found matching TimelineEvent with a matching relevant event id for out of order event ${String(outOfOrderEvent)}`,
-                        );
-
-                        return {
-                          metadata: {
-                            _updatedByEventID: String(outOfOrderEvent),
-                            _relevantEventIDS:
-                              timelineEvent.metadata._relevantEventIDS,
-                            _displayMessagesMap:
-                              timelineEvent.metadata._displayMessagesMap,
-                          },
-                          displayMessage:
-                            timelineEvent.metadata._displayMessagesMap[
-                              outOfOrderEvent.indicatesState
-                            ],
-                          state: newTimelineEventStatus,
-                        };
-                      }
-                      return timelineEvent;
-                    },
-                  );
-
-                  console.log(newTimeline, "updated");
-
-                  return newTimeline;
-                });
-
-                return false;
-              }
-              // If the next event we are expecting matches this out of order event, then update the timeline state and remove this out of order event
-              else if (
-                hasMatchingStatusCode(
-                  nextExpectedEvent,
-                  outOfOrderEvent.eventID,
-                )
-              ) {
-                console.log("Next event matches");
-                updateWithEvent(outOfOrderEvent.eventID);
-                return false;
-              }
-
-              console.log(
-                `Event ${String(outOfOrderEvent.eventID)} is still out of order.`,
-              );
-              // If this event is still out of order, leave it in here
-              return true;
-            },
-          );
-
-          // Create an array of OutOfOrder events with all duplicate events removed
-          const uniqueOutOfOrderEvents = Array.from(
-            new Set(
-              remainingOutOfOrderEvents.map((eventObj) =>
-                JSON.stringify(eventObj),
-              ),
-            ),
-          ).map(
-            (eventObj) => JSON.parse(eventObj) as OutOfOrderEvent<EventIDS>,
-          );
-
-          return uniqueOutOfOrderEvents;
-        });
-      };
-
-      setTimeline(newTimeline);
-      processOutOfOrderEvents();
+      setTimeline(newTimelineFinal);
+      setOutOfOrderEvents(newOutOfOrderEventsFinal);
+      setExpectedTimelineEvents(newExpectedTimelineEvents);
     },
     [
       errorOnlyEvents,
       expectedTimelineEvents,
       onUnexpectedEventReceived,
       timeline,
+      outOfOrderEvents,
     ],
   );
 
