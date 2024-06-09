@@ -53,11 +53,12 @@ export default function OperationDataPage({
           "An unexpected error occured while creating your video.",
       },
     ],
+    onUnexpectedEventReceived: (ev) => console.log(ev),
   });
 
   useEffect(() => {
     const eventIDS = logs.sort().map((log) => log.message);
-    updateWithEventArray(eventIDS);
+    updateWithEventArray(["cv_dl_input_success", "cv_output_to_s3_success"]);
   }, [logs, updateWithEventArray]);
 
   const { YouTube: youtubeUploads } = useUploadOperationsData(operationId);

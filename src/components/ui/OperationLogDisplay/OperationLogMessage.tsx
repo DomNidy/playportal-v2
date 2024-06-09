@@ -6,9 +6,10 @@ import { type TimelineEvent } from "~/hooks/use-timeline";
 const operationLogVariants = cva("text-medium", {
   variants: {
     variant: {
-      default: "text-muted-foreground underline",
-      destructive: "text-destructive-foreground hover:bg-destructive/90",
+      pending: "text-muted-foreground underline",
+      error: "text-red-500 ",
       success: "text-green-500",
+      cancelled: "line-through text-muted-foreground/80 strikethrough",
       outline:
         "border border-input bg-background hover:bg-accent hover:text-foreground",
       secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
@@ -23,7 +24,7 @@ const operationLogVariants = cva("text-medium", {
     },
   },
   defaultVariants: {
-    variant: "default",
+    variant: "pending",
     size: "default",
   },
 });
@@ -38,17 +39,20 @@ export function OperationLogMessage({
   operationLog,
   className,
 }: OperationLogMessageProps) {
-  let logVariant: "destructive" | "success" | "default" | undefined;
+  let logVariant: "pending" | "error" | "success" | "cancelled" | undefined;
 
   switch (operationLog.state) {
     case "error":
-      logVariant = "destructive";
+      logVariant = "error";
       break;
     case "success":
       logVariant = "success";
       break;
-    default:
-      logVariant = "default";
+    case "cancelled":
+      logVariant = "cancelled";
+      break;
+    case "pending":
+      logVariant = "pending";
   }
 
   return (
