@@ -4,7 +4,7 @@ import {
   type TimelineEventStatuses,
 } from "./types";
 
-export function hasMatchingStatusCode<T>(
+export function hasMatchingStatusCode<T extends string>(
   expecetedEvent: ExpectedTimelineEvent<T>,
   receivedEvent: T,
 ): boolean {
@@ -21,7 +21,7 @@ export function hasMatchingStatusCode<T>(
  * Events are considered to be corresponding if the `displayMessage` of the timeline event matches
  * either the `pendingDisplayMessage`, `successDisplayMessage`, or `errorDisplayMessage` of the `ExpectedTimelineEvent`
  */
-export function isCorrespondingEvents<T>(
+export function isCorrespondingEvents<T extends string>(
   expectedTimelineEvent: ExpectedTimelineEvent<T>,
   timelineEvent: TimelineEvent,
 ): boolean {
@@ -49,7 +49,7 @@ export function isCorrespondingEvents<T>(
  * @param {any} expectedTimelineEvent:ExpectedTimelineEvent<T>
  * @returns {any}
  */
-export function mapEventIDToStatus<T>(
+export function mapEventIDToStatus<T extends string>(
   eventID: T,
   expectedTimelineEvent: ExpectedTimelineEvent<T>,
 ): TimelineEventStatuses {
@@ -78,7 +78,7 @@ export function mapEventIDToStatus<T>(
  * @param {any} status:TimelineEventStatuses
  * @returns {any}
  */
-export function getDisplayMessageForStatus<T>(
+export function getDisplayMessageForStatus<T extends string>(
   correspondingExpectedTimelineEvent: ExpectedTimelineEvent<T>,
   status: TimelineEventStatuses,
 ): string {
@@ -95,7 +95,7 @@ export function getDisplayMessageForStatus<T>(
   }
 }
 
-export function isReceivedEventIDOutOfOrder<T>(
+export function isReceivedEventIDOutOfOrder<T extends string>(
   receivedEventID: T,
   expectedEvents: ExpectedTimelineEvent<T>[],
 ): boolean {
@@ -131,8 +131,14 @@ export function cancelAllPendingEvents(
   return timelineEvents.map((timelineEvent) => {
     if (timelineEvent.state === "pending") {
       return {
-        state: "cancelled",
-        displayMessage: timelineEvent.displayMessage,
+        ...timelineEvent,
+        metadata: {
+          _updatedByEventID: timelineEvent.metadata._updatedByEventID,
+          _relevantEventIDS: timelineEvent.metadata._relevantEventIDS,
+          _displayMessagesMap: {
+            ...timelineEvent.metadata._displayMessagesMap,
+          },
+        },
       };
     }
     return timelineEvent;
@@ -144,11 +150,24 @@ export function cancelAllPendingEvents(
  * @param {any} expectedTimelineEvents:ExpectedTimelineEvent<T>
  * @returns {any}
  */
-export function getInitialTimelineEvents<T>(
+export function getInitialTimelineEvents<T extends string>(
   expectedTimelineEvents: ExpectedTimelineEvent<T>[],
 ): TimelineEvent[] {
   return expectedTimelineEvents.map((expectedTimelineEvent) => ({
     displayMessage: expectedTimelineEvent.pendingDisplayMessage,
     state: "pending",
+    metadata: {
+      _relevantEventIDS: new Set([
+        expectedTimelineEvent.errorCode,
+        expectedTimelineEvent.successCode,
+      ]),
+      _displayMessagesMap: {
+        error: expectedTimelineEvent.errorDisplayMessage,
+        pending: expectedTimelineEvent.pendingDisplayMessage,
+        success: expectedTimelineEvent.successDisplayMessage,
+        // We are just using the pending display message here
+        cancelled: expectedTimelineEvent.pendingDisplayMessage,
+      },
+    },
   }));
 }

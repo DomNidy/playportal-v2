@@ -13,7 +13,7 @@ type TimelineEventStatuses = "pending" | "error" | "success" | "cancelled";
  * This is needed because any event that can fail in a system, has multiple outcomes (success or failure, etc.), so what we are
  * doing here with the ExpectedTimelineEvent is creating a container that encapsulates an event itsself with its outcomes.
  */
-type ExpectedTimelineEvent<EventIDS> = {
+type ExpectedTimelineEvent<EventIDS extends string> = {
   /**
    * When we receive an event with the status code equal to the successCode, this event is concered successfully completed
    */
@@ -37,11 +37,51 @@ type ExpectedTimelineEvent<EventIDS> = {
 };
 
 /**
+ * Stores data about out of order events
+ *
+ * When we receive an out of order event, we will remove the related ExpectedEvent from the expected events array,
+ * then we will add an `OutOfOrderEvent` to a seperate buffer that will be processed later.
+ */
+type OutOfOrderEvent<EventIDS> = {
+  /**
+   * This field specifies what status the received event id indicates
+   *
+   * When an out of order event is processed, we set the resulting TimelineEvent's state to this
+   *
+   * Also used to perform a lookup on each `TimelineEvent` so we can determine what the displayMessage should be set to
+   */
+  indicatesState: TimelineEventStatuses;
+  /**
+   * The actual event id that was received out of order
+   */
+  eventID: EventIDS;
+};
+
+/**
  * A `TimelineEvent` is a type returned by `useTimeline`, it models the current state of an event in the timeline.
  *
  * **Note**: Each `ExpectedTimelineEvent` has a corresponding `TimelineEvent`
  */
 type TimelineEvent = {
+  metadata: {
+    /**
+     * Internal variable used to determine what event id resulted in this timeline event being updated
+     *
+     * If the timeline event is in a processing state (like how they are on initial load), this will be undefined
+     */
+    _updatedByEventID?: string;
+    /**
+     * All of the event ids that can map to this TimelineEvent
+     *
+     * Example: upload_video_success, upload_video_fail
+     */
+    _relevantEventIDS: Set<string>;
+    /**
+     * Dictionairy of the event statuses and the display messages they map to
+     */
+    _displayMessagesMap: Record<TimelineEventStatuses, string>;
+  };
+
   /**
    * Represents the state of this event on the timeline
    */
@@ -88,7 +128,7 @@ type UseTimelineReturn<EventIDS> = {
  * EventIDS: EventIDS should be a literal union type that contains all possible events our timeline can receive
  * For instance, we might have the literal union `upload_success` | `download_success` | `upload_fail` | `download_fail`
  */
-type UseTimelineProps<EventIDS> = {
+type UseTimelineProps<EventIDS extends string> = {
   /**
    * This array contains events in our timeline, **chronologically ordered by when they are expected to occur**.
    *
@@ -132,4 +172,5 @@ export type {
   UseTimelineReturn,
   TimelineEvent,
   TimelineEventStatuses,
+  OutOfOrderEvent,
 };

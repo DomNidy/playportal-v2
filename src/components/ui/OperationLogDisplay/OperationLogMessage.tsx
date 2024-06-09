@@ -1,6 +1,5 @@
 import { type VariantProps, cva } from "class-variance-authority";
 import { cn } from "~/utils/utils";
-import { CheckCircle } from "lucide-react";
 import { type TimelineEvent } from "~/hooks/use-timeline";
 
 const operationLogVariants = cva("text-medium", {
