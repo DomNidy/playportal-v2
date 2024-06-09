@@ -173,6 +173,7 @@ export function getInitialTimelineEvents<T extends string>(
   }));
 }
 
+// FIXME: Ensure that we wont run into unexpected behavior with how we're passing the nextExpectedEvent
 export function processOutOfOrderEvents<T extends string>(
   nextExpectedEvent: ExpectedTimelineEvent<T> | undefined,
   outOfOrderEvents: OutOfOrderEvent<T>[],
@@ -190,6 +191,7 @@ export function processOutOfOrderEvents<T extends string>(
 
       newTimeline = timeline.map((timelineEvent) => {
         console.log(
+          "Mapping new tl",
           timelineEvent.metadata._relevantEventIDS,
           outOfOrderEvent.eventID,
         );

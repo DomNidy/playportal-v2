@@ -89,14 +89,19 @@ export default function useTimeline<EventIDS extends string>({
       // Then we will add it to an array which we will try to re-process later
       if (isEventOutOfOrder) {
         console.warn("Received out of order event", receivedEventID);
-        newOutOfOrderEvents = [
-          ...outOfOrderEvents,
-          {
-            eventID: receivedEventID,
-            indicatesState: newTimelineEventStatus,
-            metadata: { _originalExpectedEvent: { ...relevantExpectedEvent } },
+        newOutOfOrderEvents = outOfOrderEvents.map((outOfOrderEvent) => ({
+          ...outOfOrderEvent,
+          metadata: {
+            _originalExpectedEvent:
+              outOfOrderEvent.metadata._originalExpectedEvent,
           },
-        ];
+        }));
+
+        newOutOfOrderEvents.push({
+          eventID: receivedEventID,
+          indicatesState: newTimelineEventStatus,
+          metadata: { _originalExpectedEvent: { ...relevantExpectedEvent } },
+        });
       }
 
       // Create new expected events timeline
@@ -156,7 +161,11 @@ export default function useTimeline<EventIDS extends string>({
         newTimeline,
       );
 
-      console.log(newTimelineFinal);
+      console.log("NEW TL", newTimelineFinal);
+      // FIXME: These (`newOutOfOrderEventsFinal` and `newExpectedTimelineEvents`) both end up being empty arrays
+      // FIXME: but, the newTimelineFinal array does not have the updated state?
+      console.log("NEW OOE", newOutOfOrderEventsFinal);
+      console.log("NEW EET", newExpectedTimelineEvents);
 
       setTimeline(newTimelineFinal);
       setOutOfOrderEvents(newOutOfOrderEventsFinal);
