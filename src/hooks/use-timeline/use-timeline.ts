@@ -151,13 +151,17 @@ export default function useTimeline<EventIDS extends string>({
         );
       }
 
+      console.log("PREV TL", newTimeline);
+      console.log("PREV OOE", newOutOfOrderEvents);
+      console.log("PREV EET", newExpectedTimelineEvents);
+
       // Create new arrays with the out of order events processed
       const {
         newTimeline: newTimelineFinal,
         newOutOfOrderEvents: newOutOfOrderEventsFinal,
       } = processOutOfOrderEvents(
-        newExpectedTimelineEvents[0],
-        newOutOfOrderEvents ?? [],
+        newExpectedTimelineEvents,
+        newOutOfOrderEvents ?? outOfOrderEvents,
         newTimeline,
       );
 
@@ -168,6 +172,7 @@ export default function useTimeline<EventIDS extends string>({
       console.log("NEW EET", newExpectedTimelineEvents);
 
       setTimeline(newTimelineFinal);
+
       setOutOfOrderEvents(newOutOfOrderEventsFinal);
       setExpectedTimelineEvents(newExpectedTimelineEvents);
     },

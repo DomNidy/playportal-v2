@@ -60,7 +60,8 @@ export default function OperationDataPage({
 
   useEffect(() => {
     const eventIDS = logs.sort().map((log) => log.message);
-    updateWithEventArray(["cv_dl_input_success", "cv_output_to_s3_success"]);
+    updateWithEventArray(eventIDS);
+    console.log("sorted", eventIDS);
   }, [logs, updateWithEventArray]);
 
   const { YouTube: youtubeUploads } = useUploadOperationsData(operationId);
