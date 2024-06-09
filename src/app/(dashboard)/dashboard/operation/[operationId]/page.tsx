@@ -4,6 +4,8 @@ import { DownloadFileButton } from "~/components/ui/DownloadFileButton";
 import OperationLogDisplay from "~/components/ui/OperationLogDisplay/OperationLogDisplay";
 import useOperationData from "~/hooks/use-operation-data";
 import { useUploadOperationsData } from "~/hooks/use-upload-operation-data";
+import useTimeline from "~/hooks/use-timeline";
+import { OperationLogCode } from "~/definitions/db-type-aliases";
 
 export default function OperationDataPage({
   params,
@@ -18,6 +20,18 @@ export default function OperationDataPage({
 
   const { isOperationDataLoading, videoTitle, logs, status, associatedFiles } =
     useOperationData(operationId);
+
+  const { timeline, updateWithEvent } = useTimeline<OperationLogCode>({
+    expectedTimeline: [
+      {
+        errorCode: "cv_dl_input_fail",
+        successCode: "cv_dl_input_success",
+        errorDisplayMessage: "Failed to download input",
+        pendingDisplayMessage: "Downloading your files...",
+        successDisplayMessage: "Successfully downloaded your files!",
+      },
+    ],
+  });
 
   const { YouTube: youtubeUploads } = useUploadOperationsData(operationId);
 
