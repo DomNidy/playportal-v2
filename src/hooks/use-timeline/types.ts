@@ -119,7 +119,7 @@ type UseTimelineProps<EventIDS> = {
   /**
    * Function called when our timeline receives an event id that is not in the `expectedTimeline`
    *
-   * This might happen when you don't define an `ExpectedTimelineEvent` for all events in your `EventIDS`.
+   * This may occur when you try to process an event multiple times (as an event gets removed from the expected events array when it is first processed)
    *
    * **Note**: Make sure your `EventIDS` contains event identifiers for all events your external system can produce
    */

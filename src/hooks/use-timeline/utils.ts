@@ -138,3 +138,17 @@ export function cancelAllPendingEvents(
     return timelineEvent;
   });
 }
+
+/**
+ * Used to create an initial array of timeline events from the passed ExpectedTimelineEvent[]
+ * @param {any} expectedTimelineEvents:ExpectedTimelineEvent<T>
+ * @returns {any}
+ */
+export function getInitialTimelineEvents<T>(
+  expectedTimelineEvents: ExpectedTimelineEvent<T>[],
+): TimelineEvent[] {
+  return expectedTimelineEvents.map((expectedTimelineEvent) => ({
+    displayMessage: expectedTimelineEvent.pendingDisplayMessage,
+    state: "pending",
+  }));
+}

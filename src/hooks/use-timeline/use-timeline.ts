@@ -8,6 +8,7 @@ import {
 import {
   cancelAllPendingEvents,
   getDisplayMessageForStatus,
+  getInitialTimelineEvents,
   hasMatchingStatusCode,
   isCorrespondingEvents,
   isReceivedEventIDOutOfOrder,
@@ -32,7 +33,9 @@ export default function useTimeline<EventIDS>({
   // User to store events that were initially received out of order
   const [outOfOrderEvents, setOutOfOrderEvents] = useState<EventIDS[]>([]);
 
-  const [timeline, setTimeline] = useState<TimelineEvent[]>([]);
+  const [timeline, setTimeline] = useState<TimelineEvent[]>(
+    getInitialTimelineEvents(expectedTimeline),
+  );
 
   // Function that updates the state of the expectedTimelineEvents by acknowleding the passed event has occured
   // TODO: Maybe memoize this with useCallback?
@@ -100,6 +103,7 @@ export default function useTimeline<EventIDS>({
       newTimeline = cancelAllPendingEvents(newTimeline);
       setExpectedTimelineEvents([]);
     } else {
+      console.log("Updating timeline");
       // Remove the relevantExpectedEvent from the expected events array as we no longer care about it after we've received its status once
       //* Note: This logic relies on the assumption that the user did not pass in multiple events with the same status code
       // We might want to refactor the ExpectedTimelineEvents to have a constructor that generates some unique id
@@ -111,6 +115,7 @@ export default function useTimeline<EventIDS>({
       );
     }
 
+    console.log(newTimeline);
     setTimeline(newTimeline);
   };
 

@@ -38,6 +38,13 @@ export default function OperationDataPage({
         pendingDisplayMessage: "Rendering your video...",
         successDisplayMessage: "Successfully rendered your video!",
       },
+      {
+        errorCode: "cv_output_to_s3_fail",
+        successCode: "cv_output_to_s3_success",
+        errorDisplayMessage: "Failed create download link for video.",
+        pendingDisplayMessage: "Creating video download link...",
+        successDisplayMessage: "Successfully created video download link!",
+      },
     ],
     errorOnlyEvents: [
       {
@@ -49,7 +56,7 @@ export default function OperationDataPage({
   });
 
   useEffect(() => {
-    const eventIDS = logs.map((log) => log.message);
+    const eventIDS = logs.sort().map((log) => log.message);
     updateWithEventArray(eventIDS);
   }, [logs, updateWithEventArray]);
 
