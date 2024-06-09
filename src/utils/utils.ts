@@ -221,134 +221,134 @@ type OperationLogMessage = {
   type: "info" | "error" | "success";
 };
 
-/**
- * When provided with a log code, returns the associated message to show to the user
- * @param {any} logCode:OperationLogCode - The log code to convert to a message
- * @param {any} uploadTargetAccount?:UploadTargetAccount - If provided, the target account for the upload operation, used to display more context in specific messages
- * @returns {any}
- */
-export function convertOperationLogToMSG(
-  logCode: OperationLogCode,
-  uploadTargetAccount?: UploadTargetAccount & { platform: string },
-): OperationLogMessage | undefined {
-  switch (logCode) {
-    case "cv_unexpected_error":
-      return {
-        message: `An unexpected error occured while trying to create the video. Please try again, we will issue a quota refund shortly.`,
-        type: "error",
-      };
-    case "cv_dl_input_success":
-      return {
-        message: "Received your uploaded files.",
-        type: "success",
-      };
-    case "cv_dl_input_fail":
-      return {
-        message:
-          "Failed to retrieve your uploaded files. Please try again, we will issue a quota refund shortly.",
-        type: "error",
-      };
-    case "cv_render_success":
-      return {
-        message: "Successfully created video.",
-        type: "success",
-      };
-    case "cv_render_fail":
-      return {
-        message:
-          "Failed to create video. Please try again, we will issue a quota refund shortly.",
-        type: "error",
-      };
-    case "cv_output_to_s3_success":
-      return {
-        message: "You can now download your video.",
-        type: "success",
-      };
-    case "cv_output_to_s3_fail":
-      return {
-        message:
-          "Failed to make video available for download. Please try again, we will issue a quota refund shortly.",
-        type: "error",
-      };
-    case "uv_auth_success":
-      const accountName = uploadTargetAccount?.name ?? null;
-      let message;
+// /**
+//  * When provided with a log code, returns the associated message to show to the user
+//  * @param {any} logCode:OperationLogCode - The log code to convert to a message
+//  * @param {any} uploadTargetAccount?:UploadTargetAccount - If provided, the target account for the upload operation, used to display more context in specific messages
+//  * @returns {any}
+//  */
+// export function convertOperationLogToMSG(
+//   logCode: OperationLogCode,
+//   uploadTargetAccount?: UploadTargetAccount & { platform: string },
+// ): OperationLogMessage | undefined {
+//   switch (logCode) {
+//     case "cv_unexpected_error":
+//       return {
+//         message: `An unexpected error occured while trying to create the video. Please try again, we will issue a quota refund shortly.`,
+//         type: "error",
+//       };
+//     case "cv_dl_input_success":
+//       return {
+//         message: "Received your uploaded files.",
+//         type: "success",
+//       };
+//     case "cv_dl_input_fail":
+//       return {
+//         message:
+//           "Failed to retrieve your uploaded files. Please try again, we will issue a quota refund shortly.",
+//         type: "error",
+//       };
+//     case "cv_render_success":
+//       return {
+//         message: "Successfully created video.",
+//         type: "success",
+//       };
+//     case "cv_render_fail":
+//       return {
+//         message:
+//           "Failed to create video. Please try again, we will issue a quota refund shortly.",
+//         type: "error",
+//       };
+//     case "cv_output_to_s3_success":
+//       return {
+//         message: "You can now download your video.",
+//         type: "success",
+//       };
+//     case "cv_output_to_s3_fail":
+//       return {
+//         message:
+//           "Failed to make video available for download. Please try again, we will issue a quota refund shortly.",
+//         type: "error",
+//       };
+//     case "uv_auth_success":
+//       const accountName = uploadTargetAccount?.name ?? null;
+//       let message;
 
-      if (accountName) {
-        message = `Successfully your authenticated ${uploadTargetAccount?.platform} account '${accountName}'.`;
-      } else {
-        message = `Successfully authenticated your ${uploadTargetAccount?.platform} account.`;
-      }
+//       if (accountName) {
+//         message = `Successfully your authenticated ${uploadTargetAccount?.platform} account '${accountName}'.`;
+//       } else {
+//         message = `Successfully authenticated your ${uploadTargetAccount?.platform} account.`;
+//       }
 
-      return {
-        message,
-        type: "success",
-      };
-    case "uv_auth_fail":
-      const accountNameFail = uploadTargetAccount?.name ?? null;
-      let messageFail;
+//       return {
+//         message,
+//         type: "success",
+//       };
+//     case "uv_auth_fail":
+//       const accountNameFail = uploadTargetAccount?.name ?? null;
+//       let messageFail;
 
-      if (accountNameFail) {
-        messageFail = `Failed to authenticate your ${uploadTargetAccount?.platform} account '${accountNameFail}'. Please re-link your account and try again, if this issue persists please contact support.`;
-      } else {
-        messageFail = `Failed to authenticate your ${uploadTargetAccount?.platform} account. Please re-link your account and try again, if this issue persists please contact support.`;
-      }
-      return {
-        message: messageFail,
-        type: "error",
-      };
-    case "uv_unexpected_error":
-      const accountNameUnexpected = uploadTargetAccount?.name ?? null;
-      let messageUnexpected;
+//       if (accountNameFail) {
+//         messageFail = `Failed to authenticate your ${uploadTargetAccount?.platform} account '${accountNameFail}'. Please re-link your account and try again, if this issue persists please contact support.`;
+//       } else {
+//         messageFail = `Failed to authenticate your ${uploadTargetAccount?.platform} account. Please re-link your account and try again, if this issue persists please contact support.`;
+//       }
+//       return {
+//         message: messageFail,
+//         type: "error",
+//       };
+//     case "uv_unexpected_error":
+//       const accountNameUnexpected = uploadTargetAccount?.name ?? null;
+//       let messageUnexpected;
 
-      if (accountNameUnexpected) {
-        messageUnexpected = `An unexpected error occured while trying to upload video to your ${uploadTargetAccount?.platform} account '${accountNameUnexpected}'. Please try again, we will issue a quota refund shortly.`;
-      } else {
-        messageUnexpected = `An unexpected error occured while trying to upload the video to your ${uploadTargetAccount?.platform} account. Please try again, we will issue a quota refund shortly.`;
-      }
+//       if (accountNameUnexpected) {
+//         messageUnexpected = `An unexpected error occured while trying to upload video to your ${uploadTargetAccount?.platform} account '${accountNameUnexpected}'. Please try again, we will issue a quota refund shortly.`;
+//       } else {
+//         messageUnexpected = `An unexpected error occured while trying to upload the video to your ${uploadTargetAccount?.platform} account. Please try again, we will issue a quota refund shortly.`;
+//       }
 
-      return {
-        message: messageUnexpected,
-        type: "error",
-      };
-    case "uv_dl_input_success":
-      return {
-        message: "Received the video file.",
-        type: "success",
-      };
-    case "uv_dl_input_fail":
-      return {
-        message:
-          "Failed to retrieve the video file. Please try again, we will issue a quota refund shortly.",
-        type: "error",
-      };
-    case "uv_upload_success":
-      const accountNameUpload = uploadTargetAccount?.name ?? null;
-      let messageUpload;
-      if (accountNameUpload) {
-        messageUpload = `Successfully uploaded the video to your ${uploadTargetAccount?.platform} account '${accountNameUpload}'.`;
-      } else {
-        messageUpload = `Successfully uploaded the video to your ${uploadTargetAccount?.platform} account.`;
-      }
+//       return {
+//         message: messageUnexpected,
+//         type: "error",
+//       };
+//     case "uv_dl_input_success":
+//       return {
+//         message: "Received the video file.",
+//         type: "success",
+//       };
+//     case "uv_dl_input_fail":
+//       return {
+//         message:
+//           "Failed to retrieve the video file. Please try again, we will issue a quota refund shortly.",
+//         type: "error",
+//       };
+//     case "uv_upload_success":
+//       const accountNameUpload = uploadTargetAccount?.name ?? null;
+//       let messageUpload;
+//       if (accountNameUpload) {
+//         messageUpload = `Successfully uploaded the video to your ${uploadTargetAccount?.platform} account '${accountNameUpload}'.`;
+//       } else {
+//         messageUpload = `Successfully uploaded the video to your ${uploadTargetAccount?.platform} account.`;
+//       }
 
-      return {
-        message: messageUpload,
-        type: "success",
-      };
-    case "uv_upload_fail":
-      const accountNameUploadFail = uploadTargetAccount?.name ?? null;
-      let messageUploadFail;
-      if (accountNameUploadFail) {
-        messageUploadFail = `Failed to upload the video to your ${uploadTargetAccount?.platform} account '${accountNameUploadFail}'. Please try again, we will issue a quota refund shortly.`;
-      } else {
-        messageUploadFail = `Failed to upload the video to your ${uploadTargetAccount?.platform} account. Please try again, we will issue a quota refund shortly.`;
-      }
+//       return {
+//         message: messageUpload,
+//         type: "success",
+//       };
+//     case "uv_upload_fail":
+//       const accountNameUploadFail = uploadTargetAccount?.name ?? null;
+//       let messageUploadFail;
+//       if (accountNameUploadFail) {
+//         messageUploadFail = `Failed to upload the video to your ${uploadTargetAccount?.platform} account '${accountNameUploadFail}'. Please try again, we will issue a quota refund shortly.`;
+//       } else {
+//         messageUploadFail = `Failed to upload the video to your ${uploadTargetAccount?.platform} account. Please try again, we will issue a quota refund shortly.`;
+//       }
 
-      return {
-        message: messageUploadFail,
-        type: "error",
-      };
-  }
+//       return {
+//         message: messageUploadFail,
+//         type: "error",
+//       };
+//   }
 
-  return undefined;
-}
+//   return undefined;
+// }

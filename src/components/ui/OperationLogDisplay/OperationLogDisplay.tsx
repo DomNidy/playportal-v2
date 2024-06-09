@@ -1,19 +1,16 @@
 "use client";
 
-import { type Database } from "types_db";
 import { OperationLogMessage } from "./OperationLogMessage";
 import { Card, CardContent, CardHeader, CardTitle } from "../Card/Card";
 import { type OperationStatus } from "~/definitions/db-type-aliases";
-
-export type OperationLog =
-  Database["public"]["Tables"]["operation_logs"]["Row"];
+import { type TimelineEvent } from "~/hooks/use-timeline";
 
 export default function OperationLogDisplay({
   operationStatus,
   videoTitle,
   operationLogs,
 }: {
-  operationLogs: OperationLog[];
+  operationLogs: TimelineEvent[];
   operationStatus: OperationStatus;
   videoTitle: string;
 }) {
@@ -22,7 +19,7 @@ export default function OperationLogDisplay({
       <CardHeader className="p-4 pb-0">
         <CardTitle>
           {operationStatus === "Ongoing"
-            ? "Creating your video"
+            ? `Creating your video "${videoTitle}`
             : operationStatus === "Failed"
               ? "Something went wrong..."
               : "Video created!"}
@@ -30,11 +27,8 @@ export default function OperationLogDisplay({
       </CardHeader>
 
       <CardContent className="mt-0 p-4">
-        {operationLogs.map((operationLog) => (
-          <OperationLogMessage
-            key={operationLog.id}
-            operationLog={operationLog}
-          />
+        {operationLogs.map((operationLog, idx) => (
+          <OperationLogMessage key={idx} operationLog={operationLog} />
         ))}
       </CardContent>
     </Card>

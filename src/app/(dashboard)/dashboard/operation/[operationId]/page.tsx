@@ -4,8 +4,9 @@ import { DownloadFileButton } from "~/components/ui/DownloadFileButton";
 import OperationLogDisplay from "~/components/ui/OperationLogDisplay/OperationLogDisplay";
 import useOperationData from "~/hooks/use-operation-data";
 import { useUploadOperationsData } from "~/hooks/use-upload-operation-data";
-import useTimeline from "~/hooks/use-timeline";
+import useTimeline, { TimelineEvent } from "~/hooks/use-timeline";
 import { type OperationLogCode } from "~/definitions/db-type-aliases";
+import { useEffect } from "react";
 
 export default function OperationDataPage({
   params,
@@ -21,7 +22,7 @@ export default function OperationDataPage({
   const { isOperationDataLoading, videoTitle, logs, status, associatedFiles } =
     useOperationData(operationId);
 
-  const { timeline, updateWithEvent } = useTimeline<OperationLogCode>({
+  const { timeline, updateWithEventArray } = useTimeline<OperationLogCode>({
     expectedTimeline: [
       {
         errorCode: "cv_dl_input_fail",
@@ -46,6 +47,11 @@ export default function OperationDataPage({
       },
     ],
   });
+
+  useEffect(() => {
+    const eventIDS = logs.map((log) => log.message);
+    updateWithEventArray(eventIDS);
+  }, [logs, updateWithEventArray]);
 
   const { YouTube: youtubeUploads } = useUploadOperationsData(operationId);
 
@@ -73,7 +79,7 @@ export default function OperationDataPage({
 
         {status && (
           <OperationLogDisplay
-            operationLogs={logs}
+            operationLogs={timeline}
             operationStatus={status}
             videoTitle={videoTitle}
           />

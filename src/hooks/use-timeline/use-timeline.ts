@@ -92,6 +92,7 @@ export default function useTimeline<EventIDS>({
 
     // If the event status we received indicated an error occured,
     // cancel all pending events and remove all expected events
+    // otherwise, remove the received event from the expected events array
     if (newTimelineEventStatus === "error") {
       console.debug(
         "Timeline received an error event, cancelling all pending events and clearing expected events.",
@@ -113,5 +114,9 @@ export default function useTimeline<EventIDS>({
     setTimeline(newTimeline);
   };
 
-  return { timeline, updateWithEvent };
+  const updateWithEventArray = (receivedEventIDS: EventIDS[]) => {
+    receivedEventIDS.forEach(updateWithEvent);
+  };
+
+  return { timeline, updateWithEvent, updateWithEventArray };
 }

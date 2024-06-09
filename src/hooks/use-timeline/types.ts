@@ -69,6 +69,17 @@ type UseTimelineReturn<EventIDS> = {
    *
    */
   updateWithEvent: (receivedEventID: EventIDS) => void;
+  /**
+   * Function that updates the state of the timeline by acknowledging each event in the passed event ids array has occured
+   *
+   * Useful for when you are storing your external events in an array
+   *
+   * **Note**: This may be less performant, as whenever you use an array to update the state, you are essentially calling `updateWithEvent` for
+   * every event in the passed array.
+   * @param {any} receivedEventIDS:EventIDS[]
+   * @returns {any}
+   */
+  updateWithEventArray: (receivedEventIDS: EventIDS[]) => void;
 };
 
 /**

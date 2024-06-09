@@ -1,13 +1,12 @@
 import { type VariantProps, cva } from "class-variance-authority";
-import type { OperationLog } from "./OperationLogDisplay";
-import { cn, convertOperationLogToMSG } from "~/utils/utils";
-import { type OperationLogCode } from "~/definitions/db-type-aliases";
+import { cn } from "~/utils/utils";
 import { CheckCircle } from "lucide-react";
+import { type TimelineEvent } from "~/hooks/use-timeline";
 
 const operationLogVariants = cva("text-medium", {
   variants: {
     variant: {
-      default: "text-muted-foreground",
+      default: "text-muted-foreground underline",
       destructive: "text-destructive-foreground hover:bg-destructive/90",
       success: "text-green-500",
       outline:
@@ -32,26 +31,16 @@ const operationLogVariants = cva("text-medium", {
 export interface OperationLogMessageProps
   extends React.HTMLAttributes<HTMLParagraphElement>,
     VariantProps<typeof operationLogVariants> {
-  operationLog: OperationLog;
+  operationLog: TimelineEvent;
 }
 
-// TODO: We want to know the upload target accounts in props here (when applicable) so we can use the convertOperationLogToMSG function to display the correct message
-// TODO: Also want to style the message based on the log type returned by convertOperationLogToMSG
 export function OperationLogMessage({
   operationLog,
   className,
 }: OperationLogMessageProps) {
-  const msg = operationLog.message
-    ? convertOperationLogToMSG(operationLog?.message)
-    : undefined;
-
   let logVariant: "destructive" | "success" | "default" | undefined;
 
-  if (!msg) {
-    return <></>;
-  }
-
-  switch (msg.type) {
+  switch (operationLog.state) {
     case "error":
       logVariant = "destructive";
       break;
@@ -64,10 +53,10 @@ export function OperationLogMessage({
 
   return (
     <p className={cn(operationLogVariants({ variant: logVariant, className }))}>
-      {msg.type === "success" ? (
+      {/* {operationLog.state === "success" ? (
         <CheckCircle className="mr-2 inline h-[16px] w-[16px]" />
-      ) : null}
-      {msg.message}{" "}
+      ) : null} */}
+      {operationLog.state} - {operationLog.displayMessage}{" "}
     </p>
   );
 }

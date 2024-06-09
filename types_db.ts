@@ -192,19 +192,19 @@ export type Database = {
         Row: {
           created_at: string
           id: number
-          message: Database["public"]["Enums"]["operation_logs_enum"] | null
+          message: Database["public"]["Enums"]["operation_logs_enum"]
           operation_id: string | null
         }
         Insert: {
           created_at?: string
           id?: number
-          message?: Database["public"]["Enums"]["operation_logs_enum"] | null
+          message: Database["public"]["Enums"]["operation_logs_enum"]
           operation_id?: string | null
         }
         Update: {
           created_at?: string
           id?: number
-          message?: Database["public"]["Enums"]["operation_logs_enum"] | null
+          message?: Database["public"]["Enums"]["operation_logs_enum"]
           operation_id?: string | null
         }
         Relationships: [
