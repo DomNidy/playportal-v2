@@ -73,7 +73,7 @@ type OutOfOrderEvent<EventIDS extends string> = {
     /**
      * The `ExpectedTimelineEvent` that we removed when we received this out of order event
      */
-    _originalExpectedEvent?: ExpectedTimelineEvent<EventIDS>;
+    _originalExpectedEvent: ExpectedTimelineEvent<EventIDS>;
   };
 };
 

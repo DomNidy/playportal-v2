@@ -7,7 +7,6 @@ import { useUploadOperationsData } from "~/hooks/use-upload-operation-data";
 import useTimeline from "~/hooks/use-timeline";
 import { type OperationLogCode } from "~/definitions/db-type-aliases";
 import { useEffect } from "react";
-import { Button } from "~/components/ui/Button";
 
 export default function OperationDataPage({
   params,
@@ -61,7 +60,9 @@ export default function OperationDataPage({
     const eventIDS = logs.sort().map((log) => log.message);
 
     updateWithEventArray(eventIDS);
-  }, [logs, updateWithEventArray]);
+
+    console.log("Update with event array re-defined");
+  }, [updateWithEventArray, logs]);
 
   const { YouTube: youtubeUploads } = useUploadOperationsData(operationId);
 
