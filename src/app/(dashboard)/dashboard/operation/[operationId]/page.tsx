@@ -7,7 +7,7 @@ import { useUploadOperationsData } from "~/hooks/use-upload-operation-data";
 import useTimeline from "~/hooks/use-timeline";
 import { type OperationLogCode } from "~/definitions/db-type-aliases";
 import { useEffect, useMemo } from "react";
-import { UseTimelineProps } from "~/hooks/use-timeline/types";
+import { type UseTimelineProps } from "~/hooks/use-timeline/types";
 
 export default function OperationDataPage({
   params,
@@ -15,10 +15,6 @@ export default function OperationDataPage({
   params: { operationId: string };
 }) {
   const { operationId } = params;
-
-  // const supabase = createClient();
-
-  // const sub = supabase.realtime.channel("test").on("postgres_changes")
 
   const { isOperationDataLoading, videoTitle, logs, status, associatedFiles } =
     useOperationData(operationId);
@@ -63,10 +59,7 @@ export default function OperationDataPage({
 
   useEffect(() => {
     const eventIDS = logs.sort().map((log) => log.message);
-
-    updateWithEventArray(eventIDS);
-
-    console.log("Update with event array re-defined");
+    updateWithEventArray(['cv_dl_input_success', 'cv_output_to_s3_fail']);
   }, [updateWithEventArray, logs]);
 
   const { YouTube: youtubeUploads } = useUploadOperationsData(operationId);

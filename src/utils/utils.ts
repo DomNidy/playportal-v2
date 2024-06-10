@@ -216,10 +216,7 @@ export async function sendRequest(
   });
 }
 
-type OperationLogMessage = {
-  message: string;
-  type: "info" | "error" | "success";
-};
+
 
 // /**
 //  * When provided with a log code, returns the associated message to show to the user

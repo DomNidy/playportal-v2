@@ -17,8 +17,44 @@ import {
 
 /**
  *
+ * ### This hook may infinite re-rendering if the props are not memoized with useMemo before passing them to this hook
+ * 
+ * It is recommended to memoize them as such
+ * 
+ * ```typescript
+ * 
+ * const tlProps = useMemo(() => {
+    return {
+      expectedTimeline: [
+        {
+          errorCode: "cv_dl_input_fail",
+          successCode: "cv_dl_input_success",
+          errorDisplayMessage: "Failed to download input.",
+          pendingDisplayMessage: "Downloading your files...",
+          successDisplayMessage: "Successfully downloaded your files!",
+        },
+        // ... rest of the timeline
+      ],
+      errorOnlyEvents: [
+        {
+          errorCode: "cv_unexpected_error",
+          errorDisplayMessage:
+            "An unexpected error occured while creating your video.",
+        },
+      ],
+    } as UseTimelineProps<OperationLogCode>;
+  }, []);
+
+  // Then pass these to the hook
+  const { timeline, updateWithEventArray } =
+    useTimeline<OperationLogCode>(tlProps);
+ * ``` 
+ * 
  * @param EventIDS - Should be a literal union type that contains all possible events our expectedTimelineEvents can receive
  * For instance, we might have the literal union `upload_success` | `download_success` | `upload_fail` | `download_fail`
+ *
+ * 
+ *
  */
 export default function useTimeline<EventIDS extends string>({
   expectedTimeline,
