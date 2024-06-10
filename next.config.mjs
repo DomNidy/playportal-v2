@@ -5,15 +5,14 @@
 
 import createMDX from "fumadocs-mdx/config";
 import withPlaiceholder from "@plaiceholder/next";
-import { BundleAnalyzerPlugin } from "webpack-bundle-analyzer"
 
 await import("./src/env.js");
 
 
 const withMDX = createMDX();
-
 /** @type {import("next").NextConfig} */
 const config = {
+
   pageExtensions: ["js", "jsx", "ts", "tsx", "md", "mdx"],
   images:
   {

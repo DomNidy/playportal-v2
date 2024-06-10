@@ -12,7 +12,6 @@ import {
 import { headers } from "next/headers";
 import { TRPCClientError } from "@trpc/client";
 import {
-  type YoutubeChannelSummary,
   decryptYoutubeCredentials,
   getYoutubeChannelSummary,
   persistYoutubeCredentialsToDB,
@@ -30,6 +29,7 @@ import {
   getUserVideosRatelimit,
 } from "~/server/ratelimiters";
 import { youtubeOAuthClient } from "~/server/clients/oauth/youtube";
+import { type YoutubeChannelSummary } from "~/definitions/db-type-aliases";
 
 export const userRouter = createTRPCRouter({
   getUserVideos: protectedProcedure

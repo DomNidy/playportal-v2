@@ -25,7 +25,7 @@ import {
   getUserUploadYoutubeVideoQuotaUsage,
   refundFailedCreateVideoOperation,
   refundFailedUploadVideoOperation,
-} from "~/server/helpers/supabase";
+} from "~/server/helpers/supabase/helpers";
 import { type PostgrestResponseSuccess } from "@supabase/postgrest-js";
 import { type Database } from "types_db";
 import { generateUploadURLRatelimiter } from "~/server/ratelimiters";

@@ -1,3 +1,4 @@
+"use client";
 import { useQueryClient } from "@tanstack/react-query";
 import React from "react";
 import { api } from "~/trpc/react";
