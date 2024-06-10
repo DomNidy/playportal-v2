@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
 import {
   type UseTimelineReturn,
   type ExpectedTimelineEvent,
@@ -7,13 +14,39 @@ import {
   type OutOfOrderEvent,
 } from "./types";
 import {
-  cancelAllPendingEvents,
   getDisplayMessageForStatus,
   getInitialTimelineEvents,
   hasMatchingStatusCode,
   isCorrespondingEvents,
   mapEventIDToStatus,
 } from "./utils";
+
+function expectedTimelineIndexReducer(
+  state: number,
+  action:
+    | "received_error"
+    | "received_in_order_event"
+    | "received_out_of_order_event",
+) {
+  switch (action) {
+    case "received_error":
+      console.log("setExpectedTimelineIndexReducer received an error");
+      return Infinity;
+    case "received_in_order_event":
+      console.log("setExpectedTimelineIndexReducer received an in order event");
+      return state + 1;
+    case "received_out_of_order_event":
+      console.log(
+        "setExpectedTimelineIndexReducer received an out of order event",
+      );
+      return state + 1;
+    default:
+      console.warn(
+        "setExpectedTimelineIndexReducer received an unknown action",
+      );
+      return state;
+  }
+}
 
 /**
  *
@@ -61,12 +94,11 @@ export default function useTimeline<EventIDS extends string>({
   errorOnlyEvents,
 }: UseTimelineProps<EventIDS>): UseTimelineReturn<EventIDS> {
   // This is used to store the initial expected timeline events passed in props
-  // We will remove expected events from this array as they occur
-  const [expectedTimelineEvents] = useState<ExpectedTimelineEvent<EventIDS>[]>(
-    () => expectedTimeline,
-  );
+  const [expectedTimelineEvents] =
+    useState<ExpectedTimelineEvent<EventIDS>[]>(expectedTimeline);
 
-  const [expectedTimelineIndex, setExpectedTimelineIndex] = useState<number>(0);
+  // FIXME: This doesn't seem to be properly updated
+  const expectedTimelineIndex = useRef<number>(0);
 
   // User to store events that were initially received out of order
   const [outOfOrderEvents, setOutOfOrderEvents] = useState<
@@ -77,9 +109,34 @@ export default function useTimeline<EventIDS extends string>({
     getInitialTimelineEvents(expectedTimeline),
   );
 
+  // We use this to track whether or not we should run cancelAllPending events
+  // Intended to only set this once, when we receive our first error
+  const didTimelineError = useRef<boolean>(false);
+
   const nextExpectedEvent = useMemo(() => {
-    return expectedTimelineEvents.at(expectedTimelineIndex);
-  }, [expectedTimelineEvents, expectedTimelineIndex]);
+    return expectedTimelineEvents.at(expectedTimelineIndex.current);
+  }, [expectedTimelineEvents]);
+
+  const cancelAllPendingEvents = useCallback(() => {
+    setTimeline((prevTimeline) => {
+      return prevTimeline.map((tle) => {
+        if (tle.state === "pending") {
+          return {
+            ...tle,
+            state: "cancelled",
+            metadata: {
+              _updatedByEventID: tle.metadata._updatedByEventID,
+              _relevantEventIDS: tle.metadata._relevantEventIDS,
+              _displayMessagesMap: {
+                ...tle.metadata._displayMessagesMap,
+              },
+            },
+          };
+        }
+        return tle;
+      });
+    });
+  }, []);
 
   // Function that updates the state of the expectedTimelineEvents by acknowleding the passed event has occured
   const updateWithEvent = useCallback(
@@ -98,7 +155,7 @@ export default function useTimeline<EventIDS extends string>({
           errorOnlyEvents.find((errEv) => receivedEventID === errEv.errorCode)
         ) {
           console.log("Received an error only event", receivedEventID);
-          setTimeline((prevTimeline) => cancelAllPendingEvents(prevTimeline));
+          cancelAllPendingEvents();
         }
 
         console.warn("Received unexpected event", receivedEventID);
@@ -112,12 +169,18 @@ export default function useTimeline<EventIDS extends string>({
         relevantExpectedEvent,
       );
 
-      const isEventOutOfOrder = nextExpectedEvent
-        ? hasMatchingStatusCode(nextExpectedEvent, receivedEventID)
+      const receivedOutOfOrderEvent = nextExpectedEvent
+        ? !hasMatchingStatusCode(nextExpectedEvent, receivedEventID)
         : false;
 
       // If received event is out of order, add it to the out of order events array
-      if (isEventOutOfOrder) {
+      if (receivedOutOfOrderEvent) {
+        console.log(
+          receivedEventID,
+          "Was out of order",
+          expectedTimelineEvents,
+        );
+
         setOutOfOrderEvents((prevOutOfOrderEvents) => [
           ...prevOutOfOrderEvents,
           {
@@ -130,7 +193,7 @@ export default function useTimeline<EventIDS extends string>({
           },
         ]);
 
-        setExpectedTimelineIndex((prev) => prev + 1);
+        expectedTimelineIndex.current += 1;
 
         return;
       } else {
@@ -155,25 +218,41 @@ export default function useTimeline<EventIDS extends string>({
             return timelineEvent;
           }),
         );
+
+        expectedTimelineIndex.current += 1;
+
         return;
       }
     },
-    [errorOnlyEvents, expectedTimelineEvents, nextExpectedEvent],
+    [
+      errorOnlyEvents,
+      expectedTimelineEvents,
+      nextExpectedEvent,
+      cancelAllPendingEvents,
+    ],
   );
 
   // FIXME: So this runs infinitely in a loop, but it doesnt find errors so it doesnt actually updaate the timeline
   // FIXME: So that implies our expectedTimeline changes every render?
 
+  // FIXME: One problem with this is that when we end up updating the timeline array here, we update it, then this effect runs again,
+  // FIXME: and because we the 'error' event is still in the timeline, it just keeps running.
+
   // If we received an errored event, we should cancel all pending events and remove all expected events
   useEffect(() => {
     console.log("Timeline eff", timeline);
-    if (timeline.some((timelineEvent) => timelineEvent.state === "error")) {
+    if (
+      !didTimelineError.current &&
+      timeline.some((timelineEvent) => timelineEvent.state === "error")
+    ) {
+      didTimelineError.current = true;
+
       setTimeline((prevTimeline) => {
         console.log("Found an error", prevTimeline);
 
         return prevTimeline.map((tle) => ({
           ...tle,
-          state: "cancelled",
+          state: tle.state === "pending" ? "cancelled" : tle.state,
           metadata: {
             _updatedByEventID: tle.metadata._updatedByEventID,
             _relevantEventIDS: tle.metadata._relevantEventIDS,
@@ -184,7 +263,7 @@ export default function useTimeline<EventIDS extends string>({
         }));
       });
       // Set it to an index outside of the array to indicate we are done
-      setExpectedTimelineIndex(Infinity);
+      expectedTimelineIndex.current = Infinity;
     }
   }, [timeline]);
 
