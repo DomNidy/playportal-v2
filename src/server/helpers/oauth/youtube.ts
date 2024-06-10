@@ -6,6 +6,7 @@ import {
 } from "crypto";
 import { type Credentials, OAuth2Client } from "google-auth-library";
 import { google } from "googleapis";
+import { type YoutubeChannelSummary } from "~/definitions/db-type-aliases";
 import { env } from "~/env";
 import { supabaseAdmin } from "~/server/clients/supabase";
 import { getURL } from "~/utils/utils";
@@ -299,12 +300,6 @@ export async function persistYoutubeCredentialsToDB(
 }
 
 // TODO: This might not be a good practice, i dont know if the youtube api will always return the channel id ? read the docs
-
-export type YoutubeChannelSummary = {
-  channelId: string;
-  channelTitle: string;
-  channelAvatar: string | null;
-};
 
 // TODO: Review this, probably want to periodically refresh the channel summary
 // Returns summary of youtube channel associated with the provided credentials

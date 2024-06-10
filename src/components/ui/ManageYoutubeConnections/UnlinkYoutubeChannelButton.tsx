@@ -4,7 +4,7 @@ import { api } from "~/trpc/react";
 import { toast } from "../Toasts/use-toast";
 import { Button } from "../Button";
 import { MoonLoader } from "react-spinners";
-import { type YoutubeChannelSummary } from "~/utils/oauth/youtube";
+import { type YoutubeChannelSummary } from "~/definitions/db-type-aliases";
 
 export default function UnlinkYoutubeChannelButton({
   channelId,

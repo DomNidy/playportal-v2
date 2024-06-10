@@ -1,4 +1,4 @@
-import { type YoutubeChannelSummary } from "~/utils/oauth/youtube";
+import { type YoutubeChannelSummary } from "~/definitions/db-type-aliases";
 import { Avatar, AvatarFallback, AvatarImage } from "../Avatar/Avatar";
 import UnlinkYoutubeChannelButton from "./UnlinkYoutubeChannelButton";
 

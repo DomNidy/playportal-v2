@@ -13,3 +13,9 @@ export type UploadStatus = Database["public"]["Enums"]["upload_video_status"];
 export type UploadPlatforms = Database["public"]["Enums"]["upload_platform"];
 
 export type OperationStatus = Database["public"]["Enums"]["operation_status"];
+
+export type YoutubeChannelSummary = {
+  channelId: string;
+  channelTitle: string;
+  channelAvatar: string | null;
+};

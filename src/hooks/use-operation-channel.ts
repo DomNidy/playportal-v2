@@ -23,7 +23,6 @@ export type UseOperationChannelProps = {
 };
 
 export function useOperationChannel({ ...props }: UseOperationChannelProps) {
-  console.log("hopok");
   const { setOperationLogs, setOperationStatus, operationId } = props;
 
   // Manage the channel subscription here

@@ -3,9 +3,9 @@
 import posthog from "posthog-js";
 import { Resend } from "resend";
 import { env } from "~/env";
-import { createClient } from "../utils/supabase/server";
+import { createClient } from "~/utils/supabase/server";
 import { redirect } from "next/navigation";
-import { getErrorRedirect, getStatusRedirect, getURL } from "../utils/utils";
+import { getErrorRedirect, getStatusRedirect, getURL } from "~/utils/utils";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import {
@@ -13,7 +13,7 @@ import {
   resetPasswordForEmailRatelimit,
   signUpRatelimit,
   signupToMailingListRatelimit,
-} from "./ratelimiters";
+} from "../server/ratelimiters";
 
 export type SignupToMailingListResponse = {
   status: "success" | "error" | "ratelimited";

@@ -5,6 +5,7 @@
 
 import createMDX from "fumadocs-mdx/config";
 import withPlaiceholder from "@plaiceholder/next";
+import { BundleAnalyzerPlugin } from "webpack-bundle-analyzer"
 
 await import("./src/env.js");
 
@@ -28,7 +29,21 @@ const config = {
         hostname: "localhost",
       }
     ]
-  }
+  },
+
+  // https://nextjs.org/docs/app/api-reference/next-config-js/webpack
+  // webpack: (config, { isServer,  }) => {
+  //   if (!isServer) {
+  //     console.log("Webpack running on client")
+  //     // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+  //     config.plugins.push(new BundleAnalyzerPlugin({
+  //       analyzerMode: "static",
+  //       reportFilename: "./bundle-analysis-report.html"
+  //     }))
+  //   } else {
+  //     console.log("Webpack running on server mode.")
+  //   }
+  // }
 };
 
 export default withPlaiceholder(withMDX(config));
