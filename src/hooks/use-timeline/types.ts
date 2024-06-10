@@ -66,7 +66,7 @@ type OutOfOrderEvent<EventIDS extends string> = {
     // TODO: Implement this
     /**
      * The index that related `ExpectedTimelineEvent` had in the intial `expectedTimeline` array
-     * 
+     *
      * This is useful when processing out of order events
      */
     //_originalExpectedEventIndex: number;
@@ -176,6 +176,7 @@ type UseTimelineProps<EventIDS extends string> = {
     ExpectedTimelineEvent<EventIDS>,
     "errorCode" | "errorDisplayMessage"
   >[];
+  //* Implement eventually
   /**
    * Function called when our timeline receives an event id that is not in the `expectedTimeline`
    *
@@ -183,7 +184,7 @@ type UseTimelineProps<EventIDS extends string> = {
    *
    * **Note**: Make sure your `EventIDS` contains event identifiers for all events your external system can produce
    */
-  onUnexpectedEventReceived?: (unexpectedEventID: EventIDS) => void;
+  // onUnexpectedEventReceived?: (unexpectedEventID: EventIDS) => void;
 };
 
 export type {
