@@ -59,10 +59,17 @@ export default function OperationDataPage({
     });
 
   useEffect(() => {
-    const eventIDS = logs.sort().map((log) => log.message);
-    updateWithEventArray(eventIDS);
-    console.log("sorted", eventIDS);
-  }, [logs, updateWithEventArray]);
+    const update = () => {
+      const eventIDS = logs.sort().map((log) => log.message);
+
+      for (const eventID of eventIDS) {
+        console.log("Updating with event", eventID);
+        updateWithEvent(eventID);
+      }
+    };
+
+    update();
+  }, [logs, updateWithEvent]);
 
   const { YouTube: youtubeUploads } = useUploadOperationsData(operationId);
 

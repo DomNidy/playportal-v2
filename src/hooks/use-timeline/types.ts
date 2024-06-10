@@ -60,6 +60,17 @@ type OutOfOrderEvent<EventIDS extends string> = {
    */
   metadata: {
     /**
+     * The time at which we received this out of order event
+     */
+    _receivedAt: number;
+    // TODO: Implement this
+    /**
+     * The index that related `ExpectedTimelineEvent` had in the intial `expectedTimeline` array
+     * 
+     * This is useful when processing out of order events
+     */
+    //_originalExpectedEventIndex: number;
+    /**
      * The `ExpectedTimelineEvent` that we removed when we received this out of order event
      */
     _originalExpectedEvent?: ExpectedTimelineEvent<EventIDS>;

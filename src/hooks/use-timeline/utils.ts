@@ -100,6 +100,9 @@ export function isReceivedEventIDOutOfOrder<T extends string>(
   receivedEventID: T,
   expectedEvents: ExpectedTimelineEvent<T>[],
 ): boolean {
+  console.log("Checking if received event is out of order", receivedEventID);
+  console.log("with the expected events", expectedEvents);
+
   // Find the index of the received expected event
   const relevantExpectedEventIndex = expectedEvents.findIndex((expectedEvent) =>
     hasMatchingStatusCode(expectedEvent, receivedEventID),
@@ -114,8 +117,10 @@ export function isReceivedEventIDOutOfOrder<T extends string>(
   }
 
   if (relevantExpectedEventIndex > 0) {
+    console.log(`Received event ${receivedEventID} is out of order`);
     return true;
   }
+  console.log(`Received event ${receivedEventID} is not out of order`);
   return false;
 }
 
@@ -180,75 +185,91 @@ export function processOutOfOrderEvents<T extends string>(
   outOfOrderEvents: OutOfOrderEvent<T>[],
   timeline: TimelineEvent[],
 ) {
-  let newTimeline: TimelineEvent[] = timeline;
-  let newOutOfOrderEvents: OutOfOrderEvent<T>[] = [...outOfOrderEvents];
+  let newTimeline: TimelineEvent[] = [...timeline];
+  let newOutOfOrderEvents: OutOfOrderEvent<T>[] = outOfOrderEvents
+    .map((ooe) => ({ ...ooe }))
+    .sort((a, b) => -1 * (a.metadata._receivedAt - b.metadata._receivedAt));
+  const newExpectedTimelineEvents: ExpectedTimelineEvent<T>[] = [
+    ...expectedEvents,
+  ];
 
-  let currNextExpectedEventIndex = 0;
+  console.log("sorting out of order events", newOutOfOrderEvents);
+  // We only want to use shift on this array if we end up changing the next expected event
+  let currNextExpectedEvent = newExpectedTimelineEvents.shift();
+  // Used to keep track of how many times we have shifted the expected events array, we dont count the first shift
+  let _shiftedCount = 0;
   // Create local variable to store the next expected event
   // We will update this variable locally if we end up processing an out of order event that matches the next expected event
-  // TODO: Ideally change this to a different data structure that allows double-ended pop and push operations in O(1)
-  let currNextExpectedEvent = expectedEvents.at(currNextExpectedEventIndex);
 
   while (
     newOutOfOrderEvents.length > 0 &&
     currNextExpectedEvent !== undefined
   ) {
-    const _newOutOfOrderEvents = outOfOrderEvents.filter((outOfOrderEvent) => {
-      if (!currNextExpectedEvent) {
-        console.error(
-          `Expected event ${String(outOfOrderEvent.eventID)} but there are no more expected events to match it with.`,
-        );
-        return false;
-      }
+    const _newOutOfOrderEvents = newOutOfOrderEvents.filter(
+      (outOfOrderEvent) => {
+        if (!currNextExpectedEvent) {
+          console.error(
+            `Expected event ${String(outOfOrderEvent.eventID)} but there are no more expected events to match it with.`,
+          );
+          return false;
+        }
 
-      // If the event we are expecting next matches this out of order event, update the timeline's state
-      if (
-        hasMatchingStatusCode(currNextExpectedEvent, outOfOrderEvent.eventID)
-      ) {
-        console.debug(
-          `Current next expected event ${JSON.stringify(currNextExpectedEvent)} matched an out of order event, ${JSON.stringify(outOfOrderEvent)}, updating the timeline's state `,
-        );
+        // If the event we are expecting next matches this out of order event, update the timeline's state
+        if (
+          hasMatchingStatusCode(currNextExpectedEvent, outOfOrderEvent.eventID)
+        ) {
+          console.debug(
+            `Current next expected event ${JSON.stringify(currNextExpectedEvent)} matched an out of order event, ${JSON.stringify(outOfOrderEvent)}, updating the timeline's state `,
+          );
 
-        // Find the timeline event corresponding to the out of order event, and update it if it can be found
+          // Find the timeline event corresponding to the out of order event, and update it if it can be found
 
-        newTimeline = timeline.map((timelineEvent) => {
-          // Find the timeline event corresponding to the out of order event and update it
-          if (
-            timelineEvent.metadata._relevantEventIDS.has(
-              outOfOrderEvent.eventID,
-            )
-          ) {
+          newTimeline = newTimeline.map((timelineEvent) => {
+            // Find the timeline event corresponding to the out of order event and update it
+            if (
+              timelineEvent.metadata._relevantEventIDS.has(
+                outOfOrderEvent.eventID,
+              )
+            ) {
+              console.log(
+                `Found matching TimelineEvent with a matching relevant event id for out of order event ${String(outOfOrderEvent)}`,
+              );
+
+              return {
+                metadata: {
+                  _updatedByEventID: outOfOrderEvent.eventID,
+                  _relevantEventIDS: timelineEvent.metadata._relevantEventIDS,
+                  _displayMessagesMap:
+                    timelineEvent.metadata._displayMessagesMap,
+                },
+                displayMessage:
+                  timelineEvent.metadata._displayMessagesMap[
+                    outOfOrderEvent.indicatesState
+                  ],
+                state: outOfOrderEvent.indicatesState,
+              };
+            }
+
             console.log(
-              `Found matching TimelineEvent with a matching relevant event id for out of order event ${String(outOfOrderEvent)}`,
+              "No matching timeline event found for out of order event",
             );
 
-            return {
-              metadata: {
-                _updatedByEventID: outOfOrderEvent.eventID,
-                _relevantEventIDS: timelineEvent.metadata._relevantEventIDS,
-                _displayMessagesMap: timelineEvent.metadata._displayMessagesMap,
-              },
-              displayMessage:
-                timelineEvent.metadata._displayMessagesMap[
-                  outOfOrderEvent.indicatesState
-                ],
-              state: outOfOrderEvent.indicatesState,
-            };
-          }
-          return timelineEvent;
-        });
+            return timelineEvent;
+          });
 
-        // Update the next expected event
-        currNextExpectedEvent = expectedEvents.at(currNextExpectedEventIndex++);
-        return false; // Remove this event from the out of order events array
-      }
+          // Update the next expected event
+          return false; // Remove this event from the out of order events array
+        }
 
-      console.log(
-        `Event ${String(outOfOrderEvent.eventID)} is still out of order.`,
-      );
-      // If this event is still out of order, leave it in here
-      return true;
-    });
+        console.log(
+          `Event ${String(outOfOrderEvent.eventID)} is still out of order.`,
+        );
+        // If this event is still out of order, leave it in here
+        return true;
+      },
+    );
+
+    newOutOfOrderEvents = _newOutOfOrderEvents;
 
     if (newOutOfOrderEvents.length == _newOutOfOrderEvents.length) {
       console.log(
@@ -257,11 +278,16 @@ export function processOutOfOrderEvents<T extends string>(
       break;
     }
 
-    newOutOfOrderEvents = _newOutOfOrderEvents;
+    // Update the next expected event
+    currNextExpectedEvent = newExpectedTimelineEvents.shift();
+    _shiftedCount++;
   }
 
   return {
     newTimeline,
     newOutOfOrderEvents,
+    // Only return the new expected timeline events if we have shifted the expected events array
+    newExpectedTimelineEvents:
+      _shiftedCount > 0 ? newExpectedTimelineEvents : expectedEvents,
   };
 }
