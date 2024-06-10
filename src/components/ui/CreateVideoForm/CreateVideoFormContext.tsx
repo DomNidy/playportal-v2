@@ -14,10 +14,10 @@ import type {
 import { api } from "~/trpc/react";
 import { toast } from "../Toasts/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
-import { revalidatePathByServerAction } from "~/utils/actions";
 import { sendRequest } from "~/utils/utils";
 import { useRouter } from "next/navigation";
 import { type DeepPartial } from "react-hook-form";
+import { revalidatePathByServerAction } from "~/server/actions";
 
 export type CreateVideoFormCTX = {
   audioFile: File | null;

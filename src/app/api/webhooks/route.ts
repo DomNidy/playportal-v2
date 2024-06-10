@@ -7,7 +7,7 @@ import {
   manageSubscriptionStatusChange,
   upsertPriceRecord,
   upsertProductRecord,
-} from "~/utils/supabase/admin";
+} from "~/server/helpers/supabase/";
 
 // All events we receive from stripe will be sent here
 // Things such as customer payments, us updating our prices, etc.

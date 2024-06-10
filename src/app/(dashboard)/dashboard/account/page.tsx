@@ -1,6 +1,6 @@
 import ManageAccount from "~/components/ui/ManageAccount/ManageAccount";
 import { createClient } from "~/utils/supabase/server";
-import { getFeatureFlag } from "~/utils/utils";
+import { getFeatureFlag } from "~/server/helpers/supabase/";
 
 // TODO: Implement error handling here
 export default async function AccountPage() {

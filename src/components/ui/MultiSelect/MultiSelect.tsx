@@ -78,11 +78,9 @@ const MultiSelectFormField = React.forwardRef<
     {
       className,
       variant,
-      asChild = false,
       options,
       defaultValue,
       onValueChange,
-      disabled,
       placeholder,
       animation = 0,
       ...props

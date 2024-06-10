@@ -3,9 +3,9 @@ import {
   decryptYoutubeCredentials,
   encryptYoutubeCredentials,
   getYoutubeChannelSummary,
-  oAuth2Client,
   persistYoutubeCredentialsToDB,
-} from "~/utils/oauth/youtube";
+} from "~/server/helpers/oauth/youtube";
+import { youtubeOAuthClient } from "~/server/clients/oauth/youtube";
 import { createClient } from "~/utils/supabase/server";
 import { getErrorRedirect, getStatusRedirect, getURL } from "~/utils/utils";
 
@@ -53,10 +53,12 @@ export async function GET(req: NextRequest) {
 
     // Exchange the code for an access token and refresh token
     // We need to use the code verifier that we stored in a cookie
-    const { tokens, res: getTokenResponse } = await oAuth2Client.getToken({
-      code,
-      codeVerifier,
-    });
+    const { tokens, res: getTokenResponse } = await youtubeOAuthClient.getToken(
+      {
+        code,
+        codeVerifier,
+      },
+    );
 
     console.log("Get token response", JSON.stringify(getTokenResponse));
 

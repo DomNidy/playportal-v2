@@ -1,11 +1,13 @@
 import { TRPCClientError } from "@trpc/client";
-import { type createTRPCContext } from "./api/trpc";
+import { type createTRPCContext } from "~/server/api/trpc";
 import { type Database } from "types_db";
 import { type RouterInputs } from "~/trpc/react";
-import { supabaseAdmin } from "~/utils/supabase/admin";
+import { supabaseAdmin } from "~/server/clients/supabase";
 import { type NonNullableProperties } from "~/utils/utils";
-import { z } from "zod";
-import { YoutubeUploadOptions } from "~/definitions/api-schemas";
+import { type z } from "zod";
+import { type YoutubeUploadOptions } from "~/definitions/api-schemas";
+import { type createClient } from "~/utils/supabase/server";
+import { type FeatureFlag } from "~/definitions/db-type-aliases";
 
 // Alias for the type of the context that is passed to the tRPC API
 type TRPCContext = Awaited<ReturnType<typeof createTRPCContext>>;
@@ -261,4 +263,28 @@ export async function getOAuthCredentialsForYoutubeChannels(
   }
 
   return oauthCredentials;
+}
+
+// Utility function to check feature flag for a user
+// Pass this a supabase server client, it works on the server side
+export async function getFeatureFlag(
+  supabase: ReturnType<typeof createClient>,
+  feature: FeatureFlag,
+  userId: string,
+) {
+  const { data: featureFlag } = await supabase
+    .from("user_feature_flags_view")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("feature", feature)
+    .eq("feature_enabled", true)
+    .eq("feature_enabled_for_user", true)
+    .maybeSingle();
+
+  if (featureFlag) {
+    console.log(`Feature flag ${feature} is enabled for user ${userId}`);
+    return true;
+  }
+
+  return false;
 }

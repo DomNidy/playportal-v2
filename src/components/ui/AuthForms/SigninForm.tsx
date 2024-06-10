@@ -17,7 +17,7 @@ import { createClient } from "~/utils/supabase/client";
 import { getURL } from "~/utils/utils";
 import { Link } from "~/components/ui/Link";
 import { cn } from "~/utils/utils";
-import { login } from "~/utils/actions";
+import { login } from "~/server/actions";
 import { ClipLoader } from "react-spinners";
 import GoogleIcon from "~/components/icons/GoogleIcon";
 
@@ -32,7 +32,7 @@ export default function SigninForm() {
 
   const form = useForm<z.infer<typeof SignInSchema>>({
     resolver: zodResolver(SignInSchema),
-  defaultValues: {
+    defaultValues: {
       email: "",
       password: "",
     },
@@ -45,7 +45,7 @@ export default function SigninForm() {
   }
 
   return (
-    <div className="mx-auto w-fit max-w-md rounded-xl border-[1.8px] authform-bg-gradient p-4  shadow-input md:p-8 ">
+    <div className="authform-bg-gradient mx-auto w-fit max-w-md rounded-xl border-[1.8px] p-4  shadow-input md:p-8 ">
       <h2 className="text-xl font-bold text-neutral-800 dark:text-neutral-200">
         Welcome to Playportal
       </h2>

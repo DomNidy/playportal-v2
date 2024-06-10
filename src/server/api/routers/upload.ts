@@ -4,31 +4,31 @@ import { z } from "zod";
 import { SendMessageCommand } from "@aws-sdk/client-sqs";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { env } from "~/env";
-import { supabaseAdmin } from "~/utils/supabase/admin";
+import { supabaseAdmin } from "~/server/clients/supabase";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { s3Client, sqsClient } from "~/server/aws-clients";
+import { s3Client, sqsClient } from "~/server/clients/aws";
 import {
   YoutubeUploadOptions,
   type CreateVideoOptionsSchema,
 } from "~/definitions/api-schemas";
 import { headers } from "next/headers";
 import { VideoPreset } from "~/definitions/api-schemas";
-import { getFeatureFlag } from "~/utils/utils";
 import { YoutubeVideoVisibilities } from "~/definitions/form-schemas";
 import {
   createCreateVideoOperation,
   createYoutubeUploadOperation,
   enforceQuotaLimits,
+  getFeatureFlag,
   getOAuthCredentialsForYoutubeChannels,
   getUserCreateVideoQuotaUsage,
   getUserQuotaLimits,
   getUserUploadYoutubeVideoQuotaUsage,
   refundFailedCreateVideoOperation,
   refundFailedUploadVideoOperation,
-} from "~/server/server-utils";
+} from "~/server/helpers/supabase/";
 import { type PostgrestResponseSuccess } from "@supabase/postgrest-js";
 import { type Database } from "types_db";
-import { generateUploadURLRatelimiter } from "~/utils/upstash/ratelimiters";
+import { generateUploadURLRatelimiter } from "~/server/ratelimiters";
 
 export const uploadRouter = createTRPCRouter({
   generateUploadURL: protectedProcedure

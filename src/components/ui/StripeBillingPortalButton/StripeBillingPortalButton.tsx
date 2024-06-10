@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Button } from "../Button";
 import { usePathname, useRouter } from "next/navigation";
-import { createStripePortal } from "~/utils/stripe/server";
+import { createStripePortal } from "~/server/helpers/stripe";
 
 // Button that opens up the stripe billing portal for the user
 export default function StripeBillingPortalButton({

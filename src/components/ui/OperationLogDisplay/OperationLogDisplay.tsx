@@ -22,7 +22,7 @@ export default function OperationLogDisplay({
       <CardHeader className="p-4 pb-0">
         <CardTitle>
           {operationStatus === "Ongoing"
-            ? "Creating your video"
+            ? `Creating your video "${videoTitle}"...`
             : operationStatus === "Failed"
               ? "Something went wrong..."
               : "Video created!"}

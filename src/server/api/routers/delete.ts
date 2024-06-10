@@ -6,10 +6,10 @@ import {
   type ObjectIdentifier,
 } from "@aws-sdk/client-s3";
 import { env } from "~/env";
-import { s3Client } from "~/server/aws-clients";
-import { supabaseAdmin } from "~/utils/supabase/admin";
+import { s3Client } from "~/server/clients/aws";
+import { supabaseAdmin } from "~/server/clients/supabase";
 import { headers } from "next/headers";
-import { deleteOperationRatelimiter } from "~/utils/upstash/ratelimiters";
+import { deleteOperationRatelimiter } from "~/server/ratelimiters";
 
 export const deleteRouter = createTRPCRouter({
   // This endpoint deletes all files associated with an operation ID

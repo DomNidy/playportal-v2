@@ -2,8 +2,8 @@
 
 import type Stripe from "stripe";
 import { stripe } from "~/utils/stripe/config";
-import { createClient } from "../supabase/server";
-import { createOrRetrieveCustomer } from "../supabase/admin";
+import { createClient } from "~/utils/supabase/server";
+import { createOrRetrieveCustomer } from "~/server/helpers/supabase";
 import {
   getURL,
   getErrorRedirect,

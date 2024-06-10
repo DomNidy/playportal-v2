@@ -2,7 +2,7 @@
 import React from "react";
 
 import { Input } from "../Input";
-import { signupToMailingList } from "~/utils/actions";
+import { signupToMailingList } from "~/server/actions";
 import { useFormState } from "react-dom";
 import { CheckIcon } from "lucide-react";
 import { Button } from "../Button";

@@ -5,8 +5,6 @@ export async function getBlurData(src: string) {
     Buffer.from(await res.arrayBuffer()),
   );
 
-  console.log(src);
-
   const data = await getPlaiceholder(buffer);
   return data;
 }

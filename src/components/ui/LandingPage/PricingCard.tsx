@@ -7,7 +7,7 @@ import { type PricingPlan } from "./PricingSection";
 import { type Tables } from "types_db";
 import { createClient } from "~/utils/supabase/client";
 import { usePathname, useRouter } from "next/navigation";
-import { checkoutWithStripe } from "~/utils/stripe/server";
+import { checkoutWithStripe } from "~/server/helpers/stripe";
 import { getErrorRedirect, getStatusRedirect } from "~/utils/utils";
 import { getStripe } from "~/utils/stripe/client";
 

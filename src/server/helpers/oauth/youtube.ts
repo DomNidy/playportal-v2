@@ -1,23 +1,16 @@
-import { type Credentials, OAuth2Client } from "google-auth-library";
-import { env } from "~/env";
-import { getURL } from "../utils";
-import { google } from "googleapis";
 import {
   createCipheriv,
   createDecipheriv,
   createHash,
   randomBytes,
 } from "crypto";
-import { supabaseAdmin } from "../supabase/admin";
+import { type Credentials, OAuth2Client } from "google-auth-library";
+import { google } from "googleapis";
+import { env } from "~/env";
+import { supabaseAdmin } from "~/server/clients/supabase";
+import { getURL } from "~/utils/utils";
 
-export const youtube = google.youtube("v3");
-
-export const oAuth2Client = new OAuth2Client({
-  clientId: env.YOUTUBE_OAUTH_CLIENT_ID,
-  clientSecret: env.YOUTUBE_OAUTH_CLIENT_SECRET,
-  redirectUri: `${getURL()}/api/oauth/youtube/callback`,
-});
-
+const youtube = google.youtube("v3");
 const algorithm = "aes-256-cbc";
 const key = createHash("sha256")
   .update(String(env.OAUTH_TOKEN_ENCRYPTION_KEY))
@@ -155,9 +148,9 @@ export function validateYoutubeCredentialsSchema(credentials: Credentials) {
 }
 
 /**
- * If the passed credentials object contains a refresh token, and the credentials are expired, this function will return a new `Credentials` object with a new access token.
-
- */
+   * If the passed credentials object contains a refresh token, and the credentials are expired, this function will return a new `Credentials` object with a new access token.
+  
+   */
 export async function refreshYoutubeCredentials(
   credentials: Credentials,
   channelID?: string,
@@ -203,7 +196,7 @@ export async function refreshYoutubeCredentials(
     }
 
     // We need to create a new OAuth2Client object to refresh the token
-    // We do this because the main oAuth2Client object may be shared between multiple users, and if we set the credentials on it, it will be shared between all users
+    // We do this because the main youtubeOAuthClient object may be shared between multiple users, and if we set the credentials on it, it will be shared between all users
     const youtubeOAuthClient = new OAuth2Client({
       clientId: env.YOUTUBE_OAUTH_CLIENT_ID,
       clientSecret: env.YOUTUBE_OAUTH_CLIENT_SECRET,
@@ -367,7 +360,6 @@ export async function getYoutubeChannelSummary(
       part: ["snippet"],
       mine: true,
       access_token: credentials.access_token,
-      
     });
 
     if (

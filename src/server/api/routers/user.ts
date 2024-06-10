@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { s3Client } from "~/server/aws-clients";
+import { s3Client } from "~/server/clients/aws";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { env } from "~/env";
 import {
@@ -15,21 +15,21 @@ import {
   type YoutubeChannelSummary,
   decryptYoutubeCredentials,
   getYoutubeChannelSummary,
-  oAuth2Client,
   persistYoutubeCredentialsToDB,
   refreshYoutubeCredentials,
   decryptString,
-} from "~/utils/oauth/youtube";
+} from "~/server/helpers/oauth/youtube";
 import {
   CodeChallengeMethod,
   OAuth2Client,
   type Credentials,
 } from "google-auth-library";
-import { supabaseAdmin } from "~/utils/supabase/admin";
+import { supabaseAdmin } from "~/server/clients/supabase";
 import {
   getPresignedUrlForFileRatelimit,
   getUserVideosRatelimit,
-} from "~/utils/upstash/ratelimiters";
+} from "~/server/ratelimiters";
+import { youtubeOAuthClient } from "~/server/clients/oauth/youtube";
 
 export const userRouter = createTRPCRouter({
   getUserVideos: protectedProcedure
@@ -74,7 +74,7 @@ export const userRouter = createTRPCRouter({
   getYouTubeAuthorizationURL: protectedProcedure.query(async ({ ctx }) => {
     // We need to generate a code verifier and code challenge, then store the code verifier in a secure cookie
     const { codeChallenge, codeVerifier } =
-      await oAuth2Client.generateCodeVerifierAsync();
+      await youtubeOAuthClient.generateCodeVerifierAsync();
 
     // Store code verifier in a secure cookie
     ctx.setCookie("codeVerifier", codeVerifier, {
@@ -82,7 +82,7 @@ export const userRouter = createTRPCRouter({
       sameSite: "lax",
     });
 
-    const authUrl = oAuth2Client.generateAuthUrl({
+    const authUrl = youtubeOAuthClient.generateAuthUrl({
       access_type: "offline",
       scope: [
         "https://www.googleapis.com/auth/youtube.upload",

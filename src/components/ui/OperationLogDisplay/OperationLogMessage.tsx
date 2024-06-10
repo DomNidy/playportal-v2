@@ -1,7 +1,6 @@
 import { type VariantProps, cva } from "class-variance-authority";
 import type { OperationLog } from "./OperationLogDisplay";
 import { cn, convertOperationLogToMSG } from "~/utils/utils";
-import { type OperationLogCode } from "~/definitions/db-type-aliases";
 import { CheckCircle } from "lucide-react";
 
 const operationLogVariants = cva("text-medium", {
@@ -35,8 +34,6 @@ export interface OperationLogMessageProps
   operationLog: OperationLog;
 }
 
-// TODO: We want to know the upload target accounts in props here (when applicable) so we can use the convertOperationLogToMSG function to display the correct message
-// TODO: Also want to style the message based on the log type returned by convertOperationLogToMSG
 export function OperationLogMessage({
   operationLog,
   className,

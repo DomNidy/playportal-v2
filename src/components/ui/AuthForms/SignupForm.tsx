@@ -20,7 +20,7 @@ import { Link } from "~/components/ui/Link";
 import ConfirmEmailScreen from "./ConfirmEmail";
 import posthog from "posthog-js";
 import { ClipLoader } from "react-spinners";
-import { signUp } from "~/utils/actions";
+import { signUp } from "~/server/actions";
 import GoogleIcon from "~/components/icons/GoogleIcon";
 import { Checkbox } from "../Checkbox";
 

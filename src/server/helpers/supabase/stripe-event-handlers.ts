@@ -1,14 +1,9 @@
-import { createClient } from "@supabase/supabase-js";
 import type Stripe from "stripe";
-import type { Tables, Database, TablesInsert } from "types_db";
+import type { Tables, TablesInsert } from "types_db";
 import { env } from "~/env";
-import { stripe } from "../stripe/config";
-import { toIsoStringOrNull } from "../utils";
-
-export const supabaseAdmin = createClient<Database>(
-  env.NEXT_PUBLIC_SUPABASE_URL,
-  env.SUPABASE_SERVICE_ROLE,
-);
+import { stripe } from "~/utils/stripe/config";
+import { toIsoStringOrNull } from "~/utils/utils";
+import { supabaseAdmin } from "~/server/clients/supabase";
 
 // Call this with stripe product data to update the data in our database
 export async function upsertProductRecord(product: Stripe.Product) {

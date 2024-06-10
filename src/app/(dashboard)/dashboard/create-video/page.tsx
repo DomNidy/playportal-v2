@@ -2,8 +2,8 @@ import CreateVideoForm from "~/components/ui/CreateVideoForm/CreateVideoForm";
 import { CreateVideoFormProvider } from "~/components/ui/CreateVideoForm/CreateVideoFormContext";
 import CreateVideoTopnav from "~/components/ui/CreateVideoForm/CreateVideoTopnav";
 import PricingSection from "~/components/ui/LandingPage/PricingSection";
+import { getFeatureFlag } from "~/server/helpers/supabase/helpers";
 import { createClient } from "~/utils/supabase/server";
-import { getFeatureFlag } from "~/utils/utils";
 
 export default async function CreateVideoPage() {
   const supabase = createClient();

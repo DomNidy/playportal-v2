@@ -15,7 +15,7 @@ import {
 } from "~/components/ui/Form";
 import { Input } from "~/components/ui/Input";
 import { ResetPasswordFormSchema } from "~/definitions/form-schemas";
-import { resetPasswordForEmail } from "~/utils/actions";
+import { resetPasswordForEmail } from "~/server/actions";
 
 export default function ResetPasswordPage() {
   const [statusMessage, setStatusMessage] = useState<string | null>(null);

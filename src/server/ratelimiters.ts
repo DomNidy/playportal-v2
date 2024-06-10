@@ -1,7 +1,7 @@
 // This is just a central place for us to define the different ratelimiters we want to use
 
 import { Ratelimit } from "@upstash/ratelimit";
-import redis from "./redis";
+import redis from "./clients/upstash";
 
 // This is used to ratelimit the `deleteOperationFiles` endpoint
 export const deleteOperationRatelimiter = new Ratelimit({
