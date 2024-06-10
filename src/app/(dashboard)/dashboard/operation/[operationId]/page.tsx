@@ -58,8 +58,12 @@ export default function OperationDataPage({
     useTimeline<OperationLogCode>(tlProps);
 
   useEffect(() => {
-    const eventIDS = logs.sort().map((log) => log.message);
-    updateWithEventArray(["cv_dl_input_success", "cv_output_to_s3_success"]);
+    const eventIDS = logs.map((log) => log.message);
+    updateWithEventArray([
+      "cv_dl_input_success",
+      "cv_render_fail",
+      "cv_output_to_s3_success",
+    ]);
   }, [updateWithEventArray, logs]);
 
   const { YouTube: youtubeUploads } = useUploadOperationsData(operationId);
