@@ -44,17 +44,15 @@ export default function useTimeline<EventIDS extends string>({
   // Lock updates to the timeline to prevent the user from updating the timeline too quickly
 
   // Function that updates the state of the expectedTimelineEvents by acknowleding the passed event has occured
-  const updateWithEvent = (receivedEventID: EventIDS) => {
-    let newTimeline: TimelineEvent[] = [...timeline];
-
-    let newOutOfOrderEvents: OutOfOrderEvent<EventIDS>[] | null = null;
-
-    // Create new expected events timeline
-    let newExpectedTimelineEvents = [...expectedTimelineEvents];
-
-    // Update the expectedTimelineEvents
-    // * We could modify the ExpectedTimelineEvent to be mapped to a new internal structure which has a set containing its success and error codes for faster access
-    // * This might not even be a net performance increase though since we only have two strings we are comparing currently
+  const _updateWithEvent = (
+    receivedEventID: EventIDS,
+    _timeline: TimelineEvent[],
+    _outOfOrderEvents: OutOfOrderEvent<EventIDS>[],
+    _expectedTimelineEvents: ExpectedTimelineEvent<EventIDS>[],
+  ) => {
+    let newTimeline: TimelineEvent[] = [..._timeline];
+    let newOutOfOrderEvents = [..._outOfOrderEvents];
+    let newExpectedTimelineEvents = [..._expectedTimelineEvents];
 
     // Create a copy of the `ExpectedTimelineEvent` that our `receivedEvent` corresponds to
     const relevantExpectedEvent = newExpectedTimelineEvents.find(
@@ -68,7 +66,6 @@ export default function useTimeline<EventIDS extends string>({
         errorOnlyEvents.find((errEv) => receivedEventID === errEv.errorCode)
       ) {
         console.log("Received an error only event", receivedEventID);
-        // If we received an error only event, cancel all remaining pending events
         setTimeline(cancelAllPendingEvents(newTimeline));
       }
 
@@ -110,31 +107,26 @@ export default function useTimeline<EventIDS extends string>({
           _originalExpectedEvent: { ...relevantExpectedEvent },
         },
       });
+    } else {
+      // Create new timeline with updated state
+      newTimeline = newTimeline.map((timelineEvent) => {
+        if (isCorrespondingEvents(relevantExpectedEvent, timelineEvent)) {
+          return {
+            metadata: {
+              _updatedByEventID: String(receivedEventID),
+              _relevantEventIDS: timelineEvent.metadata._relevantEventIDS,
+              _displayMessagesMap: timelineEvent.metadata._displayMessagesMap,
+            },
+            displayMessage: getDisplayMessageForStatus(
+              relevantExpectedEvent,
+              newTimelineEventStatus,
+            ),
+            state: newTimelineEventStatus,
+          };
+        }
+        return timelineEvent;
+      });
     }
-
-    // Create new timeline with updated state
-    newTimeline = timeline.map((timelineEvent) => {
-      // Don't update events that are out of order
-      if (
-        isCorrespondingEvents(relevantExpectedEvent, timelineEvent) &&
-        !isEventOutOfOrder
-      ) {
-        return {
-          metadata: {
-            _updatedByEventID: String(receivedEventID),
-            _relevantEventIDS: timelineEvent.metadata._relevantEventIDS,
-            _displayMessagesMap: timelineEvent.metadata._displayMessagesMap,
-          },
-          displayMessage: getDisplayMessageForStatus(
-            relevantExpectedEvent,
-            newTimelineEventStatus,
-          ),
-          state: newTimelineEventStatus,
-        };
-      }
-
-      return timelineEvent;
-    });
 
     // If the event status we received indicated an error occured,
     // cancel all pending events and remove all expected events
@@ -148,8 +140,6 @@ export default function useTimeline<EventIDS extends string>({
     } else {
       console.log("Updating timeline");
       // Remove the relevantExpectedEvent from the expected events array as we no longer care about it after we've received its status once
-      //* Note: This logic relies on the assumption that the user did not pass in multiple events with the same status code
-      // We might want to refactor the ExpectedTimelineEvents to have a constructor that generates some unique id
       newExpectedTimelineEvents = expectedTimelineEvents.filter(
         (expectedEv) =>
           expectedEv.successCode !== relevantExpectedEvent.successCode,
@@ -169,7 +159,7 @@ export default function useTimeline<EventIDS extends string>({
       newExpectedTimelineEvents: newExpectedTimelineEventsFinal,
     } = processOutOfOrderEvents(
       newExpectedTimelineEvents,
-      newOutOfOrderEvents ?? outOfOrderEvents,
+      newOutOfOrderEvents,
       newTimeline,
     );
 
@@ -188,11 +178,42 @@ export default function useTimeline<EventIDS extends string>({
     setTimeline(newTimelineFinal);
     setOutOfOrderEvents(newOutOfOrderEventsFinal);
     setExpectedTimelineEvents(newExpectedTimelineEventsFinal);
+
+    return {
+      updatedTimeline: newTimelineFinal,
+      updatedOutOfOrderEvents: newOutOfOrderEventsFinal,
+      updatedExpectedTimelineEvents: newExpectedTimelineEventsFinal,
+    };
+  };
+
+  const updateWithEvent = (receivedEventID: EventIDS) => {
+    _updateWithEvent(
+      receivedEventID,
+      timeline,
+      outOfOrderEvents,
+      expectedTimelineEvents,
+    );
   };
 
   const updateWithEventArray = (receivedEventIDS: EventIDS[]) => {
+    let updatedTimeline = timeline;
+    let updatedOutOfOrderEvents = outOfOrderEvents;
+    let updatedExpectedTimelineEvents = expectedTimelineEvents;
+
     for (const receivedEventID of receivedEventIDS) {
-      updateWithEvent(receivedEventID);
+      const returnedValues = _updateWithEvent(
+        receivedEventID,
+        updatedTimeline,
+        updatedOutOfOrderEvents,
+        updatedExpectedTimelineEvents,
+      );
+
+      if (returnedValues) {
+        updatedTimeline = returnedValues.updatedTimeline;
+        updatedOutOfOrderEvents = returnedValues.updatedOutOfOrderEvents;
+        updatedExpectedTimelineEvents =
+          returnedValues.updatedExpectedTimelineEvents;
+      }
     }
   };
 

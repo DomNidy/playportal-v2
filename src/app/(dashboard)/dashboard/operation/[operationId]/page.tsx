@@ -23,65 +23,50 @@ export default function OperationDataPage({
   const { isOperationDataLoading, videoTitle, logs, status, associatedFiles } =
     useOperationData(operationId);
 
-  const { timeline, updateWithEventArray, updateWithEvent } =
-    useTimeline<OperationLogCode>({
-      expectedTimeline: [
-        {
-          errorCode: "cv_dl_input_fail",
-          successCode: "cv_dl_input_success",
-          errorDisplayMessage: "Failed to download input.",
-          pendingDisplayMessage: "Downloading your files...",
-          successDisplayMessage: "Successfully downloaded your files!",
-        },
-        {
-          errorCode: "cv_render_fail",
-          successCode: "cv_render_success",
-          errorDisplayMessage: "Failed to render your video.",
-          pendingDisplayMessage: "Rendering your video...",
-          successDisplayMessage: "Successfully rendered your video!",
-        },
-        {
-          errorCode: "cv_output_to_s3_fail",
-          successCode: "cv_output_to_s3_success",
-          errorDisplayMessage: "Failed create download link for video.",
-          pendingDisplayMessage: "Creating video download link...",
-          successDisplayMessage: "Successfully created video download link!",
-        },
-      ],
-      errorOnlyEvents: [
-        {
-          errorCode: "cv_unexpected_error",
-          errorDisplayMessage:
-            "An unexpected error occured while creating your video.",
-        },
-      ],
-      onUnexpectedEventReceived: (ev) => console.log(ev),
-    });
+  const { timeline, updateWithEventArray } = useTimeline<OperationLogCode>({
+    expectedTimeline: [
+      {
+        errorCode: "cv_dl_input_fail",
+        successCode: "cv_dl_input_success",
+        errorDisplayMessage: "Failed to download input.",
+        pendingDisplayMessage: "Downloading your files...",
+        successDisplayMessage: "Successfully downloaded your files!",
+      },
+      {
+        errorCode: "cv_render_fail",
+        successCode: "cv_render_success",
+        errorDisplayMessage: "Failed to render your video.",
+        pendingDisplayMessage: "Rendering your video...",
+        successDisplayMessage: "Successfully rendered your video!",
+      },
+      {
+        errorCode: "cv_output_to_s3_fail",
+        successCode: "cv_output_to_s3_success",
+        errorDisplayMessage: "Failed create download link for video.",
+        pendingDisplayMessage: "Creating video download link...",
+        successDisplayMessage: "Successfully created video download link!",
+      },
+    ],
+    errorOnlyEvents: [
+      {
+        errorCode: "cv_unexpected_error",
+        errorDisplayMessage:
+          "An unexpected error occured while creating your video.",
+      },
+    ],
+    onUnexpectedEventReceived: (ev) => console.log(ev),
+  });
 
   useEffect(() => {
-    const update = () => {
-      const eventIDS = logs.sort().map((log) => log.message);
+    const eventIDS = logs.sort().map((log) => log.message);
 
-      for (const eventID of eventIDS) {
-        console.log("Updating with event", eventID);
-        updateWithEvent(eventID);
-      }
-    };
-
-    update();
-  }, [logs, updateWithEvent]);
+    updateWithEventArray(eventIDS);
+  }, [logs, updateWithEventArray]);
 
   const { YouTube: youtubeUploads } = useUploadOperationsData(operationId);
 
   return (
     <div className="px-4">
-      <Button onClick={() => updateWithEvent("cv_render_fail")}>
-        Render fail
-      </Button>
-      <Button onClick={() => updateWithEvent("cv_render_success")}>
-        Render success
-      </Button>
-
       {!isOperationDataLoading && !videoTitle && (
         <>
           <p className="text-lg text-white">Video does not exist</p>
