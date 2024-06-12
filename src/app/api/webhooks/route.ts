@@ -25,7 +25,7 @@ const relevantEvents = new Set([
   "customer.subscription.updated",
   "customer.subscription.deleted",
   "customer.created",
-  "customer.deleted ",
+  "customer.deleted",
 ]);
 
 export async function POST(req: Request) {
