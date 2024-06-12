@@ -14,11 +14,16 @@ export function useUserSubscription() {
         data: { user },
       } = await supabase.auth.getUser();
 
+      if (!user) {
+        console.log("No user found");
+        return null;
+      }
+
       const { data } = await supabase
         .from("user_products")
         .select("*")
-        .eq("user_id", user?.id ?? "")
-        .in("sub_status", ["active", "trialing", null]) // todo: We allow null here because the free tier has no status for the subscription (it doesnt even have a subscription row in the db)
+        .in("sub_status", ["active", "trialing"])
+        .eq("user_id", user.id)
         .order("sub_current_period_start", { ascending: false })
         .limit(1)
         .maybeSingle();

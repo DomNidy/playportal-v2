@@ -4,6 +4,7 @@ import { stripe } from "~/utils/stripe/config";
 import {
   deletePriceRecord,
   deleteProductRecord,
+  deleteSupabaseCustomer,
   manageSubscriptionStatusChange,
   upsertPriceRecord,
   upsertProductRecord,
@@ -23,6 +24,8 @@ const relevantEvents = new Set([
   "customer.subscription.created",
   "customer.subscription.updated",
   "customer.subscription.deleted",
+  "customer.created",
+  "customer.deleted",
 ]);
 
 export async function POST(req: Request) {
@@ -60,6 +63,16 @@ export async function POST(req: Request) {
           break;
         case "product.deleted":
           await deleteProductRecord(event.data.object);
+          break;
+        case "customer.created":
+          // Do nothing
+          console.log("Customer created on stripe");
+          break;
+        case "customer.deleted":
+          console.log(
+            `Customer was deleted on stripe: ${event.data.object.id}`,
+          );
+          await deleteSupabaseCustomer(event.data.object.id);
           break;
         case "customer.subscription.created":
         case "customer.subscription.updated":
