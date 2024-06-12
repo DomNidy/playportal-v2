@@ -49,7 +49,10 @@ export default function LandingPageNavbar() {
       </div>
 
       <div className="flex w-full justify-center ">
-        <NavigationMenu className="hidden justify-start lg:flex">
+        <NavigationMenu
+          data-cy="lp-nav-lg"
+          className="hidden justify-start lg:flex"
+        >
           <NavigationMenuList className="gap-10">
             <NavigationMenuLink asChild>
               <Link

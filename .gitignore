@@ -44,3 +44,5 @@ yarn-error.log*
 data_dump.sql
 full_dump.sql
 seed.sql
+
+cypress.env.json

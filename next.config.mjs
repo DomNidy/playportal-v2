@@ -31,14 +31,9 @@ const config = {
   },
 
   // https://nextjs.org/docs/app/api-reference/next-config-js/webpack
-  // webpack: (config, { isServer,  }) => {
+  // webpack: (config, { isServer, webpack }) => {
   //   if (!isServer) {
-  //     console.log("Webpack running on client")
-  //     // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-  //     config.plugins.push(new BundleAnalyzerPlugin({
-  //       analyzerMode: "static",
-  //       reportFilename: "./bundle-analysis-report.html"
-  //     }))
+  //     webpack
   //   } else {
   //     console.log("Webpack running on server mode.")
   //   }
