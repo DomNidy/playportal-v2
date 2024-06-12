@@ -398,7 +398,8 @@ export async function deleteSupabaseCustomer(stripeCustomerId: string) {
   const { error: deleteError } = await supabaseAdmin
     .from("customers")
     .delete()
-    .eq("stripe_customer_id", stripeCustomerId);
+    .eq("stripe_customer_id", stripeCustomerId)
+    .limit(1);
 
   // TODO: Should implement an alert system to notify the admin that a customer failed to be deleted
   // * This means that they will no longer be able to start checkout session

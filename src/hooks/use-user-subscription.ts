@@ -19,8 +19,6 @@ export function useUserSubscription() {
         return null;
       }
 
-      console.log(user.id);
-
       const { data } = await supabase
         .from("user_products")
         .select("*")
@@ -29,11 +27,6 @@ export function useUserSubscription() {
         .order("sub_current_period_start", { ascending: false })
         .limit(1)
         .maybeSingle();
-
-      const testDat = await supabase.from("subscriptions").select("*");
-      console.log(testDat, "test dat");
-
-      console.log("User subscription data", data);
 
       return data;
     },
