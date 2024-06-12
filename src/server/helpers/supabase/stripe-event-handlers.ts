@@ -121,6 +121,16 @@ export async function createCustomerInStripe(uuid: string, email: string) {
 }
 
 /**
+ * Try to retrieve the Stripe customer ID for a user by email (looks up the users email in stripe)
+ */
+async function getStripeCustomerIdByEmail(email: string) {
+  const stripeCustomers = await stripe.customers.list({ email: email });
+  return stripeCustomers.data.length > 0
+    ? stripeCustomers.data[0]?.id
+    : undefined;
+}
+
+/**
  * Try to retrieve the Stripe customer ID using our Supabase UUIDs
  * We use email as a fallback mechanism incase we are unable to find the Stripe customer using their Supabase UUID
  */
@@ -152,9 +162,7 @@ export async function createOrRetrieveCustomer({
     stripeCustomerId = existingStripeCustomer.id;
   } else {
     // If Stripe ID is missing from Supabase, try to retrieve Stripe customer ID by email
-    const stripeCustomers = await stripe.customers.list({ email: email });
-    stripeCustomerId =
-      stripeCustomers.data.length > 0 ? stripeCustomers.data[0]?.id : undefined;
+    stripeCustomerId = await getStripeCustomerIdByEmail(email);
   }
 
   // If we still could not find a stripeCustomerId, create a new customer in stripe
@@ -164,7 +172,6 @@ export async function createOrRetrieveCustomer({
   if (!stripeIdToInsert) throw new Error("Stripe customer creation failed.");
 
   if (existingSupabaseCustomer && stripeCustomerId) {
-    // If Supabase has a record, but doesn't match Stripe, update Supabase record
     if (existingSupabaseCustomer.stripe_customer_id !== stripeCustomerId) {
       const { error: updateError } = await supabaseAdmin
         .from("customers")
@@ -380,4 +387,26 @@ export async function manageSubscriptionStatusChange(
       subscription.default_payment_method as Stripe.PaymentMethod,
     );
   }
+}
+
+/**
+ * Deletes the customer record on supabase that matches the stripeCustomerId
+ *
+ * @param stripeCustomerId Id of the deleted customer on stripe
+ */
+export async function deleteSupabaseCustomer(stripeCustomerId: string) {
+  const { error: deleteError } = await supabaseAdmin
+    .from("customers")
+    .delete()
+    .eq("stripe_customer_id", stripeCustomerId);
+
+  // TODO: Should implement an alert system to notify the admin that a customer failed to be deleted
+  // * This means that they will no longer be able to start checkout session
+  if (deleteError) {
+    console.warn("Failed to delete supabase customer record", deleteError);
+    throw new Error(
+      `Supabase customer deletion failed: ${deleteError.message}`,
+    );
+  }
+  console.log(`Supabase customer deleted: ${stripeCustomerId}`);
 }

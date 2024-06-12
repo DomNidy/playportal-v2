@@ -62,22 +62,22 @@ export async function checkoutWithStripe(
       data: { user },
     } = await supabase.auth.getUser();
 
+    if (error ?? !user) {
+      console.error(error);
+      throw new Error("Could not get user session.");
+    }
+
     // Try to get product name (if we can't find it, we'll just display a message on redirect toast)
     const productName = await getProductNameFromPriceID(price.id);
     // Displayed in the toast on redirect
     const redirectStatusMessage =
       generateSubscribtionRedirectMessage(productName);
 
-    if (error ?? !user) {
-      console.error(error);
-      console.error("Could not get user session.");
-    }
-
     // Retrieve or create the customer in Stripe
     let customer: string;
     try {
       customer = await createOrRetrieveCustomer({
-        uuid: user?.id ?? "",
+        uuid: user.id,
         email: user?.email ?? "",
       });
     } catch (err) {

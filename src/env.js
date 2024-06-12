@@ -25,7 +25,6 @@ export const env = createEnv({
     STRIPE_SECRET_KEY: z.string().min(1),
     STRIPE_WEBHOOK_SECRET: z.string().min(1),
     STRIPE_TRIAL_PERIOD_DAYS: z.number(),
-    STRIPE_LIVE_MODE: z.boolean(),
     // Upstash
     UPSTASH_REDIS_REST_URL: z.string(),
     UPSTASH_REDIS_REST_TOKEN: z.string(),
@@ -78,8 +77,6 @@ export const env = createEnv({
     SQS_REGION: process.env.SQS_REGION,
     SUPABASE_SERVICE_ROLE: process.env.SUPABASE_SERVICE_ROLE,
     NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    STRIPE_LIVE_MODE: JSON.parse(process.env.STRIPE_LIVE_MODE ?? "false"),
     STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
     STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
     STRIPE_TRIAL_PERIOD_DAYS: parseInt(process.env.STRIPE_TRIAL_PERIOD_DAYS ?? "14"),
