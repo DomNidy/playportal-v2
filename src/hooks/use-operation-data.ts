@@ -52,7 +52,14 @@ export default function useOperationData(operationId: string | null): {
   // When operation status is changed to completed, unsub
   useEffect(() => {
     if (operationStatus === "Completed") {
-      void realtimeChannel.unsubscribeChannel();
+      console.log(
+        "Operation is completed, unsubscribing from realtime channel in 5 seconds",
+      );
+      // Wait 25 seconds before unsubscribing
+      setTimeout(() => {
+        console.log("Unsubscribing from realtime channel now...");
+        void realtimeChannel.unsubscribeChannel();
+      }, 5000);
     }
   }, [operationStatus, realtimeChannel]);
 
@@ -114,7 +121,7 @@ export default function useOperationData(operationId: string | null): {
     });
   }, [operationId, supabase]);
 
-  // Hook that fetches the associated files when the operation is deemed completed, and unsubs from realtime
+  // Hook that fetches the associated files when the operation is deemed completed
   useEffect(() => {
     const fetchAssociatedFiles = async () => {
       console.log("Operation is completed, fetching associated files");

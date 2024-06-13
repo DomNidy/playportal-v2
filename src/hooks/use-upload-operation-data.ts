@@ -23,7 +23,7 @@ export type UploadTargetAccount = {
 };
 
 // Data about each individual upload operation
-type UploadOperationData<Platform> = {
+export type UploadOperationData<Platform> = {
   id: string;
   metadata: Json;
   status: UploadStatus;
@@ -67,6 +67,8 @@ export function useUploadOperationsData(
   const supabase = createClient();
 
   const uploadOperationsQuery = useQuery<UploadOperationsData>({
+    // TODO: Make this interval be computed based on the status of the operation
+    refetchInterval: 5000,
     queryFn: async () => {
       // Select all upload_video_operations related to the current operation
       // Also selects data pertaining to the target upload channel (service account)

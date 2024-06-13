@@ -4,6 +4,7 @@ import { DownloadFileButton } from "~/components/ui/DownloadFileButton";
 import OperationLogDisplay from "~/components/ui/OperationLogDisplay/OperationLogDisplay";
 import useOperationData from "~/hooks/use-operation-data";
 import { useUploadOperationsData } from "~/hooks/use-upload-operation-data";
+import UploadVideoStatusDisplay from "~/components/ui/UploadVideoStatusDisplay/UploadVideoStatusDisplay";
 
 export default function OperationDataPage({
   params,
@@ -51,10 +52,10 @@ export default function OperationDataPage({
           />
         )}
         {youtubeUploads?.map((upload) => (
-          <p key={upload.id}>
-            {upload.id} - {upload.status} - {JSON.stringify(upload.metadata)}
-            {upload.targetAccount?.name} - {upload?.targetAccount?.id}
-          </p>
+          <UploadVideoStatusDisplay
+            youtubeUploadOperationData={upload}
+            key={upload.id}
+          />
         ))}
 
         {!!associatedFiles && (

@@ -30,6 +30,8 @@ export default function OperationLogDisplay({
       </CardHeader>
 
       <CardContent className="mt-0 p-4">
+        {operationLogs.length === 0 && <p className="text-muted-foreground">Loading...</p>}
+
         {operationLogs.map((operationLog) => (
           <OperationLogMessage
             key={operationLog.id}

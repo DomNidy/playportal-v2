@@ -83,6 +83,8 @@ const MultiSelectFormField = React.forwardRef<
       onValueChange,
       placeholder,
       animation = 0,
+      isDataLoading,
+      loadingPlaceholder,
       ...props
     },
     ref,
@@ -205,7 +207,7 @@ const MultiSelectFormField = React.forwardRef<
             <CommandList>
               <CommandEmpty>No results found.</CommandEmpty>
 
-              {props.isDataLoading && props.loadingPlaceholder}
+              {isDataLoading && loadingPlaceholder}
 
               <CommandGroup>
                 {options.map((option) => {
