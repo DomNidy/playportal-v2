@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../Card";
 import { cva } from "class-variance-authority";
 import { cn } from "~/utils/utils";
 import { CheckCircle } from "lucide-react";
+import { type Json } from "types_db";
 
 const uploadVideoStatusVariants = cva("text-medium", {
   variants: {
@@ -36,6 +37,11 @@ export default function UploadVideoStatusDisplay({
   youtubeUploadOperationData: UploadOperationData<"YouTube">;
 }) {
   let statusMessage;
+
+  // Try to parse out the video url from the metadata
+  const videoUrl = (
+    youtubeUploadOperationData.metadata as { video_url?: string }
+  )?.video_url;
 
   switch (youtubeUploadOperationData.status) {
     case "Uploading":
@@ -91,6 +97,16 @@ export default function UploadVideoStatusDisplay({
           ) : null}
           {statusMessage}
         </p>
+
+        {videoUrl && (
+          <a
+            target="_blank"
+            href={videoUrl}
+            className="text-muted-foreground underline hover:text-muted-foreground/80"
+          >
+            Video link
+          </a>
+        )}
       </CardContent>
     </Card>
   );

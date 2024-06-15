@@ -22,7 +22,7 @@ export enum YoutubeVideoVisibilities {
 }
 
 export const SupportedAudioFileExtensions = [".mp3", ".wav", ".ogg"];
-export const SupportedImageFileExtensions = [".png", ".jpg", ".jpeg", ".webp"];
+export const SupportedImageFileExtensions = [".png", ".jpg", ".jpeg", ".webp", ".jfif"];
 
 // We will validate the files on our aws backend anyway
 export const CreateVideoFormSchema = z.object({
@@ -124,7 +124,7 @@ export const CreateVideoFormUploadImageSchema = z.object({
       return isFileExtensionInList(filePath, SupportedImageFileExtensions);
     },
     {
-      message: "Image file must be a .png, .jpg, .jpeg, or .webp file",
+      message: "Image file must be a .png, .jpg, .jpeg, .jfif, or .webp file",
     },
   ),
 });
