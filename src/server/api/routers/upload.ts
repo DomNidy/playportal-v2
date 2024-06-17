@@ -18,7 +18,6 @@ import {
   createCreateVideoOperation,
   createYoutubeUploadOperation,
   enforceQuotaLimits,
-  getFeatureFlag,
   getOAuthCredentialsForYoutubeChannels,
   getUserCreateVideoQuotaUsage,
   getUserQuotaLimits,
@@ -107,19 +106,6 @@ export const uploadRouter = createTRPCRouter({
         // If we were provided with a list of channel ids to upload to, we will use these to look up the oauth credentials
         let oauthCredentialIDS: string[] | null = null;
         if (input?.uploadVideoOptions?.youtube?.uploadToChannels) {
-          // Make sure user has feature flag to upload to youtube
-          const uploadVideoFeature = await getFeatureFlag(
-            ctx.db,
-            "upload_videos",
-            ctx.user.id,
-          );
-
-          if (!uploadVideoFeature) {
-            throw new TRPCClientError(
-              `This feature is not available to you, please contact support if you think this is a mistake.`,
-            );
-          }
-
           // Get the oauth credential ids associated with the service accounts (youtube channel ids in this case)
           const youtubeOAuthCredentials =
             await getOAuthCredentialsForYoutubeChannels(

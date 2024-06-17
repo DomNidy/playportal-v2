@@ -1,8 +1,6 @@
 import ManageAccount from "~/components/ui/ManageAccount/ManageAccount";
 import { createClient } from "~/utils/supabase/server";
-import { getFeatureFlag } from "~/server/helpers/supabase/helpers";
 
-// TODO: Implement error handling here
 export default async function AccountPage() {
   const supabase = createClient();
   const {
@@ -41,12 +39,6 @@ export default async function AccountPage() {
     .limit(1)
     .maybeSingle();
 
-  const linkYoutubeAccountFeature = await getFeatureFlag(
-    supabase,
-    "link_youtube_accounts",
-    user?.id ?? "",
-  );
-
   return (
     <div className="flex w-full max-w-[500px]">
       <ManageAccount
@@ -62,7 +54,7 @@ export default async function AccountPage() {
           },
         }}
         featureFlags={{
-          linkYoutubeAccounts: linkYoutubeAccountFeature ?? false,
+          linkYoutubeAccounts: true,
         }}
       />
     </div>

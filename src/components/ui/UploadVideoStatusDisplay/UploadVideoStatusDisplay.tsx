@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "../Card";
 import { cva } from "class-variance-authority";
 import { cn } from "~/utils/utils";
 import { CheckCircle } from "lucide-react";
-import { type Json } from "types_db";
 
 const uploadVideoStatusVariants = cva("text-medium", {
   variants: {

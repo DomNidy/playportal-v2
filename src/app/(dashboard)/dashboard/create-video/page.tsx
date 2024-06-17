@@ -2,7 +2,6 @@ import CreateVideoForm from "~/components/ui/CreateVideoForm/CreateVideoForm";
 import { CreateVideoFormProvider } from "~/components/ui/CreateVideoForm/CreateVideoFormContext";
 import CreateVideoTopnav from "~/components/ui/CreateVideoForm/CreateVideoTopnav";
 import PricingSection from "~/components/ui/LandingPage/PricingSection";
-import { getFeatureFlag } from "~/server/helpers/supabase/helpers";
 import { createClient } from "~/utils/supabase/server";
 
 export default async function CreateVideoPage() {
@@ -17,12 +16,6 @@ export default async function CreateVideoPage() {
       user_id: user?.id ?? "",
     })
     .maybeSingle();
-
-  const uploadVideoFeature = await getFeatureFlag(
-    supabase,
-    "upload_videos",
-    user?.id ?? "",
-  );
 
   if (!quotaLimits) {
     return (
@@ -52,7 +45,7 @@ export default async function CreateVideoPage() {
                 ? quotaLimits?.file_size_limit_mb * 1024 * 1024
                 : 0
             }
-            uploadVideoFeature={uploadVideoFeature}
+            uploadVideoFeature={true}
           />
         </div>
       </CreateVideoFormProvider>
