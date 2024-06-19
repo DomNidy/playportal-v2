@@ -22,17 +22,18 @@ export function useSubscriptionPlans() {
 
       const basicPlan = products?.find(
         (product) =>
-          product.product_id == env.NEXT_PUBLIC_STRIPE_PRODUCT_ID_BASIC_PLAN,
+          product.product_id === env.NEXT_PUBLIC_STRIPE_PRODUCT_ID_BASIC_PLAN,
       );
 
       const standardPlan = products?.find(
         (product) =>
-          product.product_id == env.NEXT_PUBLIC_STRIPE_PRODUCT_ID_STANDARD_PLAN,
+          product.product_id ===
+          env.NEXT_PUBLIC_STRIPE_PRODUCT_ID_STANDARD_PLAN,
       );
 
       const proPlan = products?.find(
         (product) =>
-          product.product_id == env.NEXT_PUBLIC_STRIPE_PRODUCT_ID_PRO_PLAN,
+          product.product_id === env.NEXT_PUBLIC_STRIPE_PRODUCT_ID_PRO_PLAN,
       );
 
       return {

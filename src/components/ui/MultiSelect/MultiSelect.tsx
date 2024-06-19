@@ -49,15 +49,17 @@ const multiSelectVariants = cva(
   },
 );
 
+export type MultiSelectFormFieldOption = {
+  label: string;
+  value: string;
+  icon?: React.ComponentType<{ className?: string }>;
+};
+
 interface MultiSelectFormFieldProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof multiSelectVariants> {
   asChild?: boolean;
-  options: {
-    label: string;
-    value: string;
-    icon?: React.ComponentType<{ className?: string }>;
-  }[];
+  options: MultiSelectFormFieldOption[];
   defaultValue?: string[];
   disabled?: boolean;
   placeholder: string;
@@ -141,6 +143,7 @@ const MultiSelectFormField = React.forwardRef<
                   {selectedValues.map((value) => {
                     const option = options.find((o) => o.value === value);
                     const IconComponent = option?.icon;
+
                     return (
                       <Badge
                         key={value}

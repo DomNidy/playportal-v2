@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import React from "react";
+import React, { useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { type z } from "zod";
 import CreateVideoFormActions from "../CreateVideoFormActions";
@@ -27,9 +27,10 @@ import {
 } from "../../Select";
 import { VideoPreset } from "~/definitions/api-schemas";
 import { Checkbox } from "../../Checkbox";
-import MultiSelectFormField from "../../MultiSelect/MultiSelect";
+import MultiSelectFormField, {
+  type MultiSelectFormFieldOption,
+} from "../../MultiSelect/MultiSelect";
 import { useLinkedYoutubeAccounts } from "~/hooks/use-linked-youtube-accounts";
-import { Avatar, AvatarFallback, AvatarImage } from "../../Avatar";
 import { Button } from "../../Button";
 import { Textarea } from "../../Textarea";
 import TagsInput from "../TagsInput";
@@ -38,6 +39,7 @@ import { useCreateVideoForm } from "../CreateVideoFormContext";
 import SubmitStatus from "../../LoaderStatus/LoaderStatus";
 import { Link } from "~/components/ui/Link";
 import { Link2Icon } from "lucide-react";
+import { YoutubeChannelAvatar } from "../YoutubeChannelAvatar";
 
 function isString(v: unknown): v is string {
   return typeof v === "string";
@@ -100,6 +102,32 @@ export default function UploadOptionsFormStep({
     isFetching: isFetchingYoutubeAccounts,
     refetch: refetchYoutubeAccounts,
   } = useLinkedYoutubeAccounts();
+
+  // We memoize the props for the MultiSelectFormField to prevent unnecessary re-renders as it would run this map
+  // every time the form re-renders otherwise.
+  const youtubeChannelOptions = useMemo(() => {
+    console.log("Recomputed youtubeChannelOptions");
+
+    const connectedAccounts: MultiSelectFormFieldOption[] =
+      connectedYoutubeAccounts
+        ? connectedYoutubeAccounts.map((youtubeAccount, idx) => ({
+            label: youtubeAccount.channelTitle,
+            value: youtubeAccount.channelId,
+            // TODO: Figure out why the image is sometimes not showing on re-renders
+            icon: () => {
+              return (
+                <YoutubeChannelAvatar
+                  key={idx}
+                  channelTitle={youtubeAccount.channelTitle}
+                  channelAvatar={youtubeAccount.channelAvatar}
+                />
+              );
+            },
+          }))
+        : [];
+
+    return connectedAccounts;
+  }, [connectedYoutubeAccounts]);
 
   const onSubmit = (
     data: z.infer<typeof CreateVideoFormUploadOptionsSchema>,
@@ -212,8 +240,10 @@ export default function UploadOptionsFormStep({
             exit={{ opacity: 0 }}
             key="5"
           >
-            <div className="flex flex-row gap-4">
-              <FormLabel>Upload video to YouTube?</FormLabel>
+            <div className="flex flex-row items-center gap-4">
+              <FormLabel className="text-lg">
+                Upload video to YouTube?
+              </FormLabel>
               <Checkbox
                 checked={isUploadYoutubeVideoChecked}
                 onCheckedChange={() =>
@@ -229,7 +259,7 @@ export default function UploadOptionsFormStep({
                 <div className="flex flex-col space-y-2">
                   <FormLabel>Upload to this YouTube Channel</FormLabel>
 
-                  <div className="dark flex flex-row gap-2">
+                  <div className="dark flex flex-col gap-2 md:flex-row">
                     <Controller
                       control={form.control}
                       shouldUnregister={true}
@@ -257,28 +287,7 @@ export default function UploadOptionsFormStep({
                               }));
                               field.onChange(v);
                             }}
-                            options={
-                              connectedYoutubeAccounts?.map(
-                                (youtubeAccount) => ({
-                                  label: youtubeAccount.channelTitle,
-                                  value: youtubeAccount.channelId,
-                                  icon: () => (
-                                    <Avatar className="mr-2 h-[16px] w-[16px] ">
-                                      <AvatarImage
-                                        src={youtubeAccount.channelAvatar ?? ""}
-                                        alt="Youtube channel thumbnail"
-                                        width={16}
-                                        height={16}
-                                        className="rounded-full"
-                                      />
-                                      <AvatarFallback>
-                                        {youtubeAccount.channelTitle}
-                                      </AvatarFallback>
-                                    </Avatar>
-                                  ),
-                                }),
-                              ) ?? []
-                            }
+                            options={youtubeChannelOptions}
                             defaultValue={field.value}
                             placeholder="Select a channel"
                           />
@@ -304,7 +313,7 @@ export default function UploadOptionsFormStep({
                     </Link>
 
                     <Button
-                      className="w-fit"
+                      className=""
                       type="button"
                       disabled={isFetchingYoutubeAccounts}
                       onClick={() => {
@@ -328,6 +337,7 @@ export default function UploadOptionsFormStep({
                 <FormField
                   control={form.control}
                   shouldUnregister={true}
+                  defaultValue={""}
                   name="uploadVideoOptions.youtube.videoTitle"
                   render={({ field }) => (
                     <FormItem>
@@ -364,6 +374,7 @@ export default function UploadOptionsFormStep({
                 <FormField
                   control={form.control}
                   shouldUnregister={true}
+                  defaultValue={""}
                   name="uploadVideoOptions.youtube.videoDescription"
                   render={({ field }) => (
                     <FormItem>

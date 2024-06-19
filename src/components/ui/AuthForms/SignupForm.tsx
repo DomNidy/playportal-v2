@@ -22,7 +22,6 @@ import posthog from "posthog-js";
 import { ClipLoader } from "react-spinners";
 import { signUp } from "~/server/actions";
 import GoogleIcon from "~/components/icons/GoogleIcon";
-import { Checkbox } from "../Checkbox";
 
 // Type used to track the status of the signup process
 type SignupStatus = {
@@ -175,40 +174,6 @@ export default function SignupForm() {
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="agreesToTerms"
-            render={({ field }) => (
-              <FormItem className="flex flex-col justify-center">
-                <FormLabel>
-                  I agree to{" "}
-                  <a className="underline" href={"/terms"} target="_blank">
-                    Playportal{"'"}s terms and conditions
-                  </a>
-                  <FormControl>
-                    <Checkbox
-                      className="relative top-[3.25px] ml-1.5"
-                      onCheckedChange={(v) => {
-                        field.onChange(v);
-                        // Since we manually set errors when the user tries to agree to TOS before signing up
-                        // We will just manually clear them here when they check this box
-                        if (v === true) {
-                          form.clearErrors("agreesToTerms");
-                        }
-                      }}
-                      onBlur={field.onBlur}
-                      checked={field.value}
-                      disabled={field.disabled}
-                      ref={field.ref}
-                      name={field.name}
-                    />
-                  </FormControl>
-                </FormLabel>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
           <Button
             disabled={isSubmitting}
             className={`group/btn relative mt-4 block h-10 w-full rounded-md bg-gradient-to-br from-black to-neutral-600 font-medium text-white 
@@ -235,23 +200,7 @@ export default function SignupForm() {
         <Button
           className=" group/btn relative flex h-10 w-full items-center justify-start space-x-2 rounded-md bg-gray-50 px-4 font-medium text-black shadow-input dark:bg-zinc-900 dark:shadow-[0px_0px_1px_1px_var(--neutral-800)]"
           onClick={async () => {
-            if (!form.getValues("agreesToTerms").valueOf()) {
-              form.setError(
-                "agreesToTerms",
-                {
-                  message:
-                    "Please agree to our terms and conditions before signing up with Google.",
-                  type: "onChange",
-                },
-                {
-                  shouldFocus: true,
-                },
-              );
-              return;
-            }
-
             posthog.capture("signup_with_google_button_clicked");
-
             await supabase.auth.signInWithOAuth({
               provider: "google",
               options: {
