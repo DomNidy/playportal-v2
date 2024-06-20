@@ -1,5 +1,7 @@
+import { redirect } from "next/navigation";
 import ManageAccount from "~/components/ui/ManageAccount/ManageAccount";
 import { createClient } from "~/utils/supabase/server";
+import { getErrorRedirect } from "~/utils/utils";
 
 export default async function AccountPage() {
   const supabase = createClient();
@@ -39,9 +41,20 @@ export default async function AccountPage() {
     .limit(1)
     .maybeSingle();
 
+  if (!user) {
+    return redirect(
+      getErrorRedirect(
+        "/sign-in",
+        "Error",
+        "You must be logged in to access this page.",
+      ),
+    );
+  }
+
   return (
     <div className="flex w-full max-w-[500px]">
       <ManageAccount
+        user={user}
         userWithProduct={userWithProduct ?? undefined}
         quotas={{
           createVideo: {

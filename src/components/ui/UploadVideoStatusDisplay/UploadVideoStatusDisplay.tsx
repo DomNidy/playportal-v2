@@ -9,7 +9,7 @@ const uploadVideoStatusVariants = cva("text-medium", {
   variants: {
     variant: {
       default: "text-muted-foreground",
-      destructive: "text-destructive-foreground hover:bg-destructive/90",
+      destructive: "text-red-500",
       success: "text-green-500",
       outline:
         "border border-input bg-background hover:bg-accent hover:text-foreground",

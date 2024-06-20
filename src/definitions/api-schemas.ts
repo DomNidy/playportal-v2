@@ -1,10 +1,24 @@
 import { z } from "zod";
 import { YoutubeVideoVisibilities } from "./form-schemas";
 
-
 export enum VideoPreset {
   YouTube = "YouTube",
   TikTok = "TikTok",
+}
+
+// List of fonts that are allowed to be used in the text overlay
+export enum Fonts {
+  Arial = "Arial", // Add a string as the first element
+  Apollo = "Apollo",
+  Europa = "Europa",
+  Memory = "Memory",
+  Sketch = "Sketch",
+  Poros = "Poros",
+  MontserratBold = "MontserratBold",
+  MontserratRegular = "MontserratRegular",
+  RobotoMedium = "RobotoMedium",
+  RobotoBlack = "RobotoBlack",
+  RobotoBold = "RobotoBold",
 }
 
 export const YoutubeUploadOptions = z.object({
@@ -52,6 +66,18 @@ export const CreateVideoOptionsSchema = z.object({
   video_output_options: z.object({
     preset: z.nativeEnum(VideoPreset),
     quality_level: z.enum(["low", "medium", "high"]),
+    text_overlay: z
+      .object({
+        text: z.string(),
+        font: z.nativeEnum(Fonts),
+        font_size: z.number(),
+        font_color: z.string(),
+        background_box: z.boolean(),
+        background_box_color: z.string(),
+        background_box_opacity: z.number(),
+        background_box_padding: z.number(),
+      })
+      .optional(),
   }),
   audio_file: z.object({
     s3_key: z.string(),

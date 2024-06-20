@@ -36,6 +36,7 @@ export async function generateMetadata(): Promise<Metadata> {
       "loop kits",
       "tunestotube",
       "producer tools",
+      "make type beat video",
       "tunestotube alternative",
       "upload audio to youtube",
       "upload mp3 to youtube",

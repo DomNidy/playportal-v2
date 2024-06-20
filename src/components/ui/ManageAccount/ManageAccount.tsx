@@ -16,12 +16,15 @@ import { Link } from "~/components/ui/Link";
 import StripeBillingPortalButton from "../StripeBillingPortalButton/StripeBillingPortalButton";
 import { type Tables } from "types_db";
 import ManageYoutubeConnections from "../ManageYoutubeConnections/ManageYoutubeConnections";
+import { type User } from "@supabase/supabase-js";
 
 export default function ManageAccount({
+  user,
   userWithProduct,
   quotas,
   featureFlags,
 }: {
+  user: User;
   userWithProduct?: Tables<"user_products">;
   quotas?: {
     createVideo: {
@@ -57,6 +60,11 @@ export default function ManageAccount({
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
+            <div className="flex flex-col space-y-1">
+              <Label>Email</Label>
+              <p>{user.email ?? "N/A"}</p>
+            </div>
+
             <div className="flex flex-col space-y-1">
               <Label>Subscription Plan</Label>
               {userWithProduct ? (

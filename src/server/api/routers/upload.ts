@@ -8,6 +8,7 @@ import { supabaseAdmin } from "~/server/clients/supabase";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { s3Client, sqsClient } from "~/server/clients/aws";
 import {
+  Fonts,
   YoutubeUploadOptions,
   type CreateVideoOptionsSchema,
 } from "~/definitions/api-schemas";
@@ -331,6 +332,16 @@ export const uploadRouter = createTRPCRouter({
             video_output_options: {
               quality_level: "high",
               preset: input.videoPreset,
+              // text_overlay: {
+              //   background_box: true,
+              //   background_box_color: "red",
+              //   background_box_opacity: 0.15,
+              //   background_box_padding: 100,
+              //   font: Fonts.Poros,
+              //   font_color: "white",
+              //   font_size: 100,
+              //   text: input.videoTitle,
+              // },
             },
           };
 
