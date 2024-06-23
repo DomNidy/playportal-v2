@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { VideoPreset } from "./api-schemas";
+import { Fonts, VideoPreset } from "./api-schemas";
 import { isFileExtensionInList } from "~/utils/utils";
 
 export const ResetPasswordFormSchema = z.object({
@@ -22,7 +22,13 @@ export enum YoutubeVideoVisibilities {
 }
 
 export const SupportedAudioFileExtensions = [".mp3", ".wav", ".ogg"];
-export const SupportedImageFileExtensions = [".png", ".jpg", ".jpeg", ".webp", ".jfif"];
+export const SupportedImageFileExtensions = [
+  ".png",
+  ".jpg",
+  ".jpeg",
+  ".webp",
+  ".jfif",
+];
 
 // We will validate the files on our aws backend anyway
 export const CreateVideoFormSchema = z.object({
@@ -60,6 +66,20 @@ export const CreateVideoFormSchema = z.object({
     .optional()
     .nullish(),
   videoPreset: z.nativeEnum(VideoPreset),
+
+  textOverlay: z
+    .object({
+      text: z.string().max(100, "Text must be at most 100 characters long"),
+      font: z.nativeEnum(Fonts),
+      fontSize: z.number().min(1, "Font size must be at least 1"),
+      fontColor: z.string(),
+      backgroundBox: z.boolean(),
+      backgroundBoxColor: z.string(),
+      backgroundBoxOpacity: z.number().min(0).max(1),
+      backgroundBoxPadding: z.number().min(1, "Padding must be at least 1"),
+    })
+    .optional(),
+
   uploadVideoOptions: z
     .object({
       youtube: z
@@ -171,4 +191,19 @@ export const CreateVideoFormUploadOptionsSchema = z.object({
         .optional(),
     })
     .optional(),
+});
+
+// Schema for the text overlay step in the create video form
+export const CreateVideoFormTextOverlaySchema = z.object({
+  text: z
+    .string()
+    .min(1, "Text must be at least 1 character long")
+    .max(100, "Text must be at most 100 characters long"),
+  font: z.nativeEnum(Fonts),
+  fontSize: z.number().min(1, "Font size must be at least 1"),
+  fontColor: z.string(),
+  backgroundBox: z.boolean(),
+  backgroundBoxColor: z.string(),
+  backgroundBoxOpacity: z.number().min(0).max(1),
+  backgroundBoxPadding: z.number().min(1, "Padding must be at least 1"),
 });

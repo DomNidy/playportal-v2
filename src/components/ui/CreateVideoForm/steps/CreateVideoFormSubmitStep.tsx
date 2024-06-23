@@ -24,6 +24,7 @@ export default function CreateVideoFormSubmitStep() {
     uploadImageFileProgress,
     imageFile,
     genUploadURLMutation,
+    textOverlayFormStep,
   } = useCreateVideoForm();
 
   // Used to store errors with submitting if any occur
@@ -34,16 +35,19 @@ export default function CreateVideoFormSubmitStep() {
     uploadAudioFormStep: unknown,
     uploadImageFormStep: unknown,
     uploadVideoOptionsFormStep: unknown,
+    textOverlayFormStep: unknown,
   ): unknown => {
     if (
       !uploadAudioFormStep ||
       !uploadImageFormStep ||
-      !uploadVideoOptionsFormStep
+      !uploadVideoOptionsFormStep ||
+      !textOverlayFormStep
     ) {
       console.error(
         uploadAudioFormStep,
         uploadImageFormStep,
         uploadVideoOptionsFormStep,
+        textOverlayFormStep,
       );
       throw new Error("One of the form steps is missing");
     }
@@ -52,6 +56,7 @@ export default function CreateVideoFormSubmitStep() {
       ...uploadAudioFormStep,
       ...uploadImageFormStep,
       ...uploadVideoOptionsFormStep,
+      textOverlay: textOverlayFormStep,
     };
   };
 
@@ -84,6 +89,7 @@ export default function CreateVideoFormSubmitStep() {
       imageFileSize: imageFile?.size,
       videoPreset: data.videoPreset,
       uploadVideoOptions: data.uploadVideoOptions,
+      textOverlay: data.textOverlay,
     });
   }
 
@@ -130,6 +136,14 @@ export default function CreateVideoFormSubmitStep() {
               uploadAudioFormStep!,
               uploadImageFormStep!,
               uploadVideoOptionsFormStep!,
+              textOverlayFormStep!,
+            );
+
+            console.log(
+              "Concated schema",
+              concatedSchema,
+              "textOverlayFormStep",
+              textOverlayFormStep,
             );
 
             const validateSchema =
@@ -164,6 +178,8 @@ export default function CreateVideoFormSubmitStep() {
           />
         </Button>
       </div>
+
+      <p>{JSON.stringify(textOverlayFormStep)}</p>
 
       {submitError && <p>{submitError}</p>}
 

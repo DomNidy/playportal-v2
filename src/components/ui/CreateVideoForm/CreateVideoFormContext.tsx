@@ -6,10 +6,11 @@ import React, {
   type SetStateAction,
 } from "react";
 import { type z } from "zod";
-import type {
-  CreateVideoFormUploadAudioSchema,
-  CreateVideoFormUploadImageSchema,
-  CreateVideoFormUploadOptionsSchema,
+import {
+  type CreateVideoFormTextOverlaySchema,
+  type CreateVideoFormUploadAudioSchema,
+  type CreateVideoFormUploadImageSchema,
+  type CreateVideoFormUploadOptionsSchema,
 } from "~/definitions/form-schemas";
 import { api } from "~/trpc/react";
 import { toast } from "../Toasts/use-toast";
@@ -67,6 +68,21 @@ export type CreateVideoFormCTX = {
     > | null>
   >;
 
+  // This is used to configure the text overlay for the video
+  textOverlayFormStep: DeepPartial<
+    z.infer<typeof CreateVideoFormTextOverlaySchema>
+  > | null;
+  setTextOverlayFormStep: React.Dispatch<
+    SetStateAction<DeepPartial<
+      z.infer<typeof CreateVideoFormTextOverlaySchema>
+    > | null>
+  >;
+
+  // Used to conditionally show text overlay configuration options
+  // If not checked, we will not include text overlay in the video
+  isConfigureTextOverlayChecked: boolean;
+  setIsConfigureTextOverlayChecked: (checked: boolean) => void;
+
   genUploadURLMutation: ReturnType<
     typeof api.upload.generateUploadURL.useMutation
   >;
@@ -115,6 +131,13 @@ export function CreateVideoFormProvider({
     useState<DeepPartial<
       z.infer<typeof CreateVideoFormUploadOptionsSchema>
     > | null>(null);
+
+  const [textOverlayFormStep, setTextOverlayFormStep] = useState<DeepPartial<
+    z.infer<typeof CreateVideoFormTextOverlaySchema>
+  > | null>(null);
+
+  const [isConfigureTextOverlayChecked, setIsConfigureTextOverlayChecked] =
+    useState<boolean>(false);
 
   // Query used to generate presigned urls for file uploaad
   const genUploadURL = api.upload.generateUploadURL.useMutation({
@@ -242,6 +265,10 @@ export function CreateVideoFormProvider({
         setUploadImageFileProgress,
         isUploadingFiles,
         setIsUploadingFiles,
+        textOverlayFormStep,
+        setTextOverlayFormStep,
+        isConfigureTextOverlayChecked,
+        setIsConfigureTextOverlayChecked,
       }}
     >
       {children}

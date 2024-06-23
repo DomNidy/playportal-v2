@@ -68,13 +68,16 @@ export default function UploadOptionsFormStep({
       videoTitle: uploadVideoOptionsFormStep?.videoTitle ?? "",
       videoPreset:
         uploadVideoOptionsFormStep?.videoPreset ?? VideoPreset.YouTube,
+
       uploadVideoOptions: isUploadYoutubeVideoChecked
         ? {
             ...uploadVideoOptionsFormStep?.uploadVideoOptions,
             youtube: {
               videoTitle:
                 uploadVideoOptionsFormStep?.uploadVideoOptions?.youtube
-                  ?.videoTitle ?? "",
+                  ?.videoTitle ??
+                uploadVideoOptionsFormStep?.videoTitle ??
+                "",
               videoDescription:
                 uploadVideoOptionsFormStep?.uploadVideoOptions?.youtube
                   ?.videoDescription ?? "",
@@ -134,7 +137,6 @@ export default function UploadOptionsFormStep({
   ) => {
     setUploadVideoOptionsFormStep(data);
     nextStep();
-    console.log("Final step submitted", data);
   };
 
   return (
@@ -158,7 +160,7 @@ export default function UploadOptionsFormStep({
               key="3"
             >
               <FormItem>
-                <FormLabel>Video Title</FormLabel>
+                <FormLabel>Beat Name</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="My video"
@@ -194,7 +196,7 @@ export default function UploadOptionsFormStep({
           exit={{ opacity: 0 }}
           key="4"
         >
-          <FormLabel>Video preset</FormLabel>
+          <FormLabel className="py-2">Aspect Ratio</FormLabel>
           <Select
             defaultValue="YouTube"
             value={uploadVideoOptionsFormStep?.videoPreset ?? "YouTube"}
@@ -337,7 +339,7 @@ export default function UploadOptionsFormStep({
                 <FormField
                   control={form.control}
                   shouldUnregister={true}
-                  defaultValue={""}
+                  defaultValue={uploadVideoOptionsFormStep?.videoTitle ?? ""}
                   name="uploadVideoOptions.youtube.videoTitle"
                   render={({ field }) => (
                     <FormItem>

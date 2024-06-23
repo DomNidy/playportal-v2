@@ -6,6 +6,7 @@ import UploadAudioFormStep from "./steps/UploadAudioFormStep";
 import UploadImageFormStep from "./steps/UploadImageFormStep";
 import UploadOptionsFormStep from "./steps/UploadOptionsFormStep";
 import CreateVideoFormSubmitStep from "./steps/CreateVideoFormSubmitStep";
+import TextOverlayOptionsFormStep from "./steps/TextOverlayOptionsFormStep";
 
 // Hardcoded at 8MB
 const MAX_IMAGE_SIZE = 8 * 1024 * 1024;
@@ -33,6 +34,10 @@ export default function CreateVideoForm({
     {
       label: "Select Video Options",
       description: "Name the video, choose a preset, and select upload options",
+    },
+    {
+      label: "Text Overlay",
+      description: "Configure text overlay",
     },
     {
       label: "Finalize and Submit",
@@ -78,6 +83,12 @@ export default function CreateVideoForm({
               </Step>
             );
           } else if (index === 3) {
+            return (
+              <Step key={index} {...stepProps} className="mt-16">
+                <TextOverlayOptionsFormStep />
+              </Step>
+            );
+          } else if (index === 4) {
             return (
               <Step key={index} {...stepProps} className="mt-16">
                 <CreateVideoFormSubmitStep />

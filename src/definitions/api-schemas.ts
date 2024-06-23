@@ -8,7 +8,6 @@ export enum VideoPreset {
 
 // List of fonts that are allowed to be used in the text overlay
 export enum Fonts {
-  Arial = "Arial", // Add a string as the first element
   Apollo = "Apollo",
   Europa = "Europa",
   Memory = "Memory",
@@ -35,7 +34,7 @@ export const YoutubeUploadOptions = z.object({
   video_visibility: z.nativeEnum(YoutubeVideoVisibilities),
 });
 
-export const CreateVideoOptionsSchema = z.object({
+export const CreateVideoOptionsMessageSchema = z.object({
   kind: z.literal("CreateVideoOptions"),
   user_id: z.string(),
   associated_transaction_id: z.string(),

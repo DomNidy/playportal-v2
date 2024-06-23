@@ -10,7 +10,7 @@ import { s3Client, sqsClient } from "~/server/clients/aws";
 import {
   Fonts,
   YoutubeUploadOptions,
-  type CreateVideoOptionsSchema,
+  type CreateVideoOptionsMessageSchema,
 } from "~/definitions/api-schemas";
 import { headers } from "next/headers";
 import { VideoPreset } from "~/definitions/api-schemas";
@@ -42,6 +42,22 @@ export const uploadRouter = createTRPCRouter({
         audioFileExtension: z.string().nullable(),
         imageFileExtension: z.string().nullable(),
         videoPreset: z.nativeEnum(VideoPreset),
+        textOverlay: z
+          .object({
+            text: z
+              .string()
+              .max(100, "Text must be at most 100 characters long"),
+            font: z.nativeEnum(Fonts),
+            fontSize: z.number().min(1, "Font size must be at least 1"),
+            fontColor: z.string(),
+            backgroundBox: z.boolean(),
+            backgroundBoxColor: z.string(),
+            backgroundBoxOpacity: z.number().min(0).max(1),
+            backgroundBoxPadding: z
+              .number()
+              .min(1, "Padding must be at least 1"),
+          })
+          .optional(),
         uploadVideoOptions: z
           .object({
             youtube: z
@@ -286,7 +302,9 @@ export const uploadRouter = createTRPCRouter({
             : null;
 
           // Create message that we will post to sqs queue
-          const createVideoMessage: z.infer<typeof CreateVideoOptionsSchema> = {
+          const createVideoMessage: z.infer<
+            typeof CreateVideoOptionsMessageSchema
+          > = {
             kind: "CreateVideoOptions",
             upload_after_creation_options: input?.uploadVideoOptions?.youtube
               ? {
@@ -332,16 +350,21 @@ export const uploadRouter = createTRPCRouter({
             video_output_options: {
               quality_level: "high",
               preset: input.videoPreset,
-              // text_overlay: {
-              //   background_box: true,
-              //   background_box_color: "red",
-              //   background_box_opacity: 0.15,
-              //   background_box_padding: 100,
-              //   font: Fonts.Poros,
-              //   font_color: "white",
-              //   font_size: 100,
-              //   text: input.videoTitle,
-              // },
+              // TODO: Implement text overlay
+              text_overlay: input?.textOverlay
+                ? {
+                    background_box: input.textOverlay.backgroundBox,
+                    background_box_color: input.textOverlay.backgroundBoxColor,
+                    background_box_opacity:
+                      input.textOverlay.backgroundBoxOpacity,
+                    background_box_padding:
+                      input.textOverlay.backgroundBoxPadding,
+                    font: input.textOverlay.font,
+                    font_color: input.textOverlay.fontColor,
+                    font_size: input.textOverlay.fontSize,
+                    text: input.textOverlay.text,
+                  }
+                : undefined,
             },
           };
 
