@@ -37,17 +37,16 @@ export default function CreateVideoFormSubmitStep() {
     uploadVideoOptionsFormStep: unknown,
     textOverlayFormStep: unknown,
   ): unknown => {
+    // Don't
     if (
       !uploadAudioFormStep ||
       !uploadImageFormStep ||
-      !uploadVideoOptionsFormStep ||
-      !textOverlayFormStep
+      !uploadVideoOptionsFormStep
     ) {
       console.error(
         uploadAudioFormStep,
         uploadImageFormStep,
         uploadVideoOptionsFormStep,
-        textOverlayFormStep,
       );
       throw new Error("One of the form steps is missing");
     }
@@ -56,7 +55,7 @@ export default function CreateVideoFormSubmitStep() {
       ...uploadAudioFormStep,
       ...uploadImageFormStep,
       ...uploadVideoOptionsFormStep,
-      textOverlay: textOverlayFormStep,
+      textOverlay: textOverlayFormStep ?? undefined,
     };
   };
 
