@@ -179,8 +179,6 @@ export default function CreateVideoFormSubmitStep() {
         </Button>
       </div>
 
-      <p>{JSON.stringify(textOverlayFormStep)}</p>
-
       {submitError && <p>{submitError}</p>}
 
       {isUploadingFiles && (
