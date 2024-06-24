@@ -61,7 +61,7 @@ export default async function DownloadsPage() {
     .from("kits")
     .select(
       "title:name, downloadURL:download_url, description, type, imageSrc:image_url",
-    );
+    ).order("created_at", { ascending: false });
 
   return (
     <div className="flex flex-col items-center px-4">
