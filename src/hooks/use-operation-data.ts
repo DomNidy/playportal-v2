@@ -125,10 +125,13 @@ export default function useOperationData(operationId: string | null): {
   useEffect(() => {
     const fetchAssociatedFiles = async () => {
       console.log("Operation is completed, fetching associated files");
+
+      // Filter out s3keys that have the substring 'thumbnail' in them
       const s3Key = await supabase
         .from("file_metadata")
         .select("*")
-        .eq("operation_id", operationId ?? "");
+        .eq("operation_id", operationId ?? "")
+        .filter("s3_key", "not.like", "%thumbnail%");
 
       setAssociatedFiles(s3Key.data ?? []);
     };
