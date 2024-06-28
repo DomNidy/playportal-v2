@@ -29,6 +29,7 @@ export default function useRecentOperations({
         .select("*")
         .order("created_at", { ascending: false })
         .eq("file_origin", "PlayportalBackend")
+        .eq("file_type", "Video")
         .eq("user_id", user.id)
         .range(pageParam.from, pageParam.to)
         .limit(itemsPerPage);

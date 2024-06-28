@@ -40,6 +40,7 @@ import SubmitStatus from "../../LoaderStatus/LoaderStatus";
 import { Link } from "~/components/ui/Link";
 import { Link2Icon } from "lucide-react";
 import { YoutubeChannelAvatar } from "../YoutubeChannelAvatar";
+import TitleBuilder from "../../TitleBuilder";
 
 function isString(v: unknown): v is string {
   return typeof v === "string";
@@ -138,6 +139,22 @@ export default function UploadOptionsFormStep({
     setUploadVideoOptionsFormStep(data);
     nextStep();
   };
+
+  const onTitleBuilderSubmit = (title: string, beatName: string) => {
+    setUploadVideoOptionsFormStep((prev) => ({
+      ...prev,
+      videoTitle: beatName,
+      uploadVideoOptions: {
+        youtube: {
+          videoTitle: title,
+        },
+      },
+    }));
+
+    setTitleBuilderOpen(false);
+  };
+
+  const [titleBuilderOpen, setTitleBuilderOpen] = React.useState(false);
 
   return (
     <Form {...form}>
@@ -258,121 +275,55 @@ export default function UploadOptionsFormStep({
 
             {isUploadYoutubeVideoChecked && (
               <>
-                <div className="flex flex-col space-y-2">
-                  <FormLabel>Upload to this YouTube Channel</FormLabel>
-
-                  <div className="dark flex flex-col gap-2 md:flex-row">
-                    <Controller
-                      control={form.control}
-                      shouldUnregister={true}
-                      name="uploadVideoOptions.youtube.uploadToChannels"
-                      render={({ field }) => (
-                        <>
-                          <MultiSelectFormField
-                            value={field.value}
-                            isDataLoading={isLoadingYoutubeAccounts}
-                            loadingPlaceholder={
-                              <p className="text-center text-white">
-                                Loading...
-                              </p>
-                            }
-                            onValueChange={(v) => {
+                <div className="flex w-full flex-col gap-1 md:flex-row md:items-center justify-center">
+                  <FormField
+                    control={form.control}
+                    shouldUnregister={true}
+                    defaultValue={uploadVideoOptionsFormStep?.videoTitle ?? ""}
+                    name="uploadVideoOptions.youtube.videoTitle"
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormLabel>YouTube Video Title</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="My video"
+                            {...field}
+                            onChange={(v) => {
+                              field.onChange(v);
                               setUploadVideoOptionsFormStep((prev) => ({
                                 ...prev,
                                 uploadVideoOptions: {
                                   ...prev?.uploadVideoOptions,
                                   youtube: {
                                     ...prev?.uploadVideoOptions?.youtube,
-                                    uploadToChannels: v,
+                                    videoTitle: v.target.value,
                                   },
                                 },
                               }));
-                              field.onChange(v);
                             }}
-                            options={youtubeChannelOptions}
-                            defaultValue={field.value}
-                            placeholder="Select a channel"
                           />
-                        </>
-                      )}
-                    />
+                        </FormControl>
 
-                    <Link
-                      className="w-fit"
-                      href="/dashboard/account"
-                      variant={"button"}
-                      passHref
-                      legacyBehavior
-                    >
-                      <a
-                        target="_blank"
-                        className={
-                          "inline-flex items-center justify-center gap-1 whitespace-nowrap rounded-md bg-primary p-2 text-sm font-medium text-black ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-                        }
-                      >
-                        <Link2Icon size={20} /> Link a YouTube Channel
-                      </a>
-                    </Link>
-
-                    <Button
-                      className=""
-                      type="button"
-                      disabled={isFetchingYoutubeAccounts}
-                      onClick={() => {
-                        void refetchYoutubeAccounts();
-                      }}
-                    >
-                      <SubmitStatus
-                        text="Refresh linked channels"
-                        isLoading={isFetchingYoutubeAccounts}
-                        loaderProps={{ size: 12 }}
-                      />
-                    </Button>
-                  </div>
-
-                  <FormMessage>
-                    {" "}
-                    {form?.formState?.errors?.uploadVideoOptions?.youtube?.uploadToChannels?.message?.toString()}{" "}
-                  </FormMessage>
+                        <FormMessage>
+                          {form.formState.errors?.uploadVideoOptions?.youtube?.videoTitle?.message?.toString()}
+                        </FormMessage>
+                      </FormItem>
+                    )}
+                  />
+                  <TitleBuilder
+                    modalOpen={titleBuilderOpen}
+                    onModalOpenChange={setTitleBuilderOpen}
+                    setTitleCallback={onTitleBuilderSubmit}
+                    triggerButton={
+                      <Button className="min-w-64 md:self-end bg-ptl_accent-def text-white hover:bg-ptl_accent-hover">
+                        Title Builder
+                      </Button>
+                    }
+                  />
                 </div>
-
-                <FormField
-                  control={form.control}
-                  shouldUnregister={true}
-                  defaultValue={uploadVideoOptionsFormStep?.videoTitle ?? ""}
-                  name="uploadVideoOptions.youtube.videoTitle"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>YouTube Video Title</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="My video"
-                          {...field}
-                          onChange={(v) => {
-                            field.onChange(v);
-                            setUploadVideoOptionsFormStep((prev) => ({
-                              ...prev,
-                              uploadVideoOptions: {
-                                ...prev?.uploadVideoOptions,
-                                youtube: {
-                                  ...prev?.uploadVideoOptions?.youtube,
-                                  videoTitle: v.target.value,
-                                },
-                              },
-                            }));
-                          }}
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        The title of the video on YouTube
-                      </FormDescription>
-                      <FormMessage>
-                        {form.formState.errors?.uploadVideoOptions?.youtube?.videoTitle?.message?.toString()}
-                      </FormMessage>
-                    </FormItem>
-                  )}
-                />
-
+                <FormDescription>
+                  The title of the video on YouTube
+                </FormDescription>
                 <FormField
                   control={form.control}
                   shouldUnregister={true}
@@ -464,6 +415,84 @@ export default function UploadOptionsFormStep({
                     </FormItem>
                   )}
                 />
+
+                <div className="flex flex-col space-y-2">
+                  <FormLabel>Upload to this YouTube Channel</FormLabel>
+
+                  <div className="dark flex flex-col gap-2 md:flex-row">
+                    <Controller
+                      control={form.control}
+                      shouldUnregister={true}
+                      name="uploadVideoOptions.youtube.uploadToChannels"
+                      render={({ field }) => (
+                        <>
+                          <MultiSelectFormField
+                            value={field.value}
+                            isDataLoading={isLoadingYoutubeAccounts}
+                            loadingPlaceholder={
+                              <p className="text-center text-white">
+                                Loading...
+                              </p>
+                            }
+                            onValueChange={(v) => {
+                              setUploadVideoOptionsFormStep((prev) => ({
+                                ...prev,
+                                uploadVideoOptions: {
+                                  ...prev?.uploadVideoOptions,
+                                  youtube: {
+                                    ...prev?.uploadVideoOptions?.youtube,
+                                    uploadToChannels: v,
+                                  },
+                                },
+                              }));
+                              field.onChange(v);
+                            }}
+                            options={youtubeChannelOptions}
+                            defaultValue={field.value}
+                            placeholder="Select a channel"
+                          />
+                        </>
+                      )}
+                    />
+
+                    <Link
+                      className="w-fit"
+                      href="/dashboard/account"
+                      variant={"button"}
+                      passHref
+                      legacyBehavior
+                    >
+                      <a
+                        target="_blank"
+                        className={
+                          "inline-flex items-center justify-center gap-1 whitespace-nowrap rounded-md bg-primary p-2 text-sm font-medium text-black ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+                        }
+                      >
+                        <Link2Icon size={20} /> Link a YouTube Channel
+                      </a>
+                    </Link>
+
+                    <Button
+                      className=""
+                      type="button"
+                      disabled={isFetchingYoutubeAccounts}
+                      onClick={() => {
+                        void refetchYoutubeAccounts();
+                      }}
+                    >
+                      <SubmitStatus
+                        text="Refresh linked channels"
+                        isLoading={isFetchingYoutubeAccounts}
+                        loaderProps={{ size: 12 }}
+                      />
+                    </Button>
+                  </div>
+
+                  <FormMessage>
+                    {" "}
+                    {form?.formState?.errors?.uploadVideoOptions?.youtube?.uploadToChannels?.message?.toString()}{" "}
+                  </FormMessage>
+                </div>
 
                 <Controller
                   control={form.control}

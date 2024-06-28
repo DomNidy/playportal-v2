@@ -80,6 +80,10 @@ export default function TextOverlayOptionsFormStep() {
   const form = useForm<z.infer<typeof CreateVideoFormTextOverlaySchema>>({
     resolver: zodResolver(CreateVideoFormTextOverlaySchema),
     defaultValues: {
+      text:
+        textOverlayFormStep?.text ??
+        uploadVideoOptionsFormStep?.videoTitle ??
+        "",
       backgroundBox: true,
       backgroundBoxColor: "black",
       backgroundBoxOpacity: 0.75,
@@ -289,7 +293,7 @@ export default function TextOverlayOptionsFormStep() {
                 color: textOverlayFormStep?.fontColor ?? "white",
               }}
             >
-              {textOverlayFormStep?.text ?? "My beat"}
+              {form.getValues("text") ?? "My beat"}
             </p>
           </div>
         )}

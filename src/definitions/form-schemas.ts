@@ -207,3 +207,24 @@ export const CreateVideoFormTextOverlaySchema = z.object({
   backgroundBoxOpacity: z.number().min(0).max(1),
   backgroundBoxPadding: z.number().min(1, "Padding must be at least 1"),
 });
+
+//* We need to make sure that the created title is >= 100 characters
+export const TitleBuilderFormSchema = z.object({
+  beatDescriptors: z
+    .array(z.string())
+    .min(1, "Please enter at least one beat descriptor.")
+    .max(3)
+    .refine((descriptors) => {
+      const descriptorsLength = descriptors.join("").length;
+      return descriptorsLength >= 1;
+    }, "Please enter at least one beat descriptor."),
+  beatAvailability: z.enum(["Free", "FreeForProfit", "NoLabel"]),
+  beatName: z.string().min(1, "Beat name must be at least 1 character long"),
+  title: z
+    .string()
+    .min(1, "Title must be at least 1 character long")
+    .max(
+      100,
+      "Title must be at most 100 characters long, please try to shorten your descriptors.",
+    ),
+});
