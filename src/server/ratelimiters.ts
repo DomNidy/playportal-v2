@@ -19,6 +19,16 @@ export const generateUploadURLRatelimiter = new Ratelimit({
   limiter: Ratelimit.fixedWindow(10, "3 m"),
 });
 
+// This is used to rate limit tag generation requests with youtube api
+// * This endpoint uses quota, so this is important
+// Each call to this endpoint costs 101 yt quota
+export const generateTagsRatelimiter = new Ratelimit({
+  redis: redis,
+  analytics: true,
+  prefix: "generateTags",
+  limiter: Ratelimit.fixedWindow(20, "45 m"),
+});
+
 // Used to rate limit getPresignedUrlForFile
 export const getPresignedUrlForFileRatelimit = new Ratelimit({
   redis: redis,

@@ -228,3 +228,7 @@ export const TitleBuilderFormSchema = z.object({
       "Title must be at most 100 characters long, please try to shorten your descriptors.",
     ),
 });
+
+export const TagGeneratorFormSchema = z.object({
+  queryString: z.string().min(1).max(500),
+});

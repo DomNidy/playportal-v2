@@ -41,6 +41,7 @@ import { Link } from "~/components/ui/Link";
 import { Link2Icon } from "lucide-react";
 import { YoutubeChannelAvatar } from "../YoutubeChannelAvatar";
 import TitleBuilder from "../../TitleBuilder";
+import TagGenerator from "../../TagGenerator";
 
 function isString(v: unknown): v is string {
   return typeof v === "string";
@@ -140,6 +141,7 @@ export default function UploadOptionsFormStep({
     nextStep();
   };
 
+  //* Title builder
   const onTitleBuilderSubmit = (title: string, beatName: string) => {
     setUploadVideoOptionsFormStep((prev) => ({
       ...prev,
@@ -153,8 +155,23 @@ export default function UploadOptionsFormStep({
 
     setTitleBuilderOpen(false);
   };
-
   const [titleBuilderOpen, setTitleBuilderOpen] = React.useState(false);
+
+  //* Tag generator
+  const onTagGeneratorSubmit = (newTags: string[]) => {
+    setUploadVideoOptionsFormStep((prev) => ({
+      ...prev,
+      uploadVideoOptions: {
+        ...prev?.uploadVideoOptions,
+        youtube: {
+          ...prev?.uploadVideoOptions?.youtube,
+          videoTags: newTags,
+        },
+      },
+    }));
+  };
+
+  const [tagGeneratorOpen, setTagGeneratorOpen] = React.useState(false);
 
   return (
     <Form {...form}>
@@ -275,16 +292,16 @@ export default function UploadOptionsFormStep({
 
             {isUploadYoutubeVideoChecked && (
               <>
-                <div className="flex w-full flex-col gap-1 md:flex-row md:items-center justify-center">
-                  <FormField
-                    control={form.control}
-                    shouldUnregister={true}
-                    defaultValue={uploadVideoOptionsFormStep?.videoTitle ?? ""}
-                    name="uploadVideoOptions.youtube.videoTitle"
-                    render={({ field }) => (
-                      <FormItem className="flex-1">
-                        <FormLabel>YouTube Video Title</FormLabel>
-                        <FormControl>
+                <FormField
+                  control={form.control}
+                  shouldUnregister={true}
+                  defaultValue={uploadVideoOptionsFormStep?.videoTitle ?? ""}
+                  name="uploadVideoOptions.youtube.videoTitle"
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel>YouTube Video Title</FormLabel>
+                      <FormControl>
+                        <div className="flex flex-col gap-2 md:flex-row">
                           <Input
                             placeholder="My video"
                             {...field}
@@ -302,25 +319,27 @@ export default function UploadOptionsFormStep({
                               }));
                             }}
                           />
-                        </FormControl>
 
-                        <FormMessage>
-                          {form.formState.errors?.uploadVideoOptions?.youtube?.videoTitle?.message?.toString()}
-                        </FormMessage>
-                      </FormItem>
-                    )}
-                  />
-                  <TitleBuilder
-                    modalOpen={titleBuilderOpen}
-                    onModalOpenChange={setTitleBuilderOpen}
-                    setTitleCallback={onTitleBuilderSubmit}
-                    triggerButton={
-                      <Button className="min-w-64 md:self-end bg-ptl_accent-def text-white hover:bg-ptl_accent-hover">
-                        Title Builder
-                      </Button>
-                    }
-                  />
-                </div>
+                          <TitleBuilder
+                            modalOpen={titleBuilderOpen}
+                            onModalOpenChange={setTitleBuilderOpen}
+                            setTitleCallback={onTitleBuilderSubmit}
+                            triggerButton={
+                              <Button className="min-w-64  md:self-end">
+                                Title Builder
+                              </Button>
+                            }
+                          />
+                        </div>
+                      </FormControl>
+
+                      <FormMessage>
+                        {form.formState.errors?.uploadVideoOptions?.youtube?.videoTitle?.message?.toString()}
+                      </FormMessage>
+                    </FormItem>
+                  )}
+                />
+
                 <FormDescription>
                   The title of the video on YouTube
                 </FormDescription>
@@ -372,49 +391,75 @@ export default function UploadOptionsFormStep({
                   }
                   name="uploadVideoOptions.youtube.videoTags"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="flex-1">
                       <FormLabel>YouTube Video Tags</FormLabel>
                       <FormControl>
-                        <TagsInput
-                          initialKeywords={
-                            uploadVideoOptionsFormStep?.uploadVideoOptions?.youtube?.videoTags?.filter(
-                              isString,
-                            ) ?? []
-                          }
-                          controllerRenderProps={{
-                            name: field.name,
-                            ref: field.ref,
-                            onBlur: field.onBlur,
-                            onChange: () => null,
-                            disabled: field.disabled,
-                            // We don't need to set the value here since the TagsInput component will handle that
-                            value: field.value,
-                          }}
-                          onKeywordsChange={(keywords) => {
-                            field.onChange(keywords);
+                        <div className="flex flex-col gap-2 md:flex-row ">
+                          <TagsInput
+                            initialKeywords={
+                              form.getValues(
+                                "uploadVideoOptions.youtube.videoTags",
+                              ) ??
+                              uploadVideoOptionsFormStep?.uploadVideoOptions?.youtube?.videoTags?.filter(
+                                isString,
+                              ) ??
+                              []
+                            }
+                            controllerRenderProps={{
+                              name: field.name,
+                              ref: field.ref,
+                              onBlur: field.onBlur,
+                              onChange: field.onChange,
+                              disabled: field.disabled,
+                              // We don't need to set the value here since the TagsInput component will handle that
+                              value: field.value,
+                            }}
+                            onKeywordsChange={(keywords) => {
+                              field.onChange(keywords);
 
-                            setUploadVideoOptionsFormStep((prev) => ({
-                              ...prev,
-                              uploadVideoOptions: {
-                                ...prev?.uploadVideoOptions,
-                                youtube: {
-                                  ...prev?.uploadVideoOptions?.youtube,
-                                  videoTags: keywords,
+                              setUploadVideoOptionsFormStep((prev) => ({
+                                ...prev,
+                                uploadVideoOptions: {
+                                  ...prev?.uploadVideoOptions,
+                                  youtube: {
+                                    ...prev?.uploadVideoOptions?.youtube,
+                                    videoTags: keywords,
+                                  },
                                 },
-                              },
-                            }));
-                          }}
-                        />
+                              }));
+                            }}
+                          />
+
+                          <TagGenerator
+                            defaultTagQuery={
+                              form
+                                .getValues(
+                                  "uploadVideoOptions.youtube.videoTitle",
+                                )
+                                .replace(/"[^"]*"| - /g, "") ?? ""
+                            }
+                            modalOpen={tagGeneratorOpen}
+                            onModalOpenChange={setTagGeneratorOpen}
+                            setTagsCallback={onTagGeneratorSubmit}
+                            triggerButton={
+                              <Button className="min-w-64  md:self-start">
+                                Open Tag Generator
+                              </Button>
+                            }
+                          />
+                        </div>
                       </FormControl>
-                      <FormDescription>
-                        Comma separated list of tags for the video on YouTube
-                      </FormDescription>
+
                       <FormMessage>
                         {form.formState.errors?.uploadVideoOptions?.youtube?.videoTags?.message?.toString()}
                       </FormMessage>
                     </FormItem>
                   )}
                 />
+
+                <FormDescription>
+                  Comma separated list of tags for the video on YouTube
+                </FormDescription>
 
                 <div className="flex flex-col space-y-2">
                   <FormLabel>Upload to this YouTube Channel</FormLabel>

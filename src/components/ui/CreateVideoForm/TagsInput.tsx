@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { type ControllerRenderProps } from "react-hook-form";
 import { Input } from "../Input";
@@ -15,6 +15,11 @@ const TagsInput: React.FC<TagsInputProps> = ({
   onKeywordsChange,
   controllerRenderProps,
 }) => {
+  // When the passed keywords are changed, overwrite the interal state with them
+  useEffect(() => {
+    setKeywords(initialKeywords);
+  }, [initialKeywords]);
+
   const [keywords, setKeywords] = useState<string[]>(initialKeywords);
   const [inputValue, setInputValue] = useState<string>("");
 
@@ -89,6 +94,7 @@ const TagsInput: React.FC<TagsInputProps> = ({
         {keywords.map((keyword, index) => (
           <button
             key={index}
+            type="button"
             onClick={() => removeKeyword(index)}
             className="m-1 flex items-center rounded-full bg-blue-500 px-2 py-1 text-xs text-white"
           >
