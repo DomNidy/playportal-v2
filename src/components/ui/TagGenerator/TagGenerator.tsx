@@ -28,13 +28,15 @@ export default function TagGenerator({ ...props }: TagGeneratorProps) {
             Generate SEO Optimized tags for your Video
           </p>
         </div>
-        <TagGeneratorForm
-          setTagsCallback={(tags) => {
-            setTagsCallback(tags);
-          }}
-          defaultTagQuery={defaultTagQuery}
-          setModalOpen={onModalOpenChange}
-        />
+        <div className="flex flex-col space-y-4">
+          <TagGeneratorForm
+            setTagsCallback={(tags) => {
+              setTagsCallback(tags);
+            }}
+            defaultTagQuery={defaultTagQuery}
+            setModalOpen={onModalOpenChange}
+          />
+        </div>
       </DialogContent>
     </Dialog>
   );

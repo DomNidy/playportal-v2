@@ -50,7 +50,7 @@ export default function TagGeneratorForm({ ...props }: TagGeneratorFormProps) {
   return (
     <Form {...form}>
       <form
-        className="space-y-4 "
+        className="space-y-4"
         onSubmit={async (e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -84,22 +84,22 @@ export default function TagGeneratorForm({ ...props }: TagGeneratorFormProps) {
             loaderProps={{ size: 20 }}
           />
         </Button>
-      </form>
 
-      {generatedTags && (
-        <div className="flex rounded-lg bg-white p-2">
-          <p className="font-mono text-sm text-black">{generatedTags}</p>
-        </div>
-      )}
-      <Button
-        type="button"
-        onClick={() => {
-          setTagsCallback(tagsQuery.data ?? []);
-          setModalOpen(false);
-        }}
-      >
-        Accept Tags
-      </Button>
+        {generatedTags && (
+          <div className="flex rounded-lg bg-white p-2">
+            <p className="font-mono text-sm text-black">{generatedTags}</p>
+          </div>
+        )}
+        <Button
+          type="button"
+          onClick={() => {
+            setTagsCallback(tagsQuery.data ?? []);
+            setModalOpen(false);
+          }}
+        >
+          Accept Tags
+        </Button>
+      </form>
     </Form>
   );
 }

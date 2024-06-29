@@ -432,11 +432,11 @@ export default function UploadOptionsFormStep({
 
                           <TagGenerator
                             defaultTagQuery={
-                              form
-                                .getValues(
+                              (
+                                form.getValues(
                                   "uploadVideoOptions.youtube.videoTitle",
-                                )
-                                .replace(/"[^"]*"| - /g, "") ?? ""
+                                ) ?? ""
+                              ).replace(/"[^"]*"| - /g, "") ?? ""
                             }
                             modalOpen={tagGeneratorOpen}
                             onModalOpenChange={setTagGeneratorOpen}
