@@ -83,6 +83,9 @@ export type CreateVideoFormCTX = {
   isConfigureTextOverlayChecked: boolean;
   setIsConfigureTextOverlayChecked: (checked: boolean) => void;
 
+  isShowBackgroundTextBoxChecked: boolean;
+  setIsShowBackgroundTextBoxChecked: (checked: boolean) => void;
+
   genUploadURLMutation: ReturnType<
     typeof api.upload.generateUploadURL.useMutation
   >;
@@ -136,8 +139,12 @@ export function CreateVideoFormProvider({
     z.infer<typeof CreateVideoFormTextOverlaySchema>
   > | null>(null);
 
+  // In the text overlay step, should we show options to configure text overlay?
   const [isConfigureTextOverlayChecked, setIsConfigureTextOverlayChecked] =
     useState<boolean>(false);
+
+  const [isShowBackgroundTextBoxChecked, setIsShowBackgroundTextBoxChecked] =
+    useState<boolean>(true);
 
   // Query used to generate presigned urls for file uploaad
   const genUploadURL = api.upload.generateUploadURL.useMutation({
@@ -269,6 +276,8 @@ export function CreateVideoFormProvider({
         setTextOverlayFormStep,
         isConfigureTextOverlayChecked,
         setIsConfigureTextOverlayChecked,
+        isShowBackgroundTextBoxChecked,
+        setIsShowBackgroundTextBoxChecked,
       }}
     >
       {children}

@@ -92,6 +92,7 @@ export default function TagGeneratorForm({ ...props }: TagGeneratorFormProps) {
         )}
         <Button
           type="button"
+          className="w-full"
           onClick={() => {
             setTagsCallback(tagsQuery.data ?? []);
             setModalOpen(false);

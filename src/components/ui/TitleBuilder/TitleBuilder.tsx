@@ -6,11 +6,17 @@ interface TitleBuilderProps {
   onModalOpenChange: (isOpen: boolean) => void;
   setTitleCallback: (newTitle: string, beatName: string) => void;
   triggerButton: React.ReactNode;
+  defaultBeatName?: string;
 }
 
 export default function TitleBuilder({ ...props }: TitleBuilderProps) {
-  const { modalOpen, setTitleCallback, onModalOpenChange, triggerButton } =
-    props;
+  const {
+    modalOpen,
+    setTitleCallback,
+    defaultBeatName,
+    onModalOpenChange,
+    triggerButton,
+  } = props;
 
   return (
     <Dialog open={modalOpen} onOpenChange={onModalOpenChange}>
@@ -24,6 +30,7 @@ export default function TitleBuilder({ ...props }: TitleBuilderProps) {
         </div>
         {/** It might be worth memoizing this setTitlCallback if the titlebuilder component gets bigger */}
         <TitleBuilderForm
+          defaultBeatName={defaultBeatName}
           setTitleCallback={(title, beatName) => {
             setTitleCallback(title, beatName);
           }}

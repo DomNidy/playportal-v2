@@ -20,6 +20,7 @@ import { Input } from "../Input";
 
 interface TitleBuilderFormProps {
   setTitleCallback: (newTitle: string, beatName: string) => void;
+  defaultBeatName?: string;
 }
 
 function getDescriptorPlaceholder(index: number): string {
@@ -62,13 +63,13 @@ function getAvailabilityString(
 }
 
 export function TitleBuilderForm({ ...props }: TitleBuilderFormProps) {
-  const { setTitleCallback } = props;
+  const { setTitleCallback, defaultBeatName } = props;
 
   const [selectedDescriptors, setSelectedDescriptors] = useState<string[]>([]);
   const [selectedAvailability, setSelectedAvailability] = useState<string>(
     getAvailabilityString("Free"),
   );
-  const [beatName, setBeatName] = useState<string>("");
+  const [beatName, setBeatName] = useState<string>(defaultBeatName ?? "");
 
   const form = useForm<z.infer<typeof TitleBuilderFormSchema>>({
     resolver: zodResolver(TitleBuilderFormSchema),
@@ -76,7 +77,7 @@ export function TitleBuilderForm({ ...props }: TitleBuilderFormProps) {
       beatDescriptors: [""],
       beatAvailability: "Free",
       title: "",
-      beatName: "",
+      beatName: beatName ?? defaultBeatName ?? "",
     },
   });
 

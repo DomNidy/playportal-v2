@@ -321,6 +321,9 @@ export default function UploadOptionsFormStep({
                           />
 
                           <TitleBuilder
+                            defaultBeatName={
+                              uploadVideoOptionsFormStep?.videoTitle
+                            }
                             modalOpen={titleBuilderOpen}
                             onModalOpenChange={setTitleBuilderOpen}
                             setTitleCallback={onTitleBuilderSubmit}
@@ -449,7 +452,6 @@ export default function UploadOptionsFormStep({
                           />
                         </div>
                       </FormControl>
-
                       <FormMessage>
                         {form.formState.errors?.uploadVideoOptions?.youtube?.videoTags?.message?.toString()}
                       </FormMessage>
