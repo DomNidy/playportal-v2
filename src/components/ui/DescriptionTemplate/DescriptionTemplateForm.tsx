@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { DescriptionTemplateFormSchema } from "~/definitions/form-schemas";
+import { ApplyDescriptionTemplateFormSchema } from "~/definitions/form-schemas";
 import {
   Form,
   FormControl,
@@ -24,11 +24,11 @@ export default function DescriptionTemplateForm({
 }: DescriptionTemplateFormProps) {
   const { setDescriptionCallback, selectedDescriptionTemplateId } = props;
 
-  const form = useForm<z.infer<typeof DescriptionTemplateFormSchema>>({
-    resolver: zodResolver(DescriptionTemplateFormSchema),
+  const form = useForm<z.infer<typeof ApplyDescriptionTemplateFormSchema>>({
+    resolver: zodResolver(ApplyDescriptionTemplateFormSchema),
   });
 
-  const onSubmit = (data: z.infer<typeof DescriptionTemplateFormSchema>) => {
+  const onSubmit = (data: z.infer<typeof ApplyDescriptionTemplateFormSchema>) => {
     setDescriptionCallback(data.description);
   };
 

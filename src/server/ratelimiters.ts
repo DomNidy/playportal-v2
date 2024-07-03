@@ -76,3 +76,11 @@ export const signUpRatelimit = new Ratelimit({
   prefix: "signup",
   limiter: Ratelimit.fixedWindow(6, "1 h"),
 });
+
+// Rate limit description template save & update
+export const saveDescriptionTemplateRatelimit = new Ratelimit({
+  redis: redis,
+  analytics: true,
+  prefix: "saveDescriptionTemplate",
+  limiter: Ratelimit.fixedWindow(50, "5 m"),
+});

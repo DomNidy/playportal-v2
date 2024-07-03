@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Dialog, DialogTrigger, DialogTitle, DialogContent } from "../Dialog";
 import DescriptionTemplateForm from "./DescriptionTemplateForm";
 import useDescriptionTemplates from "~/hooks/use-description-templates";
@@ -9,8 +9,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../Select";
-import { createClient } from "~/utils/supabase/client";
-import { useFullDescriptionTemplate } from "~/hooks/use-full-description-template";
+import { Button } from "../Button";
+import SaveDescriptionTemplateForm from "./SaveDescriptionTemplateForm";
+import { FormLabel } from "../Form";
 
 interface DescriptionTemplateProps {
   modalOpen: boolean;
@@ -29,7 +30,9 @@ export default function DescriptionTemplate({
     triggerButton,
   } = props;
 
-  const supabase = createClient();
+  const [displayedForm, setDisplayedForm] = useState<"create" | "apply">(
+    "apply",
+  );
 
   // We initially only load the description template titles & ids (not the full text)
   // So when we select a template, we need to fetch the full description, we use this to store the selected id
@@ -51,28 +54,57 @@ export default function DescriptionTemplate({
           </p>
         </div>
 
-        <Select
-          value={selectedDescriptionTemplateId ?? ""}
-          onValueChange={(newTemplateId) =>
-            setSelectedDescriptionTemplateId(newTemplateId)
-          }
-        >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select a template" />
-          </SelectTrigger>
-          <SelectContent>
-            {descriptions.data?.map((desc) => (
-              <SelectItem key={desc.id} value={desc.id}>
-                {desc.template_name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex w-full flex-row gap-2">
+          <Button
+            disabled={displayedForm === "apply"}
+            className="flex-1"
+            onClick={() => {
+              setDisplayedForm("apply");
+            }}
+          >
+            Select Template
+          </Button>
+          <Button
+            disabled={displayedForm === "create"}
+            className="flex-1"
+            onClick={() => {
+              setDisplayedForm("create");
+            }}
+          >
+            Create Template
+          </Button>
+        </div>
 
-        <DescriptionTemplateForm
-          setDescriptionCallback={setDescriptionCallback}
-          selectedDescriptionTemplateId={selectedDescriptionTemplateId}
-        />
+        {/** TODO: Move this UI to the description template form, allow for updating and deleting the current selected template */}
+        {displayedForm === "apply" ? (
+          <>
+            <FormLabel>Select a Description Template</FormLabel>
+            <Select
+              value={selectedDescriptionTemplateId ?? ""}
+              onValueChange={(newTemplateId) =>
+                setSelectedDescriptionTemplateId(newTemplateId)
+              }
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Select a template" />
+              </SelectTrigger>
+              <SelectContent>
+                {descriptions.data?.map((desc) => (
+                  <SelectItem key={desc.id} value={desc.id}>
+                    {desc.template_name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <DescriptionTemplateForm
+              setDescriptionCallback={setDescriptionCallback}
+              selectedDescriptionTemplateId={selectedDescriptionTemplateId}
+            />
+          </>
+        ) : (
+          <SaveDescriptionTemplateForm />
+        )}
       </DialogContent>
     </Dialog>
   );

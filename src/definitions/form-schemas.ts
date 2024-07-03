@@ -233,6 +233,14 @@ export const TagGeneratorFormSchema = z.object({
   queryString: z.string().min(1).max(500),
 });
 
-export const DescriptionTemplateFormSchema = z.object({
+// This form schema is for the description template form that applies a description template, not the one that saves it
+export const ApplyDescriptionTemplateFormSchema = z.object({
   description: z.string().max(5000),
+});
+
+export const SaveDescriptionTemplateFormSchema = z.object({
+  descriptionText: z.string().max(5000),
+  templateName: z.string().min(1).max(100),
+  // Currently only supports YouTube
+  platform: z.enum(["YouTube"]),
 });

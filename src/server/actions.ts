@@ -11,9 +11,12 @@ import { headers } from "next/headers";
 import {
   loginRatelimit,
   resetPasswordForEmailRatelimit,
+  saveDescriptionTemplateRatelimit,
   signUpRatelimit,
   signupToMailingListRatelimit,
 } from "../server/ratelimiters";
+import { type z } from "zod";
+import { type YoutubeDescriptionSchema } from "~/definitions/api-schemas";
 
 export type SignupToMailingListResponse = {
   status: "success" | "error" | "ratelimited";
@@ -223,8 +226,6 @@ export async function resetPasswordForEmail(
       ipIdentifier ?? "cant-get-ip",
     );
 
-    console.log(ipIdentifier, "requested");
-
     // If the ip has exceeded their ratelimit, return
     if (!result.success) {
       return {
@@ -286,14 +287,126 @@ export async function resetPasswordForEmail(
   }
 }
 
-// export async function signInWithOAuth(
-//   ...params: Parameters<typeof GoTrueClient.prototype.signInWithOAuth>
-// ) {
-//   const supabase = createClient();
+type UpdateDescriptionTemplateResponse = {
+  status: "success" | "error" | "ratelimited";
+  text: string;
+};
 
-//   const { error } = await supabase.auth.signInWithOAuth(...params);
+type UpdateDescriptionTemplateProps = {
+  id: string;
+  descriptionText: string;
+};
 
-//   if (error) {
-//     console.error("Error occured while trying to sign in with oauth", error);
-//   }
-// }
+export async function updateDescriptionTemplate(
+  template: UpdateDescriptionTemplateProps,
+): Promise<UpdateDescriptionTemplateResponse> {
+  try {
+    const headersList = headers();
+    const ipIdentifier = headersList.get("x-real-ip");
+    const result = await saveDescriptionTemplateRatelimit.limit(
+      ipIdentifier ?? "cant-get-ip",
+    );
+
+    // If the ip has exceeded their ratelimit, return
+    if (!result.success) {
+      return {
+        status: "ratelimited",
+        text: "You're doing that too much, please wait a few minutes.",
+      };
+    }
+
+    const { id, descriptionText } = template;
+    const supabase = createClient();
+
+    const { error } = await supabase
+      .from("description_templates")
+      .update({ description: descriptionText })
+      .eq("id", id);
+
+    if (error) {
+      console.error("Error saving description template", error);
+    }
+
+    return {
+      status: "success",
+      text: "Description template saved successfully",
+    };
+  } catch (err) {
+    console.error(
+      "Error occured while trying to update description template",
+      err,
+    );
+    return {
+      status: "error",
+      text: "Something went wrong, please try again later or contact support.",
+    };
+  }
+}
+
+type SaveDescriptionTemplateResponse = {
+  status: "success" | "error" | "ratelimited";
+  text: string;
+};
+
+type SaveDescriptionTemplateProps = {
+  descriptionText: string;
+  templateName: string;
+  platform: "YouTube";
+};
+
+export async function saveDescriptionTemplate(
+  template: SaveDescriptionTemplateProps,
+): Promise<SaveDescriptionTemplateResponse> {
+  try {
+    console.log(template);
+
+    const headersList = headers();
+    const ipIdentifier = headersList.get("x-real-ip");
+    const result = await saveDescriptionTemplateRatelimit.limit(
+      ipIdentifier ?? "cant-get-ip",
+    );
+
+    // If the ip has exceeded their ratelimit, return
+    if (!result.success) {
+      return {
+        status: "ratelimited",
+        text: "You're doing that too much, please wait a few minutes.",
+      };
+    }
+
+    const { descriptionText, templateName, platform } = template;
+    const supabase = createClient();
+
+    const { error } = await supabase.from("description_templates").insert([
+      {
+        description: { descriptionText } as z.infer<
+          typeof YoutubeDescriptionSchema
+        >,
+        template_name: templateName,
+        platform,
+      },
+    ]);
+
+    if (error) {
+      console.error("Error saving description template", error);
+      return {
+        status: "error",
+        text: "Error saving description template",
+      };
+    }
+
+    return {
+      status: "success",
+      text: "Description template saved successfully",
+    };
+  } catch (err) {
+    console.error(
+      "Error occured while trying to save description template",
+      err,
+    );
+    return {
+      status: "error",
+      text: "Something went wrong, please try again later or contact support.",
+    };
+  }
+}

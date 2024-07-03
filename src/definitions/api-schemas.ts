@@ -109,7 +109,9 @@ export const UploadVideoOptionsSchema = z.object({
   }),
 });
 
-
 export const YoutubeDescriptionSchema = z.object({
-  descriptionText: z.string().min(1).max(5000, "Description may be no longer than 5000 characters")
-})
+  descriptionText: z
+    .string()
+    .min(1)
+    .max(5000, "Description may be no longer than 5000 characters"),
+});
