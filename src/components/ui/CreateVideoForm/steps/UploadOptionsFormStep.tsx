@@ -42,6 +42,7 @@ import { Link2Icon } from "lucide-react";
 import { YoutubeChannelAvatar } from "../YoutubeChannelAvatar";
 import TitleBuilder from "../../TitleBuilder";
 import TagGenerator from "../../TagGenerator";
+import DescriptionTemplate from "../../DescriptionTemplate";
 
 function isString(v: unknown): v is string {
   return typeof v === "string";
@@ -172,6 +173,23 @@ export default function UploadOptionsFormStep({
   };
 
   const [tagGeneratorOpen, setTagGeneratorOpen] = React.useState(false);
+
+  //* Description template
+  const onDescriptionTemplateSubmit = (newDescription: string) => {
+    setUploadVideoOptionsFormStep((prev) => ({
+      ...prev,
+      uploadVideoOptions: {
+        ...prev?.uploadVideoOptions,
+        youtube: {
+          ...prev?.uploadVideoOptions?.youtube,
+          videoDescription: newDescription,
+        },
+      },
+    }));
+  };
+
+  const [descriptionTemplateOpen, setDescriptionTemplateOpen] =
+    React.useState(false);
 
   return (
     <Form {...form}>
@@ -355,34 +373,51 @@ export default function UploadOptionsFormStep({
                     <FormItem>
                       <FormLabel>YouTube Video Description</FormLabel>
                       <FormControl>
-                        <Textarea
-                          maxLength={5000}
-                          placeholder="My video description"
-                          {...field}
-                          onChange={(v) => {
-                            field.onChange(v);
-                            setUploadVideoOptionsFormStep((prev) => ({
-                              ...prev,
-                              uploadVideoOptions: {
-                                ...prev?.uploadVideoOptions,
-                                youtube: {
-                                  ...prev?.uploadVideoOptions?.youtube,
-                                  videoDescription: v.target.value,
+                        <div className="flex flex-col gap-2 md:flex-row ">
+                          <Textarea
+                            maxLength={5000}
+                            placeholder="My video description"
+                            {...field}
+                            onChange={(v) => {
+                              field.onChange(v);
+                              setUploadVideoOptionsFormStep((prev) => ({
+                                ...prev,
+                                uploadVideoOptions: {
+                                  ...prev?.uploadVideoOptions,
+                                  youtube: {
+                                    ...prev?.uploadVideoOptions?.youtube,
+                                    videoDescription: v.target.value,
+                                  },
                                 },
-                              },
-                            }));
-                          }}
-                        />
+                              }));
+                            }}
+                          />
+
+                          <FormMessage>
+                            {form.formState.errors?.uploadVideoOptions?.youtube?.videoDescription?.message?.toString()}
+                          </FormMessage>
+                          <DescriptionTemplate
+                            modalOpen={descriptionTemplateOpen}
+                            onModalOpenChange={setDescriptionTemplateOpen}
+                            setDescriptionCallback={onDescriptionTemplateSubmit}
+                            triggerButton={
+                              <Button className="min-w-64   md:self-start">
+                                Description Template
+                              </Button>
+                            }
+                          />
+                        </div>
                       </FormControl>
-                      <FormDescription>
-                        The description of the video on YouTube
-                      </FormDescription>
+
                       <FormMessage>
                         {form.formState.errors?.uploadVideoOptions?.youtube?.videoDescription?.message?.toString()}
                       </FormMessage>
                     </FormItem>
                   )}
                 />
+                <FormDescription>
+                  The description of the video on YouTube
+                </FormDescription>
 
                 <FormField
                   control={form.control}

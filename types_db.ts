@@ -57,6 +57,41 @@ export type Database = {
           },
         ]
       }
+      description_templates: {
+        Row: {
+          created_at: string
+          description: Json | null
+          id: string
+          platform: Database["public"]["Enums"]["description_template_platform"]
+          template_name: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: Json | null
+          id?: string
+          platform: Database["public"]["Enums"]["description_template_platform"]
+          template_name: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: Json | null
+          id?: string
+          platform?: Database["public"]["Enums"]["description_template_platform"]
+          template_name?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "description_templates_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       feature_flags: {
         Row: {
           description: string | null
@@ -192,19 +227,19 @@ export type Database = {
         Row: {
           created_at: string
           id: number
-          message: Database["public"]["Enums"]["operation_logs_enum"] | null
+          message: Database["public"]["Enums"]["operation_logs_enum"]
           operation_id: string | null
         }
         Insert: {
           created_at?: string
           id?: number
-          message?: Database["public"]["Enums"]["operation_logs_enum"] | null
+          message: Database["public"]["Enums"]["operation_logs_enum"]
           operation_id?: string | null
         }
         Update: {
           created_at?: string
           id?: number
-          message?: Database["public"]["Enums"]["operation_logs_enum"] | null
+          message?: Database["public"]["Enums"]["operation_logs_enum"]
           operation_id?: string | null
         }
         Relationships: [
@@ -568,7 +603,7 @@ export type Database = {
           create_operation_id: string
           created_at: string | null
           id: string
-          metadata: Json | null
+          metadata: Json
           oauth_creds_id: string | null
           status: Database["public"]["Enums"]["upload_video_status"]
           upload_options_id: string
@@ -578,7 +613,7 @@ export type Database = {
           create_operation_id?: string
           created_at?: string | null
           id?: string
-          metadata?: Json | null
+          metadata?: Json
           oauth_creds_id?: string | null
           status?: Database["public"]["Enums"]["upload_video_status"]
           upload_options_id: string
@@ -588,7 +623,7 @@ export type Database = {
           create_operation_id?: string
           created_at?: string | null
           id?: string
-          metadata?: Json | null
+          metadata?: Json
           oauth_creds_id?: string | null
           status?: Database["public"]["Enums"]["upload_video_status"]
           upload_options_id?: string
@@ -878,6 +913,39 @@ export type Database = {
           },
         ]
       }
+      user_stats: {
+        Row: {
+          created_at: string | null
+          created_videos: number | null
+          email: string | null
+          granted_role: string | null
+          user_id: string | null
+          youtube_uploads: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_granted_role_fkey"
+            columns: ["granted_role"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_roles_granted_role_fkey"
+            columns: ["granted_role"]
+            isOneToOne: false
+            referencedRelation: "user_products"
+            referencedColumns: ["role_id"]
+          },
+          {
+            foreignKeyName: "user_roles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       create_operation_and_transaction: {
@@ -954,8 +1022,16 @@ export type Database = {
         }
         Returns: undefined
       }
+      update_upload_options: {
+        Args: {
+          upload_options_id: string
+          new_upload_options: Json
+        }
+        Returns: undefined
+      }
     }
     Enums: {
+      description_template_platform: "YouTube"
       feature: "upload_videos" | "link_youtube_accounts"
       file_origin: "PlayportalBackend" | "UserProvided"
       file_type: "Video" | "Audio" | "Image"
@@ -1275,6 +1351,10 @@ export type Database = {
           metadata: Json
           updated_at: string
         }[]
+      }
+      operation: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       search: {
         Args: {

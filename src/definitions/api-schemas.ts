@@ -108,3 +108,8 @@ export const UploadVideoOptionsSchema = z.object({
     s3_key: z.string(),
   }),
 });
+
+
+export const YoutubeDescriptionSchema = z.object({
+  descriptionText: z.string().min(1).max(5000, "Description may be no longer than 5000 characters")
+})

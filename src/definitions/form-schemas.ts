@@ -232,3 +232,7 @@ export const TitleBuilderFormSchema = z.object({
 export const TagGeneratorFormSchema = z.object({
   queryString: z.string().min(1).max(500),
 });
+
+export const DescriptionTemplateFormSchema = z.object({
+  description: z.string().max(5000),
+});
