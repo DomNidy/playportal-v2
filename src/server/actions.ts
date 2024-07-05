@@ -294,7 +294,9 @@ type UpdateDescriptionTemplateResponse = {
 
 type UpdateDescriptionTemplateProps = {
   id: string;
-  descriptionText: string;
+  descriptionText?: string;
+  templateName?: string;
+  platform?: "YouTube";
 };
 
 export async function updateDescriptionTemplate(
@@ -315,12 +317,24 @@ export async function updateDescriptionTemplate(
       };
     }
 
-    const { id, descriptionText } = template;
+    const { id, descriptionText, templateName, platform } = template;
     const supabase = createClient();
+
+    const fieldsToUpdate = {
+      ...(descriptionText
+        ? { description: { descriptionText: descriptionText } }
+        : {}),
+      ...(templateName ? { template_name: templateName } : {}),
+      ...(platform ? { platform } : {}),
+    };
+
+    console.log(
+      `Updating description template ${id} with ${JSON.stringify(fieldsToUpdate)}`,
+    );
 
     const { error } = await supabase
       .from("description_templates")
-      .update({ description: descriptionText })
+      .update(fieldsToUpdate)
       .eq("id", id);
 
     if (error) {
@@ -343,20 +357,26 @@ export async function updateDescriptionTemplate(
   }
 }
 
-type SaveDescriptionTemplateResponse = {
-  status: "success" | "error" | "ratelimited";
-  text: string;
-};
+type CreateNewDescriptionTemplateResponse =
+  | {
+      status: "error" | "ratelimited";
+      text: string;
+    }
+  | {
+      status: "success";
+      text: string;
+      templateId: string;
+    };
 
-type SaveDescriptionTemplateProps = {
+type CreateNewDescriptionTemplateProps = {
   descriptionText: string;
   templateName: string;
   platform: "YouTube";
 };
 
-export async function saveDescriptionTemplate(
-  template: SaveDescriptionTemplateProps,
-): Promise<SaveDescriptionTemplateResponse> {
+export async function createNewDescriptionTemplate(
+  template: CreateNewDescriptionTemplateProps,
+): Promise<CreateNewDescriptionTemplateResponse> {
   try {
     console.log(template);
 
@@ -377,17 +397,21 @@ export async function saveDescriptionTemplate(
     const { descriptionText, templateName, platform } = template;
     const supabase = createClient();
 
-    const { error } = await supabase.from("description_templates").insert([
-      {
-        description: { descriptionText } as z.infer<
-          typeof YoutubeDescriptionSchema
-        >,
-        template_name: templateName,
-        platform,
-      },
-    ]);
+    const { data: newTemplate, error } = await supabase
+      .from("description_templates")
+      .insert([
+        {
+          description: { descriptionText } as z.infer<
+            typeof YoutubeDescriptionSchema
+          >,
+          template_name: templateName,
+          platform,
+        },
+      ])
+      .select("id")
+      .maybeSingle();
 
-    if (error) {
+    if (error ?? !newTemplate) {
       console.error("Error saving description template", error);
       return {
         status: "error",
@@ -398,10 +422,69 @@ export async function saveDescriptionTemplate(
     return {
       status: "success",
       text: "Description template saved successfully",
+      templateId: newTemplate.id,
     };
   } catch (err) {
     console.error(
       "Error occured while trying to save description template",
+      err,
+    );
+    return {
+      status: "error",
+      text: "Something went wrong, please try again later or contact support.",
+    };
+  }
+}
+type DeleteDescriptionTemplateResponse =
+  | {
+      status: "error" | "notfound";
+      text: string;
+    }
+  | {
+      status: "success";
+      text: string;
+    };
+
+type DeleteDescriptionTemplateProps = {
+  templateId: string;
+};
+
+export async function deleteDescriptionTemplate({
+  ...props
+}: DeleteDescriptionTemplateProps): Promise<DeleteDescriptionTemplateResponse> {
+  const { templateId } = props;
+  try {
+    const supabase = createClient();
+
+    const { data: deletedTemplate, error } = await supabase
+      .from("description_templates")
+      .delete()
+      .eq("id", templateId)
+      .select("id")
+      .maybeSingle();
+
+    if (error) {
+      console.error("Error deleting description template", error);
+      return {
+        status: "error",
+        text: "Error deleting description template",
+      };
+    }
+
+    if (!deletedTemplate) {
+      return {
+        status: "notfound",
+        text: "Description template not found",
+      };
+    }
+
+    return {
+      status: "success",
+      text: "Description template deleted successfully",
+    };
+  } catch (err) {
+    console.error(
+      "Error occurred while trying to delete description template",
       err,
     );
     return {

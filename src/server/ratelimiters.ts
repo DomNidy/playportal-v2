@@ -81,6 +81,6 @@ export const signUpRatelimit = new Ratelimit({
 export const saveDescriptionTemplateRatelimit = new Ratelimit({
   redis: redis,
   analytics: true,
-  prefix: "saveDescriptionTemplate",
+  prefix: "createNewDescriptionTemplate",
   limiter: Ratelimit.fixedWindow(50, "5 m"),
 });

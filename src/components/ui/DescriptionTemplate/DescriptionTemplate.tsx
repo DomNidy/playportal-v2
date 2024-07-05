@@ -1,39 +1,54 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Dialog, DialogTrigger, DialogTitle, DialogContent } from "../Dialog";
-import DescriptionTemplateForm from "./DescriptionTemplateForm";
 import useDescriptionTemplates from "~/hooks/use-description-templates";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../Select";
+import DescriptionTemplateApplyForm from "./DescriptionTemplateApplyForm";
+import DescriptionTemplateCreateForm from "./DescriptionTemplateCreateForm";
+import DescriptionTemplateUpdateForm from "./DescriptionTemplateUpdateForm";
 import { Button } from "../Button";
-import SaveDescriptionTemplateForm from "./SaveDescriptionTemplateForm";
-import { FormLabel } from "../Form";
 import DescriptionTemplateCard from "./DescriptionTemplateCard";
 
 interface DescriptionTemplateProps {
   modalOpen: boolean;
-  onModalOpenChange: (isOpen: boolean) => void;
+  setModalOpen: (isOpen: boolean) => void;
   setDescriptionCallback: (newDescription: string) => void;
   triggerButton: React.ReactNode;
+}
+
+function getDescriptionTemplateDialogTitle(
+  displayedForm: "create" | "update" | "apply",
+) {
+  switch (displayedForm) {
+    case "create":
+      return "Create New Description Template";
+    case "update":
+      return "Update Description Template";
+    case "apply":
+      return "Description Templates";
+  }
+}
+
+function getDescriptionTemplateDialogDescription(
+  displayedForm: "create" | "update" | "apply",
+) {
+  switch (displayedForm) {
+    case "create":
+      return "Create a new description template";
+    case "update":
+      return "Update an existing description template";
+    case "apply":
+      return "Quickly save and load description templates for your video";
+  }
 }
 
 export default function DescriptionTemplate({
   ...props
 }: DescriptionTemplateProps) {
-  const {
-    modalOpen,
-    onModalOpenChange,
-    setDescriptionCallback,
-    triggerButton,
-  } = props;
+  const { modalOpen, setModalOpen, setDescriptionCallback, triggerButton } =
+    props;
 
-  const [displayedForm, setDisplayedForm] = useState<"create" | "apply">(
-    "apply",
-  );
+  const [displayedForm, setDisplayedForm] = useState<
+    "create" | "update" | "apply"
+  >("apply");
 
   // We initially only load the description template titles & ids (not the full text)
   // So when we select a template, we need to fetch the full description, we use this to store the selected id
@@ -41,78 +56,109 @@ export default function DescriptionTemplate({
   const [selectedDescriptionTemplateId, setSelectedDescriptionTemplateId] =
     useState<string | null>(null);
 
+  // When we select a template, use this state to store the initial template name
+  const [initialTemplateName, setInitialTemplateName] = useState<string>(
+    "My Description Template",
+  );
+
   // Used to query for the users description templates (does not return the full description)
   const descriptions = useDescriptionTemplates();
 
+  useEffect(() => {
+    console.log("Description templates loaded", descriptions.data);
+    if (descriptions.data?.length === 0) {
+      setDisplayedForm("create");
+    }
+  }, [descriptions.data]);
+
   return (
-    <Dialog open={modalOpen} onOpenChange={onModalOpenChange}>
+    <Dialog open={modalOpen} onOpenChange={setModalOpen}>
       <DialogTrigger asChild>{triggerButton}</DialogTrigger>
       <DialogContent>
-        <div className="flex max-w-[300px] flex-col gap-1">
-          <DialogTitle>Description Templates</DialogTitle>
+        <div className="flex  flex-col gap-1">
+          <DialogTitle>
+            {getDescriptionTemplateDialogTitle(displayedForm)}
+          </DialogTitle>
           <p className="text-sm text-muted-foreground">
-            Quickly save and load description templates for your video
+            {getDescriptionTemplateDialogDescription(displayedForm)}
           </p>
         </div>
-        <div className="flex w-full flex-col gap-2  max-h-[300px] overflow-y-scroll">
-          {descriptions.data?.map((desc) => (
-            <DescriptionTemplateCard
-              key={desc.id}
-              templateId={desc.id}
-              templateName={desc.template_name}
-            />
-          ))}
-        </div>
-        <div className="flex w-full flex-row gap-2">
-          <Button
-            disabled={displayedForm === "apply"}
-            className="flex-1"
-            onClick={() => {
-              setDisplayedForm("apply");
-            }}
-          >
-            Select Template
-          </Button>
-          <Button
-            disabled={displayedForm === "create"}
-            className="flex-1"
-            onClick={() => {
-              setDisplayedForm("create");
-            }}
-          >
-            Create Template
-          </Button>
-        </div>
 
-        {/** TODO: Move this UI to the description template form, allow for updating and deleting the current selected template */}
-        {displayedForm === "apply" ? (
+        {displayedForm === "apply" && (
+          <div className="flex max-h-[300px] w-full flex-col  gap-2 overflow-y-scroll">
+            {descriptions.data?.map((desc) => (
+              <DescriptionTemplateCard
+                key={desc.id}
+                templateId={desc.id}
+                templateName={desc.template_name}
+                isCurrentlySelected={desc.id === selectedDescriptionTemplateId}
+                onDeleteTemplateSuccess={() => {
+                  setDisplayedForm("apply");
+                }}
+                onClickSelectTemplate={(templateId) => {
+                  setSelectedDescriptionTemplateId(templateId);
+                  setDisplayedForm("apply");
+                }}
+                onClickEditTemplate={(templateId, templateName) => {
+                  setSelectedDescriptionTemplateId(templateId);
+                  setInitialTemplateName(templateName);
+                  setDisplayedForm("update");
+                }}
+              />
+            ))}
+          </div>
+        )}
+
+        {displayedForm === "apply" && (
+          <Button onClick={() => setDisplayedForm("create")}>
+            Create New Description Template
+          </Button>
+        )}
+        {/** When the user wants to apply a selected template */}
+        {displayedForm === "apply" && selectedDescriptionTemplateId && (
           <>
-            <FormLabel>Select a Description Template</FormLabel>
-            <Select
-              value={selectedDescriptionTemplateId ?? ""}
-              onValueChange={(newTemplateId) =>
-                setSelectedDescriptionTemplateId(newTemplateId)
-              }
-            >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Select a template" />
-              </SelectTrigger>
-              <SelectContent>
-                {descriptions.data?.map((desc) => (
-                  <SelectItem key={desc.id} value={desc.id}>
-                    {desc.template_name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <DescriptionTemplateForm
-              setDescriptionCallback={setDescriptionCallback}
+            <DescriptionTemplateApplyForm
               selectedDescriptionTemplateId={selectedDescriptionTemplateId}
+              onApplyDescriptionTemplate={(newDescription) => {
+                setDescriptionCallback(newDescription);
+                setModalOpen(false);
+              }}
+              onCancelApplyDescriptionTemplate={() => setModalOpen(false)}
             />
           </>
-        ) : (
-          <SaveDescriptionTemplateForm />
+        )}
+
+        {/** When the user wants to update a template */}
+        {displayedForm === "update" && selectedDescriptionTemplateId && (
+          <>
+            <DescriptionTemplateUpdateForm
+              templateId={selectedDescriptionTemplateId}
+              initialDescriptionText=""
+              initialTemplateName={initialTemplateName}
+              onUpdateDescriptionTemplateCancel={() =>
+                setDisplayedForm("apply")
+              }
+              onUpdateDescriptionTemplateSuccess={(templateId) => {
+                setSelectedDescriptionTemplateId(templateId);
+                setDisplayedForm("apply");
+              }}
+            />
+          </>
+        )}
+
+        {/** When the user wants to create a new template */}
+        {displayedForm === "create" && (
+          <>
+            <DescriptionTemplateCreateForm
+              onCreateDescriptionTemplateCancel={() =>
+                setDisplayedForm("apply")
+              }
+              onCreateDescriptionTemplateSuccess={(newTemplateId) => {
+                setSelectedDescriptionTemplateId(newTemplateId);
+                setDisplayedForm("apply");
+              }}
+            />
+          </>
         )}
       </DialogContent>
     </Dialog>

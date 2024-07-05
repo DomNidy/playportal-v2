@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { type z } from "zod";
 import { ApplyDescriptionTemplateFormSchema } from "~/definitions/form-schemas";
 import {
   Form,
@@ -15,15 +15,21 @@ import { Textarea } from "../Textarea";
 import { useFullDescriptionTemplate } from "~/hooks/use-full-description-template";
 import { Button } from "../Button";
 
-interface DescriptionTemplateFormProps {
-  setDescriptionCallback: (newDescription: string) => void;
+interface DescriptionTemplateApplyFormProps {
   selectedDescriptionTemplateId: string | null;
+  onCancelApplyDescriptionTemplate: () => void;
+  onApplyDescriptionTemplate: (newDescription: string) => void;
 }
 
-export default function DescriptionTemplateForm({
+export default function DescriptionTemplateApplyForm({
   ...props
-}: DescriptionTemplateFormProps) {
-  const { setDescriptionCallback, selectedDescriptionTemplateId } = props;
+}: DescriptionTemplateApplyFormProps) {
+  const {
+    selectedDescriptionTemplateId,
+    // Called when the
+    onApplyDescriptionTemplate,
+    onCancelApplyDescriptionTemplate,
+  } = props;
 
   const form = useForm<z.infer<typeof ApplyDescriptionTemplateFormSchema>>({
     resolver: zodResolver(ApplyDescriptionTemplateFormSchema),
@@ -32,7 +38,7 @@ export default function DescriptionTemplateForm({
   const onSubmit = (
     data: z.infer<typeof ApplyDescriptionTemplateFormSchema>,
   ) => {
-    setDescriptionCallback(data.description);
+    onApplyDescriptionTemplate(data.description);
   };
 
   const fullDescription = useFullDescriptionTemplate(
@@ -40,8 +46,6 @@ export default function DescriptionTemplateForm({
   );
 
   useEffect(() => {
-    console.log("Full description data changed", fullDescription.data);
-
     if (fullDescription.data?.descriptionText) {
       form.setValue("description", fullDescription.data.descriptionText);
     }
@@ -79,7 +83,16 @@ export default function DescriptionTemplateForm({
           )}
         />
 
-        <Button type="submit">Apply Description</Button>
+        <div className=" flex w-full flex-row justify-between">
+          <Button
+            variant={"ghost"}
+            type="button"
+            onClick={() => onCancelApplyDescriptionTemplate()}
+          >
+            Cancel
+          </Button>
+          <Button type="submit">Apply</Button>
+        </div>
       </form>
     </Form>
   );

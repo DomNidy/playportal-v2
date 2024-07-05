@@ -4,7 +4,7 @@ import TagGeneratorForm from "./TagGeneratorForm";
 interface TagGeneratorProps {
   modalOpen: boolean;
   defaultTagQuery: string;
-  onModalOpenChange: (isOpen: boolean) => void;
+  setModalOpen: (isOpen: boolean) => void;
   setTagsCallback: (newTags: string[]) => void;
   triggerButton: React.ReactNode;
 }
@@ -13,13 +13,13 @@ export default function TagGenerator({ ...props }: TagGeneratorProps) {
   const {
     modalOpen,
     setTagsCallback,
-    onModalOpenChange,
+    setModalOpen,
     triggerButton,
     defaultTagQuery,
   } = props;
 
   return (
-    <Dialog open={modalOpen} onOpenChange={onModalOpenChange}>
+    <Dialog open={modalOpen} onOpenChange={setModalOpen}>
       <DialogTrigger asChild>{triggerButton}</DialogTrigger>
       <DialogContent>
         <div className="flex  max-w-[320px] flex-col gap-1">
@@ -33,7 +33,7 @@ export default function TagGenerator({ ...props }: TagGeneratorProps) {
             setTagsCallback(tags);
           }}
           defaultTagQuery={defaultTagQuery}
-          setModalOpen={onModalOpenChange}
+          setModalOpen={setModalOpen}
         />
       </DialogContent>
     </Dialog>

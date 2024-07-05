@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { type z } from "zod";
-import { SaveDescriptionTemplateFormSchema } from "~/definitions/form-schemas";
+import { CreateNewDescriptionTemplateFormSchema } from "~/definitions/form-schemas";
 import {
   Form,
   FormControl,
@@ -11,7 +11,7 @@ import {
   FormLabel,
   FormMessage,
 } from "../Form";
-import { saveDescriptionTemplate } from "~/server/actions";
+import { createNewDescriptionTemplate } from "~/server/actions";
 import { toast } from "../Toasts/use-toast";
 import { Input } from "../Input";
 import { Textarea } from "../Textarea";
@@ -19,29 +19,31 @@ import { Button } from "../Button";
 import LoaderStatus from "../LoaderStatus";
 import { useQueryClient } from "@tanstack/react-query";
 
-interface SaveDescriptionTemplateFormProps {
-  initialDescriptionText?: string;
+export interface DescriptionTemplateCreateFormProps {
+  onCreateDescriptionTemplateCancel: () => void;
+  onCreateDescriptionTemplateSuccess: (newTemplateId: string) => void;
 }
 
-export default function SaveDescriptionTemplateForm({
+export default function DescriptionTemplateCreateForm({
   ...props
-}: SaveDescriptionTemplateFormProps) {
-  const { initialDescriptionText } = props;
+}: DescriptionTemplateCreateFormProps) {
+  const {
+    onCreateDescriptionTemplateCancel,
+    onCreateDescriptionTemplateSuccess,
+  } = props;
 
   const queryClient = useQueryClient();
-  const [descriptionText, setDescriptionText] = React.useState(
-    initialDescriptionText ?? "",
-  );
+  const [descriptionText, setDescriptionText] = React.useState("");
 
   const [templateName, setTemplateName] = React.useState(
     "My Description Template",
   );
 
-  const [saveTemplateMutationState, setSaveTemplateMutationState] =
+  const [createTemplateMutationState, setCreateTemplateMutationState] =
     React.useState<"idle" | "loading">("idle");
 
-  const form = useForm<z.infer<typeof SaveDescriptionTemplateFormSchema>>({
-    resolver: zodResolver(SaveDescriptionTemplateFormSchema),
+  const form = useForm<z.infer<typeof CreateNewDescriptionTemplateFormSchema>>({
+    resolver: zodResolver(CreateNewDescriptionTemplateFormSchema),
     values: {
       platform: "YouTube",
       templateName,
@@ -50,11 +52,11 @@ export default function SaveDescriptionTemplateForm({
   });
 
   const onSubmit = async (
-    data: z.infer<typeof SaveDescriptionTemplateFormSchema>,
+    data: z.infer<typeof CreateNewDescriptionTemplateFormSchema>,
   ) => {
     try {
-      setSaveTemplateMutationState("loading");
-      const res = await saveDescriptionTemplate({
+      setCreateTemplateMutationState("loading");
+      const res = await createNewDescriptionTemplate({
         descriptionText: data.descriptionText,
         platform: data.platform,
         templateName: data.templateName,
@@ -67,21 +69,30 @@ export default function SaveDescriptionTemplateForm({
           variant: "destructive",
         });
       } else if (res.status === "success") {
+        // Display a success toast
         toast({
           description: res.text,
           title: "Success",
           variant: "default",
         });
 
-        // TODO: Close the modal
+        //* This function should be called before the callback is ran incase that unmounts this component
+        void queryClient.invalidateQueries({
+          queryKey: ["user", "descriptions"],
+        });
+
+        // Update mutation state here
+        setCreateTemplateMutationState("idle");
+
+        // Call success callback
+        onCreateDescriptionTemplateSuccess(res.templateId);
       } else if (res.status === "error") {
         form.setError("descriptionText", { message: res.text });
       }
     } catch (err) {
       console.error(err);
     }
-    setSaveTemplateMutationState("idle");
-    void queryClient.invalidateQueries({ queryKey: ["user", "descriptions"] });
+    setCreateTemplateMutationState("idle");
   };
 
   return (
@@ -126,11 +137,11 @@ export default function SaveDescriptionTemplateForm({
           shouldUnregister
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Template Name</FormLabel>
+              <FormLabel>Description Text</FormLabel>
               <FormControl>
                 <Textarea
                   maxLength={5000}
-                  placeholder="Template Name"
+                  placeholder="Some description text here..."
                   {...field}
                   onChange={(e) => {
                     field.onChange(e);
@@ -144,16 +155,26 @@ export default function SaveDescriptionTemplateForm({
             </FormItem>
           )}
         />
-        <Button
-          type="submit"
-          disabled={saveTemplateMutationState === "loading"}
-        >
-          <LoaderStatus
-            text="Save Template"
-            isLoading={saveTemplateMutationState === "loading"}
-            loaderProps={{ size: 20 }}
-          />
-        </Button>
+
+        <div className=" flex w-full flex-row justify-between">
+          <Button
+            variant={"ghost"}
+            type="button"
+            onClick={() => onCreateDescriptionTemplateCancel()}
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            disabled={createTemplateMutationState === "loading"}
+          >
+            <LoaderStatus
+              text="Create Template"
+              isLoading={createTemplateMutationState === "loading"}
+              loaderProps={{ size: 20 }}
+            />
+          </Button>
+        </div>
       </form>
     </Form>
   );

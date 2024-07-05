@@ -21,6 +21,8 @@ import { Input } from "../Input";
 interface TitleBuilderFormProps {
   setTitleCallback: (newTitle: string, beatName: string) => void;
   defaultBeatName?: string;
+  // Called when the user cancels the title builder
+  onTitleBuilderCancel: () => void;
 }
 
 function getDescriptorPlaceholder(index: number): string {
@@ -63,7 +65,7 @@ function getAvailabilityString(
 }
 
 export function TitleBuilderForm({ ...props }: TitleBuilderFormProps) {
-  const { setTitleCallback, defaultBeatName } = props;
+  const { setTitleCallback, defaultBeatName, onTitleBuilderCancel } = props;
 
   const [selectedDescriptors, setSelectedDescriptors] = useState<string[]>([]);
   const [selectedAvailability, setSelectedAvailability] = useState<string>(
@@ -276,7 +278,18 @@ export function TitleBuilderForm({ ...props }: TitleBuilderFormProps) {
           />
         </div>
 
-        <Button type="submit">Accept Title</Button>
+        <div className="flex flex-row">
+          <Button
+            type="button"
+            variant={"ghost"}
+            onClick={() => onTitleBuilderCancel()}
+          >
+            Cancel
+          </Button>
+          <Button type="submit" className="ml-auto self-end">
+            Accept Title
+          </Button>
+        </div>
       </form>
     </Form>
   );

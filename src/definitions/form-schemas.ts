@@ -238,9 +238,16 @@ export const ApplyDescriptionTemplateFormSchema = z.object({
   description: z.string().max(5000),
 });
 
-export const SaveDescriptionTemplateFormSchema = z.object({
-  descriptionText: z.string().max(5000),
+export const CreateNewDescriptionTemplateFormSchema = z.object({
+  descriptionText: z.string().min(1).max(5000),
   templateName: z.string().min(1).max(100),
   // Currently only supports YouTube
+  platform: z.enum(["YouTube"]),
+});
+
+export const UpdateDescriptionTemplateFormSchema = z.object({
+  templateId: z.string(),
+  descriptionText: z.string().min(1).max(5000),
+  templateName: z.string().min(1).max(100),
   platform: z.enum(["YouTube"]),
 });

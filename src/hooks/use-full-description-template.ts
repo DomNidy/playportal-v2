@@ -8,6 +8,8 @@ export function useFullDescriptionTemplate(descriptionTemplateId: string) {
   const supabase = createClient();
 
   const fullDescriptionQuery = useQuery({
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
     queryKey: ["description", descriptionTemplateId],
     queryFn: async () => {
       const { data, error: fetchDescriptionError } = await supabase

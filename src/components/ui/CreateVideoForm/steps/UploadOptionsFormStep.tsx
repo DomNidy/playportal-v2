@@ -148,7 +148,9 @@ export default function UploadOptionsFormStep({
       ...prev,
       videoTitle: beatName,
       uploadVideoOptions: {
+        ...prev?.uploadVideoOptions,
         youtube: {
+          ...prev?.uploadVideoOptions?.youtube,
           videoTitle: title,
         },
       },
@@ -344,7 +346,7 @@ export default function UploadOptionsFormStep({
                               uploadVideoOptionsFormStep?.videoTitle
                             }
                             modalOpen={titleBuilderOpen}
-                            onModalOpenChange={setTitleBuilderOpen}
+                            setModalOpen={setTitleBuilderOpen}
                             setTitleCallback={onTitleBuilderSubmit}
                             triggerButton={
                               <Button className="min-w-64  md:self-end">
@@ -399,7 +401,7 @@ export default function UploadOptionsFormStep({
                           </FormMessage>
                           <DescriptionTemplate
                             modalOpen={descriptionTemplateOpen}
-                            onModalOpenChange={setDescriptionTemplateOpen}
+                            setModalOpen={setDescriptionTemplateOpen}
                             setDescriptionCallback={onDescriptionTemplateSubmit}
                             triggerButton={
                               <Button className="min-w-64   md:self-start">
@@ -478,7 +480,7 @@ export default function UploadOptionsFormStep({
                               ).replace(/"[^"]*"| - /g, "") ?? ""
                             }
                             modalOpen={tagGeneratorOpen}
-                            onModalOpenChange={setTagGeneratorOpen}
+                            setModalOpen={setTagGeneratorOpen}
                             setTagsCallback={onTagGeneratorSubmit}
                             triggerButton={
                               <Button className="min-w-64  md:self-start">
