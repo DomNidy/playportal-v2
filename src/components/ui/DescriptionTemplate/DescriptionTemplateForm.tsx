@@ -13,6 +13,7 @@ import {
 } from "../Form";
 import { Textarea } from "../Textarea";
 import { useFullDescriptionTemplate } from "~/hooks/use-full-description-template";
+import { Button } from "../Button";
 
 interface DescriptionTemplateFormProps {
   setDescriptionCallback: (newDescription: string) => void;
@@ -28,7 +29,9 @@ export default function DescriptionTemplateForm({
     resolver: zodResolver(ApplyDescriptionTemplateFormSchema),
   });
 
-  const onSubmit = (data: z.infer<typeof ApplyDescriptionTemplateFormSchema>) => {
+  const onSubmit = (
+    data: z.infer<typeof ApplyDescriptionTemplateFormSchema>,
+  ) => {
     setDescriptionCallback(data.description);
   };
 
@@ -75,6 +78,8 @@ export default function DescriptionTemplateForm({
             </FormItem>
           )}
         />
+
+        <Button type="submit">Apply Description</Button>
       </form>
     </Form>
   );

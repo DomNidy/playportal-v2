@@ -12,6 +12,7 @@ import {
 import { Button } from "../Button";
 import SaveDescriptionTemplateForm from "./SaveDescriptionTemplateForm";
 import { FormLabel } from "../Form";
+import DescriptionTemplateCard from "./DescriptionTemplateCard";
 
 interface DescriptionTemplateProps {
   modalOpen: boolean;
@@ -53,7 +54,15 @@ export default function DescriptionTemplate({
             Quickly save and load description templates for your video
           </p>
         </div>
-
+        <div className="flex w-full flex-col gap-2  max-h-[300px] overflow-y-scroll">
+          {descriptions.data?.map((desc) => (
+            <DescriptionTemplateCard
+              key={desc.id}
+              templateId={desc.id}
+              templateName={desc.template_name}
+            />
+          ))}
+        </div>
         <div className="flex w-full flex-row gap-2">
           <Button
             disabled={displayedForm === "apply"}

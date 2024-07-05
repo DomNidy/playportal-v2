@@ -186,6 +186,7 @@ export default function UploadOptionsFormStep({
         },
       },
     }));
+    setDescriptionTemplateOpen(false);
   };
 
   const [descriptionTemplateOpen, setDescriptionTemplateOpen] =
