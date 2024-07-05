@@ -325,3 +325,18 @@ export function convertOperationLogToMSG(
 
   return undefined;
 }
+
+export enum PlayportalClientErrorCodes {
+  YOUTUBE_OAUTH_CHANNEL_ID_NOT_FOUND = 1001,
+}
+
+export class PlayportalClientError extends Error {
+  constructor(
+    message: string,
+    public code: PlayportalClientErrorCodes,
+  ) {
+    super(message);
+    this.name = "PlayportalClientError";
+    this.code = code;
+  }
+}

@@ -1,6 +1,6 @@
 import React from "react";
 import { type Tables } from "types_db";
-import { PricingCard } from "../LandingPage";
+import { PricingCard } from "../PricingCard";
 import { useUserSubscription } from "~/hooks/use-user-subscription";
 
 export default function PricingSectionClientComponent({
@@ -34,7 +34,9 @@ export default function PricingSectionClientComponent({
           ]}
           planName="BASIC"
           planPrice={(basicPlan.unit_amount ?? 495) / 100}
-          userOwnsPlan={userSub.data?.product_id === basicPlan.product_id}
+          currentUserOwnsPlan={
+            userSub.data?.product_id === basicPlan.product_id
+          }
         />
       )}
       {standardPlan && (
@@ -55,7 +57,9 @@ export default function PricingSectionClientComponent({
           ]}
           planName="STANDARD"
           planPrice={(standardPlan.unit_amount ?? 995) / 100}
-          userOwnsPlan={userSub.data?.product_id === standardPlan.product_id}
+          currentUserOwnsPlan={
+            userSub.data?.product_id === standardPlan.product_id
+          }
         />
       )}
       {proPlan && (
@@ -76,7 +80,7 @@ export default function PricingSectionClientComponent({
           ]}
           planName="PRO"
           planPrice={(proPlan.unit_amount ?? 1495) / 100}
-          userOwnsPlan={userSub.data?.product_id === proPlan.product_id}
+          currentUserOwnsPlan={userSub.data?.product_id === proPlan.product_id}
         />
       )}
     </>

@@ -7,7 +7,13 @@ import {
 } from "~/server/helpers/oauth/youtube";
 import { youtubeOAuthClient } from "~/server/clients/oauth/youtube";
 import { createClient } from "~/utils/supabase/server";
-import { getErrorRedirect, getStatusRedirect, getURL } from "~/utils/utils";
+import {
+  getErrorRedirect,
+  getStatusRedirect,
+  getURL,
+  PlayportalClientError,
+  PlayportalClientErrorCodes,
+} from "~/utils/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -69,6 +75,7 @@ export async function GET(req: NextRequest) {
       decryptYoutubeCredentials(encryptedCredentials);
 
     // TODO: This might not be a good practice, i dont know if the youtube api will always return the channel id ? read the docs
+
     const { channelId, channelAvatar, channelTitle } =
       await getYoutubeChannelSummary(decryptedCredentials);
 
@@ -103,6 +110,20 @@ export async function GET(req: NextRequest) {
     );
   } catch (error) {
     console.error("Error while trying to connect YouTube account", error);
+
+    if (
+      error instanceof PlayportalClientError &&
+      error.code ===
+        PlayportalClientErrorCodes.YOUTUBE_OAUTH_CHANNEL_ID_NOT_FOUND
+    ) {
+      return NextResponse.redirect(
+        getErrorRedirect(
+          `${getURL()}/dashboard/account`,
+          `Invalid YouTube Channel`,
+          error.message,
+        ),
+      );
+    }
     return NextResponse.redirect(redirectErrorURL);
   }
 }

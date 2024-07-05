@@ -9,7 +9,11 @@ import { google } from "googleapis";
 import { type YoutubeChannelSummary } from "~/definitions/db-type-aliases";
 import { env } from "~/env";
 import { supabaseAdmin } from "~/server/clients/supabase";
-import { getURL } from "~/utils/utils";
+import {
+  getURL,
+  PlayportalClientError,
+  PlayportalClientErrorCodes,
+} from "~/utils/utils";
 
 const youtube = google.youtube("v3");
 const algorithm = "aes-256-cbc";
@@ -357,25 +361,29 @@ export async function getYoutubeChannelSummary(
       access_token: credentials.access_token,
     });
 
-    if (
-      !channelData ??
-      !channelData.items ??
-      !channelData.items[0] ??
-      !channelData.items[0].id
-    ) {
-      throw new Error("Could not get channel ID from YouTube API response");
+    const channel = channelData?.items?.[0];
+    console.log("Channel data: ", channelData);
+    console.log("Channel: ", channel);
+    if (channel?.id) {
+      return {
+        channelId: channel.id,
+        channelTitle: channel.snippet?.title ?? "Unknown Channel",
+        channelAvatar: channel.snippet?.thumbnails?.default?.url ?? null,
+      };
+    } else {
+      throw new PlayportalClientError(
+        "This account does not have a YouTube channel associated with it, please create a channel and try again.",
+        PlayportalClientErrorCodes.YOUTUBE_OAUTH_CHANNEL_ID_NOT_FOUND,
+      );
     }
-
-    // TODO: Get channel title, and avatar, these are not required but provide better UX
-
-    return {
-      channelId: channelData.items[0].id,
-      channelTitle: channelData.items[0]?.snippet?.title ?? "Unknown Channel",
-      channelAvatar:
-        channelData.items[0]?.snippet?.thumbnails?.default?.url ?? null,
-    };
   } catch (err) {
     console.error("Error while trying to get channel ID: ", err);
+
+    if (err instanceof PlayportalClientError) {
+      console.log("Error is a PlayportalClientError, rethrowing");
+      throw err;
+    }
+
     throw new Error("Error occurred while trying to get channel ID");
   }
 }

@@ -8,12 +8,16 @@ export default function SubmitStatus({
 }: {
   isLoading: boolean;
   text: string;
-  loaderProps: LoaderSizeProps;
+  loaderProps?: LoaderSizeProps;
 }) {
+  const _loaderProps = loaderProps ?? {
+    size: 20,
+  };
+
   return isLoading ? (
     <span className="flex flex-row items-center justify-center gap-2">
       <p>{text}</p>
-      <MoonLoader {...loaderProps} />
+      <MoonLoader {..._loaderProps} />
     </span>
   ) : (
     <p>{text}</p>

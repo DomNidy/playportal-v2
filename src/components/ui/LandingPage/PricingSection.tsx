@@ -1,20 +1,7 @@
 import React from "react";
-import { type Tables } from "types_db";
 import { env } from "~/env";
 import { createClient } from "~/utils/supabase/server";
-import PricingCard from "./PricingCard";
-
-export type PricingPlan = {
-  planName: string;
-  planPrice: number;
-  // A <p> element, we pass it this way because we want to apply custom styling to it
-  planDescription: React.ReactNode;
-  // An array of <p> elements, we pass them this way because we want to apply custom styling to certain parts of each element
-  planFeatures: React.ReactNode[];
-  planData: Tables<"products_prices">;
-  // Whether or not the user owns the plan
-  userOwnsPlan?: boolean;
-};
+import { PricingCard } from "../PricingCard";
 
 export default async function PricingSection({
   displayMode,
@@ -44,7 +31,7 @@ export default async function PricingSection({
     (product) =>
       product.product_id == env.NEXT_PUBLIC_STRIPE_PRODUCT_ID_PRO_PLAN,
   );
-  
+
   return (
     <div
       className={`${displayMode === "landing" ? "mt-[470px] md:mt-[480px] lg:mt-[600px]" : ""} flex max-w-[800px] flex-col items-center`}
