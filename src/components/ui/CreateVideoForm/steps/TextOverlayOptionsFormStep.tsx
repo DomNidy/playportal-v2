@@ -41,6 +41,15 @@ export default function TextOverlayOptionsFormStep() {
     setIsConfigureTextOverlayChecked,
   } = useCreateVideoForm();
   const { nextStep } = useStepper();
+
+  //* Note: We use local states here to control the font color as we only update the context for these values on form submit
+  const [localFontColor, setLocalFontColor] = React.useState(
+    textOverlayFormStep?.fontColor ?? "#ffffff",
+  );
+  const [localBackgroundBoxColor, setLocalBackgroundBoxColor] = React.useState(
+    textOverlayFormStep?.backgroundBoxSettings?.backgroundBoxColor ?? "#000000",
+  );
+
   const form = useForm<z.infer<typeof CreateVideoFormTextOverlaySchema>>({
     resolver: zodResolver(CreateVideoFormTextOverlaySchema),
     defaultValues: {
@@ -48,13 +57,11 @@ export default function TextOverlayOptionsFormStep() {
         textOverlayFormStep?.text ??
         uploadVideoOptionsFormStep?.videoTitle ??
         "",
-      font: Fonts.RobotoBlack,
-      fontColor: textOverlayFormStep?.fontColor ?? "white",
-      fontSize: 104,
+      font: textOverlayFormStep?.font ?? Fonts.RobotoBlack,
+      fontColor: localFontColor,
+      fontSize: textOverlayFormStep?.fontSize ?? 104,
       backgroundBoxSettings: {
-        backgroundBoxColor:
-          textOverlayFormStep?.backgroundBoxSettings?.backgroundBoxColor ??
-          "black",
+        backgroundBoxColor: localBackgroundBoxColor,
         backgroundBoxOpacity:
           textOverlayFormStep?.backgroundBoxSettings?.backgroundBoxOpacity ??
           0.75,
@@ -70,14 +77,11 @@ export default function TextOverlayOptionsFormStep() {
         "",
       font: textOverlayFormStep?.font ?? Fonts.RobotoBlack,
       fontSize: textOverlayFormStep?.fontSize ?? 104,
-      fontColor: textOverlayFormStep?.fontColor ?? "white",
-
-      // TODO: This causes error with the uncontrolled components turning into controlled components
+      //* Note: The reason this is reading as undefined, is because we only update the context on form submit, so it effectively is reset when other fields are changed
+      fontColor: localFontColor,
       backgroundBoxSettings: isShowBackgroundTextBoxChecked
         ? {
-            backgroundBoxColor:
-              textOverlayFormStep?.backgroundBoxSettings?.backgroundBoxColor ??
-              "black",
+            backgroundBoxColor: localBackgroundBoxColor,
             backgroundBoxOpacity:
               textOverlayFormStep?.backgroundBoxSettings
                 ?.backgroundBoxOpacity ?? 0.75,
@@ -89,37 +93,14 @@ export default function TextOverlayOptionsFormStep() {
     },
   });
 
-  console.log(form.getValues(), form.formState.errors);
-
   const onSubmit = (data: z.infer<typeof CreateVideoFormTextOverlaySchema>) => {
     setTextOverlayFormStep(data);
     nextStep();
   };
 
-  const watchBackgroundBoxColor = form.watch(
-    "backgroundBoxSettings.backgroundBoxColor",
-    textOverlayFormStep?.backgroundBoxSettings?.backgroundBoxColor ?? "black",
-  );
-
-  const watchBackgroundBoxOpacity = form.watch(
-    "backgroundBoxSettings.backgroundBoxOpacity",
-    textOverlayFormStep?.backgroundBoxSettings?.backgroundBoxOpacity ?? 0.75,
-  );
-
-  const watchBackgroundBoxPadding = form.watch(
-    "backgroundBoxSettings.backgroundBoxPadding",
-    textOverlayFormStep?.backgroundBoxSettings?.backgroundBoxPadding ?? 20,
-  );
-
-  // TODO: For some reason, changing the font color, then checking the background box checkbox resets this to its previous value
-  // TODO: (previous as in the value it was when this form step was submitted last)
-  //* This is because we only update the font color (and some other fields) when the form is submitted
-  //* We do this for performance reasons, because updating the context on every change is very inneficient
-  //* We probably are going to want to stop using the context outside of the initial useForm call, this may be leading to the issues we are seeing
-  const watchFontColor = form.watch(
-    "fontColor",
-    textOverlayFormStep?.fontColor ?? "white",
-  );
+  const backgroundCssClass = isShowBackgroundTextBoxChecked
+    ? `${hexToRGBA(localBackgroundBoxColor, textOverlayFormStep?.backgroundBoxSettings?.backgroundBoxOpacity ?? 0.75)}`
+    : ``;
 
   return (
     <Form {...form}>
@@ -153,14 +134,8 @@ export default function TextOverlayOptionsFormStep() {
                   <div
                     className=" flex h-fit w-fit flex-col items-center justify-center"
                     style={{
-                      backgroundColor: `${
-                        isShowBackgroundTextBoxChecked &&
-                        hexToRGBA(
-                          watchBackgroundBoxColor,
-                          watchBackgroundBoxOpacity,
-                        )
-                      }`,
-                      padding: `${isShowBackgroundTextBoxChecked && watchBackgroundBoxPadding}px`,
+                      backgroundColor: `${backgroundCssClass}`,
+                      padding: `${isShowBackgroundTextBoxChecked && textOverlayFormStep?.backgroundBoxSettings?.backgroundBoxPadding}px`,
                     }}
                   >
                     <p
@@ -169,7 +144,7 @@ export default function TextOverlayOptionsFormStep() {
                       )} left-5 right-20 z-50`}
                       style={{
                         fontSize: `${(textOverlayFormStep?.fontSize ?? 104) / 36}vw`,
-                        color: watchFontColor,
+                        color: localFontColor,
                       }}
                     >
                       {form.getValues("text") ?? "My beat"}
@@ -195,13 +170,13 @@ export default function TextOverlayOptionsFormStep() {
                       <Input
                         placeholder="My beat"
                         {...field}
+                        value={textOverlayFormStep?.text ?? field.value ?? ""}
                         onChange={(v) => {
-                          field.onChange(v);
-
                           setTextOverlayFormStep((prev) => ({
                             ...prev,
                             text: v.target.value,
                           }));
+                          field.onChange(v);
                         }}
                       />
                     </FormControl>
@@ -277,14 +252,13 @@ export default function TextOverlayOptionsFormStep() {
                 name="font"
                 render={({ field }) => (
                   <div className="z-[47] space-y-2">
-                    <FormLabel>Font</FormLabel>
+                    <FormLabel ref={field.ref}>Font</FormLabel>
                     <Select
-                      defaultValue={Fonts.MontserratBold}
-                      value={textOverlayFormStep?.font ?? Fonts.MontserratBold}
+                      value={textOverlayFormStep?.font ?? Fonts.RobotoBlack}
                       onValueChange={(value) => {
                         // Check if the value is a valid preset
                         if (value in Fonts) {
-                          form.setValue("font", value as Fonts);
+                          field.onChange(value);
                           setTextOverlayFormStep((prev) => ({
                             ...prev,
                             font: value as Fonts,
@@ -319,6 +293,7 @@ export default function TextOverlayOptionsFormStep() {
                       color={field.value}
                       onChange={(newColor) => {
                         // Dont update the context here, because this is very inneficient for rapidly changing colors
+                        setLocalFontColor(newColor);
                         field.onChange(newColor);
                       }}
                     />
@@ -352,6 +327,11 @@ export default function TextOverlayOptionsFormStep() {
                       <Select
                         name={field.name}
                         disabled={field.disabled}
+                        value={
+                          textOverlayFormStep?.backgroundBoxSettings?.backgroundBoxPadding?.toString() ??
+                          "10"
+                        }
+                        defaultValue="10"
                         onValueChange={(value) => {
                           const padAmount = parseInt(value, 10) ?? 10;
                           setTextOverlayFormStep((prev) => ({
@@ -408,12 +388,9 @@ export default function TextOverlayOptionsFormStep() {
                             const value = parseFloat(e.target.value);
                             setTextOverlayFormStep((prev) => ({
                               ...prev,
-                              textOverlaySettings: {
-                                ...prev,
-                                backgroundBoxSettings: {
-                                  ...prev?.backgroundBoxSettings,
-                                  backgroundBoxOpacity: value,
-                                },
+                              backgroundBoxSettings: {
+                                ...prev?.backgroundBoxSettings,
+                                backgroundBoxOpacity: value,
                               },
                             }));
                             field.onChange(value);
@@ -434,9 +411,11 @@ export default function TextOverlayOptionsFormStep() {
                         Background Box Color
                       </FormLabel>
                       <HexColorPicker
-                        color={field.value}
+                        color={localBackgroundBoxColor}
+                        defaultValue={localBackgroundBoxColor}
                         onChange={(newColor) => {
                           // Dont update the context here, because this is very inneficient for rapidly changing colors
+                          setLocalBackgroundBoxColor(newColor);
                           field.onChange(newColor);
                         }}
                       />
@@ -450,6 +429,17 @@ export default function TextOverlayOptionsFormStep() {
 
         <CreateVideoFormActions
           disableFormSubmit={isConfigureTextOverlayChecked === false}
+          beforePreviousCallback={() => {
+            // Update the context with the color fields that arent updated on every change
+            setTextOverlayFormStep((prev) => ({
+              ...prev,
+              fontColor: localFontColor,
+              backgroundBoxSettings: {
+                ...prev?.backgroundBoxSettings,
+                backgroundBoxColor: localBackgroundBoxColor,
+              },
+            }));
+          }}
           beforeNextCallback={() => {
             // If the user has not checked the configure text overlay checkbox, we can skip this step and ignore the form
             if (!isConfigureTextOverlayChecked) {
