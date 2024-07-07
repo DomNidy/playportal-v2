@@ -8,9 +8,13 @@ export default function CreateVideoFormActions({
   beforePreviousCallback,
   // Callback executed before the next step is shown
   beforeNextCallback,
+  // If set to true, we will use a type="button" for the submit button instead of type="submit"
+  // Useful if there is an optional form step
+  disableFormSubmit = false,
 }: {
   beforePreviousCallback?: () => void;
   beforeNextCallback?: () => void;
+  disableFormSubmit?: boolean;
 }) {
   const {
     prevStep,
@@ -45,7 +49,7 @@ export default function CreateVideoFormActions({
           {!isLastStep && (
             <Button
               size="sm"
-              type="submit"
+              type={disableFormSubmit ? "button" : "submit"}
               onClick={() => {
                 beforeNextCallback?.();
               }}

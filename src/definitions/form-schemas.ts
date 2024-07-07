@@ -72,7 +72,7 @@ export const CreateVideoFormSchema = z.object({
       text: z.string().max(100, "Text must be at most 100 characters long"),
       font: z.nativeEnum(Fonts),
       fontSize: z.number().min(1, "Font size must be at least 1"),
-      fontColor: z.string(),
+      fontColor: z.string().min(1, "Font color must be a hex color code"),
       backgroundBox: z.boolean(),
       backgroundBoxColor: z.string(),
       backgroundBoxOpacity: z.number().min(0).max(1),
@@ -202,10 +202,13 @@ export const CreateVideoFormTextOverlaySchema = z.object({
   font: z.nativeEnum(Fonts),
   fontSize: z.number().min(1, "Font size must be at least 1"),
   fontColor: z.string(),
-  backgroundBox: z.boolean(),
-  backgroundBoxColor: z.string(),
-  backgroundBoxOpacity: z.number().min(0).max(1),
-  backgroundBoxPadding: z.number().min(1, "Padding must be at least 1"),
+  backgroundBoxSettings: z
+    .object({
+      backgroundBoxColor: z.string(),
+      backgroundBoxOpacity: z.number().min(0).max(1),
+      backgroundBoxPadding: z.number().min(1, "Padding must be at least 1"),
+    })
+    .optional(),
 });
 
 //* We need to make sure that the created title is >= 100 characters

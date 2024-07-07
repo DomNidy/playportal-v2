@@ -11,6 +11,7 @@ import { Label } from "../../Label";
 import { Progress } from "../../Progress";
 import LoaderStatus from "../../LoaderStatus/LoaderStatus";
 import { CirclePlay } from "lucide-react";
+import { isTextOverlayFormDataObject } from "../utils";
 
 export default function CreateVideoFormSubmitStep() {
   const {
@@ -20,6 +21,8 @@ export default function CreateVideoFormSubmitStep() {
     audioFile,
     isUploadingFiles,
     setIsUploadingFiles,
+    isConfigureTextOverlayChecked,
+    isShowBackgroundTextBoxChecked,
     uploadAudioFileProgress,
     uploadImageFileProgress,
     imageFile,
@@ -51,11 +54,40 @@ export default function CreateVideoFormSubmitStep() {
       throw new Error("One of the form steps is missing");
     }
 
+    // Our API uses a different schema than our form, so here we are picking the fields that are needed so we can map them to the correct schema
+    const CreateVideoFormTextSchema = CreateVideoFormSchema.pick({
+      textOverlay: true,
+    });
+
+    const transformedTextOverlayFormStep =
+      isConfigureTextOverlayChecked &&
+      isTextOverlayFormDataObject(textOverlayFormStep)
+        ? ({
+            textOverlay: {
+              text: textOverlayFormStep.text,
+              font: textOverlayFormStep.font,
+              fontColor: textOverlayFormStep.fontColor ?? "black",
+              fontSize: textOverlayFormStep.fontSize,
+              backgroundBox: isShowBackgroundTextBoxChecked ? true : false,
+              //* We need to set these values here to match the schema of the textOverlay object in the CreateVideoFormSchema
+              backgroundBoxColor:
+                textOverlayFormStep?.backgroundBoxSettings
+                  ?.backgroundBoxColor ?? "black",
+              backgroundBoxOpacity:
+                textOverlayFormStep?.backgroundBoxSettings
+                  ?.backgroundBoxOpacity ?? 0,
+              backgroundBoxPadding:
+                textOverlayFormStep?.backgroundBoxSettings
+                  ?.backgroundBoxPadding ?? 1,
+            },
+          } as z.infer<typeof CreateVideoFormTextSchema>)
+        : {};
+
     return {
       ...uploadAudioFormStep,
       ...uploadImageFormStep,
       ...uploadVideoOptionsFormStep,
-      textOverlay: textOverlayFormStep ?? undefined,
+      ...transformedTextOverlayFormStep,
     };
   };
 
@@ -103,7 +135,8 @@ export default function CreateVideoFormSubmitStep() {
       setSubmitError(
         "Invalid video settings, please try again or contact support.",
       );
-      console.error("Create video form schema is invalid", res.error);
+
+      console.log("Create video form schema is invalid", res.error.issues);
       return;
     }
 
@@ -147,6 +180,7 @@ export default function CreateVideoFormSubmitStep() {
 
             const validateSchema =
               CreateVideoFormSchema.safeParse(concatedSchema);
+            console.log("Concat schema parse", validateSchema);
 
             if (!validateSchema.success) {
               setSubmitError(
