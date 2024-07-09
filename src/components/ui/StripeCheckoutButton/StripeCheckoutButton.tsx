@@ -3,16 +3,23 @@ import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "~/utils/supabase/client";
 import { type Tables } from "types_db";
 import { checkoutWithStripe } from "~/server/helpers/stripe";
-import { getErrorRedirect, getStatusRedirect } from "~/utils/utils";
+import { cn, getErrorRedirect, getStatusRedirect } from "~/utils/utils";
 import { getStripe } from "~/utils/stripe/client";
 import { toast } from "../Toasts/use-toast";
 import { Button } from "../Button";
 import { useState } from "react";
 import LoaderStatus from "../LoaderStatus";
+import React from "react";
 
-export default function StripeCheckoutButton({
-  ...productData
-}: Tables<"products_prices">) {
+export interface StripeCheckoutButtonProps
+  extends React.ComponentPropsWithoutRef<typeof Button> {
+  productData: Tables<"products_prices">;
+}
+
+const StripeCheckoutButton = React.forwardRef<
+  HTMLButtonElement,
+  StripeCheckoutButtonProps
+>(({ productData, ...buttonProps }, ref) => {
   const supabase = createClient();
   const router = useRouter();
   const currentPath = usePathname();
@@ -81,15 +88,21 @@ export default function StripeCheckoutButton({
 
   return (
     <Button
+      ref={ref}
       onClick={() => {
         setIsCheckoutLoading(true);
         void handleStripeCheckout(productData).then(() => {
           setIsCheckoutLoading(false);
         });
       }}
+      className={cn("", buttonProps.className)}
       disabled={isCheckoutLoading}
     >
       <LoaderStatus isLoading={isCheckoutLoading} text="Upgrade Now" />
     </Button>
   );
-}
+});
+
+StripeCheckoutButton.displayName = "StripeCheckoutButton";
+
+export default StripeCheckoutButton;

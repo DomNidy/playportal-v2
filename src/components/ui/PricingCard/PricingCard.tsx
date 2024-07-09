@@ -13,32 +13,52 @@ export default function PricingCard({
   currentUserOwnsPlan,
 }: PricingPlan) {
   return (
-    <div className="flex h-[330px] max-w-[330px] flex-col rounded-lg bg-[#0F0F0F] p-4">
-      <h2 className="text-xl font-bold tracking-tight text-white">
-        {planName}
-      </h2>
+    <div className="flex w-full flex-col  items-center rounded-xl border-2 border-white/10">
+      {/** Plan intro section */}
+      <div
+        style={{
+          backgroundColor: "rgba(20, 20, 20, 1)",
+        }}
+        className="flex h-[300px] w-full flex-col gap-2 rounded-t-xl px-4 py-8"
+      >
+        {/** Plan title */}
+        <h3 className="text-center text-2xl font-semibold">{planName}</h3>
+        {/** Plan description */}
+        <>{planDescription}</>
 
-      <h1 className="mb-2 text-[32px] font-bold tracking-tighter text-white">
-        ${planPrice}
-      </h1>
+        {/** Plan price */}
+        <h2 className="mt-4 text-center text-3xl font-medium">
+          ${planPrice} <span className="text-lg">/mo</span>
+        </h2>
 
-      <>{planDescription}</>
-
-      <div className="mt-6 flex flex-col gap-4 grow">
+        {/** Plan CTA */}
+        {!currentUserOwnsPlan ? (
+          <StripeCheckoutButton
+            productData={planData}
+            className="mt-auto rounded-md bg-[#0070f3] px-4 py-2 text-white hover:bg-[#0070f3]/90 active:bg-[#0070f3]/80"
+          />
+        ) : (
+          <Button disabled className="gap-2">
+            You own this! <CheckCircle2 className="inline h-4 w-4" />
+          </Button>
+        )}
+      </div>
+      {/** Plan features section */}
+      <div
+        style={{
+          backgroundColor: "rgba(22, 22, 22, 1)",
+        }}
+        className=" flex w-full flex-col gap-4 rounded-b-xl px-4 py-4"
+      >
+        <p className="my-2 font-semibold tracking-tight ">
+          {planName} tier includes:
+        </p>
         {planFeatures.map((feature, index) => (
-          <div className="flex gap-2" key={index}>
-            <CheckCircle2 className="text-white" /> {feature}
-          </div>
+          <p className="flex tracking-tight text-muted-foreground" key={index}>
+            <CheckCircle2 className="mr-2 inline" color="green" /> {feature}
+          </p>
         ))}
       </div>
-
-      {!currentUserOwnsPlan ? (
-        <StripeCheckoutButton {...planData} />
-      ) : (
-        <Button disabled className="gap-2">
-          You own this! <CheckCircle2 className="inline h-4 w-4" />
-        </Button>
-      )}
     </div>
   );
 }

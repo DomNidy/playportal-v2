@@ -199,3 +199,6 @@
     rgba(114, 106, 115, 0.039) 100%
   );
 }
+.landing-grad {
+  background: linear-gradient(to bottom, rgba(125, 125, 155, 0.23), rgba(3, 3, 3, 1));
+}

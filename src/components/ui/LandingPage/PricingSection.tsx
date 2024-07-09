@@ -33,20 +33,18 @@ export default async function PricingSection({
   );
 
   return (
-    <div
-      className={`${displayMode === "landing" ? "mt-[470px] md:mt-[480px] lg:mt-[600px]" : ""} flex max-w-[800px] flex-col items-center`}
-    >
-      <h2 className="text-center text-3xl font-semibold tracking-tighter text-white md:text-4xl">
-        Our Plans
+    <div className=" my-24 flex w-full max-w-[1000px] flex-col bg-neutral-950">
+      <h2 className="text-center text-4xl font-bold ">
+        Grow your Channel Today
       </h2>
-
-      <div className="mt-8 flex w-full flex-col items-center justify-evenly gap-4 sm:flex-row ">
+      <div className="mt-10 grid w-full  grid-cols-1 items-stretch gap-8 px-4 sm:grid-cols-2">
         {basicPlan && (
           <PricingCard
             planData={basicPlan}
             planDescription={
-              <p className="text-white text-opacity-[0.83]">
-                Create <strong>5 Videos</strong> per day.
+              <p className="text-center text-sm text-muted-foreground">
+                See how much Playportal can streamline your workflow. Completely
+                free.
               </p>
             }
             planFeatures={[
@@ -87,8 +85,31 @@ export default async function PricingSection({
           <PricingCard
             planData={proPlan}
             planDescription={
-              <p className="text-white text-opacity-[0.83]">
+              <p className="text-center text-sm text-muted-foreground">
+                See how much Playportal can streamline your workflow. Completely
+                free.
+              </p>
+            }
+            planFeatures={[
+              <p key={"1"} className="text-white">
                 Create <strong>30 Videos</strong> per day.
+              </p>,
+              <p key={"2"} className="text-white">
+                <strong>200 MB</strong> File upload limit.
+              </p>,
+            ]}
+            planName="PRO"
+            planPrice={(proPlan.unit_amount ?? 1495) / 100}
+          />
+        )}
+
+        {proPlan && (
+          <PricingCard
+            planData={proPlan}
+            planDescription={
+              <p className="text-center text-sm text-muted-foreground">
+                See how much Playportal can streamline your workflow. Completely
+                free.
               </p>
             }
             planFeatures={[
