@@ -1,11 +1,8 @@
 import localFont from "next/font/local";
 import { ErrorCode } from "react-dropzone";
-import { z } from "zod";
+import { type z } from "zod";
 import { Fonts } from "~/definitions/api-schemas";
-import {
-  CreateVideoFormSchema,
-  CreateVideoFormTextOverlaySchema,
-} from "~/definitions/form-schemas";
+import { CreateVideoFormTextOverlaySchema } from "~/definitions/form-schemas";
 
 export function getFileDropErrorMessage(
   fileType: "audio" | "image",

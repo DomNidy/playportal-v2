@@ -11,10 +11,7 @@ import {
   FormLabel,
   FormMessage,
 } from "../Form";
-import {
-  createNewDescriptionTemplate,
-  updateDescriptionTemplate,
-} from "~/server/actions";
+import { updateDescriptionTemplate } from "~/server/actions";
 import { toast } from "../Toasts/use-toast";
 import { Input } from "../Input";
 import { Textarea } from "../Textarea";

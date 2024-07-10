@@ -1,6 +1,6 @@
 // Here we define type aliases just to make the types more readable
 
-import { Tables, type Database } from "types_db";
+import { type Database } from "types_db";
 
 export type OperationLogCode =
   Database["public"]["Enums"]["operation_logs_enum"];
@@ -19,4 +19,3 @@ export type YoutubeChannelSummary = {
   channelTitle: string;
   channelAvatar: string | null;
 };
-

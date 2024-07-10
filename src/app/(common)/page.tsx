@@ -20,10 +20,7 @@ import Link from "next/link";
 export default function Home() {
   return (
     <div className="flex flex-col items-center bg-neutral-950">
-      {" "}
-      {/** Hero container */}
       <div className="landing-grad z-10 flex h-full min-h-[800px] w-full flex-col items-center px-4">
-        {/** TODO: This hero text needs to stay vertically centered when the screen grows */}
         <div className="flex max-w-[1000px] translate-y-24 flex-col items-center gap-4 self-center text-center md:translate-y-36 ">
           <h1 className="text-[51.4px] font-semibold leading-[53px] tracking-tight text-white ">
             Drag and Drop Your Beats, Upload them Anywhere
@@ -57,20 +54,7 @@ export default function Home() {
             />
           </div>
         </div>
-
-        {/* <div className="video-container -z-10 w-full ">
-          <video
-            src="/trailer-hero.mp4"
-            autoPlay
-            muted
-            loop
-            className="object-cover overflow-hidden h-full w-full aspect-auto"
-          />
-        </div> */}
       </div>
-      {/** TODO: Items center on the praent is causing this to be centered as well, we don't want that, it causes the issue */}
-      {/** Video container */}
-      {/** TODO: This needs to be relative positioned because this makes the video be placed properly inside the container, h-900px needs to match the hero height */}
       <div className="w-full bg-gradient-to-b from-neutral-900 to-neutral-950">
         <div className="flex flex-col items-center justify-start">
           <Image
@@ -320,9 +304,6 @@ export default function Home() {
           />
         </div>
       </div>
-      {/* <div className="bg-neutral-950 w-full ">
-        <Testimonals />
-      </div> */}
       <div className="h-[2px] w-full bg-white/10" />
       <div className=" my-24 flex w-full max-w-[1000px] flex-col bg-neutral-950">
         <h2 className="text-center text-4xl font-bold ">
