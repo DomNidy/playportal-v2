@@ -29,9 +29,12 @@ export default function Home() {
             A simple way to automatically create videos with your music, and
             upload them directly to YouTube, or any other platform.
           </h3>
-          <button className="mt-6 rounded-md bg-[#2175d5] px-12 py-4 tracking-tight text-white shadow-[0_4px_14px_0_rgb(0,118,255,39%)] transition  duration-200 ease-linear hover:bg-[rgba(0,118,255,0.95)] hover:shadow-[0_6px_20px_rgba(0,118,255,23%)]">
+          <Link
+            href={"/sign-up"}
+            className="mt-6 rounded-md bg-[#2175d5] px-12 py-4 tracking-tight text-white shadow-[0_4px_14px_0_rgb(0,118,255,39%)] transition  duration-200 ease-linear hover:bg-[rgba(0,118,255,0.95)] hover:shadow-[0_6px_20px_rgba(0,118,255,23%)]"
+          >
             Create Now
-          </button>
+          </Link>
           <div className="mt-12 grid grid-cols-1 items-stretch justify-stretch gap-8 px-4 pb-52  text-start md:grid-cols-2  md:pb-72 lg:grid-cols-3 lg:pb-0">
             <FeatureCard
               iconBackgroundColor="bg-red-600 "
@@ -291,9 +294,12 @@ export default function Home() {
                 Upload from your Laptop
               </h3>
             </div>
-            <button className="mt-6  rounded-md bg-[#2175d5] px-12 py-4 tracking-tight text-white shadow-[0_4px_14px_0_rgb(0,118,255,39%)] transition  duration-200 ease-linear hover:bg-[rgba(0,118,255,0.95)] hover:shadow-[0_6px_20px_rgba(0,118,255,23%)]">
+            <Link
+              href={"/sign-up"}
+              className="mt-6  rounded-md bg-[#2175d5] px-12 py-4 tracking-tight text-white shadow-[0_4px_14px_0_rgb(0,118,255,39%)] transition  duration-200 ease-linear hover:bg-[rgba(0,118,255,0.95)] hover:shadow-[0_6px_20px_rgba(0,118,255,23%)]"
+            >
               Upload Now
-            </button>
+            </Link>
           </div>
           <video
             src="https://playportal-static-content.s3.amazonaws.com/video-preview.mp4"
