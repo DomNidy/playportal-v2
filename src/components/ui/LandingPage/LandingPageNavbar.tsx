@@ -179,14 +179,15 @@ export default function LandingPageNavbar() {
         {!user ? (
           <>
             <Link
-              className="inline-flex h-fit items-center justify-center self-center whitespace-nowrap rounded-md bg-primary-foreground  bg-white px-3 py-[0.33rem] text-sm font-medium text-black ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+              className="inline-flex h-fit items-center justify-center self-center whitespace-nowrap rounded-md bg-primary-foreground  bg-white px-3 py-[0.45rem] text-sm font-medium text-black ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
               href={"/sign-in"}
             >
               Log in
             </Link>
 
             <Link
-              className="inline-flex h-fit items-center justify-center self-center whitespace-nowrap  rounded-md bg-primary-foreground bg-ptl_accent-def px-3  py-[0.33rem] text-sm font-medium   text-white ring-offset-background  transition-colors hover:bg-primary/90 hover:bg-ptl_accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+              variant={"button"}
+              className="bg-landing_cta-def hover:bg-landing_cta-def/95 inline-flex h-fit items-center justify-center self-center  whitespace-nowrap rounded-md   px-3 py-[0.45rem] text-sm   font-medium text-white  ring-offset-background transition-colors  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
               href={"/sign-up"}
             >
               Sign up

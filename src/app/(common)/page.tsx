@@ -13,6 +13,9 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import PricingSection from "~/components/ui/LandingPage/PricingSection";
+import React, { Suspense } from "react";
+import PricingCardSkeleton from "~/components/ui/PricingCard/PricingCardSkeleton";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -68,7 +71,7 @@ export default function Home() {
       {/** TODO: Items center on the praent is causing this to be centered as well, we don't want that, it causes the issue */}
       {/** Video container */}
       {/** TODO: This needs to be relative positioned because this makes the video be placed properly inside the container, h-900px needs to match the hero height */}
-      <div className="w-full bg-neutral-900">
+      <div className="w-full bg-gradient-to-b from-neutral-900 to-neutral-950">
         <div className="flex flex-col items-center justify-start">
           <Image
             src={"/landing/dash-preview.png"}
@@ -142,9 +145,12 @@ export default function Home() {
                 directly sourced from YouTube.
               </p>
             </div>
-            <button className="mt-6  rounded-md bg-[#2175d5] px-12 py-4 tracking-tight text-white shadow-[0_4px_14px_0_rgb(0,118,255,39%)] transition  duration-200 ease-linear hover:bg-[rgba(0,118,255,0.95)] hover:shadow-[0_6px_20px_rgba(0,118,255,23%)]">
+            <Link
+              href={"/sign-up"}
+              className="mt-6  rounded-md bg-[#2175d5] px-12 py-4 tracking-tight text-white shadow-[0_4px_14px_0_rgb(0,118,255,39%)] transition  duration-200 ease-linear hover:bg-[rgba(0,118,255,0.95)] hover:shadow-[0_6px_20px_rgba(0,118,255,23%)]"
+            >
               Create Now
-            </button>
+            </Link>
           </div>
           <div className="w-full max-w-[360px] rounded-lg bg-gradient-to-r from-orange-600 to-red-500 p-4">
             <Image
@@ -175,9 +181,12 @@ export default function Home() {
                 availability of the beat (free, free for profit, no label).
               </p>
             </div>
-            <button className="mt-6  rounded-md bg-[#2175d5] px-12 py-4 tracking-tight text-white shadow-[0_4px_14px_0_rgb(0,118,255,39%)] transition  duration-200 ease-linear hover:bg-[rgba(0,118,255,0.95)] hover:shadow-[0_6px_20px_rgba(0,118,255,23%)]">
+            <Link
+              href={"/sign-up"}
+              className="mt-6  rounded-md bg-[#2175d5] px-12 py-4 tracking-tight text-white shadow-[0_4px_14px_0_rgb(0,118,255,39%)] transition  duration-200 ease-linear hover:bg-[rgba(0,118,255,0.95)] hover:shadow-[0_6px_20px_rgba(0,118,255,23%)]"
+            >
               Create Now
-            </button>
+            </Link>
           </div>
           <div className="w-full max-w-[360px] rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 p-4">
             <Image
@@ -210,9 +219,12 @@ export default function Home() {
                 link your socials.
               </p>
             </div>
-            <button className="mt-6  rounded-md bg-[#2175d5] px-12 py-4 tracking-tight text-white shadow-[0_4px_14px_0_rgb(0,118,255,39%)] transition  duration-200 ease-linear hover:bg-[rgba(0,118,255,0.95)] hover:shadow-[0_6px_20px_rgba(0,118,255,23%)]">
+            <Link
+              href={"/sign-up"}
+              className="mt-6  rounded-md bg-[#2175d5] px-12 py-4 tracking-tight text-white shadow-[0_4px_14px_0_rgb(0,118,255,39%)] transition  duration-200 ease-linear hover:bg-[rgba(0,118,255,0.95)] hover:shadow-[0_6px_20px_rgba(0,118,255,23%)]"
+            >
               Create Now
-            </button>
+            </Link>
           </div>
           <div className="w-full max-w-[360px] rounded-lg  bg-gradient-to-r from-orange-600 to-red-500 p-4 text-center ">
             <Image
@@ -250,9 +262,12 @@ export default function Home() {
                 Select a Size
               </p>{" "}
             </div>
-            <button className="mt-6  rounded-md bg-[#2175d5] px-12 py-4 tracking-tight text-white shadow-[0_4px_14px_0_rgb(0,118,255,39%)] transition  duration-200 ease-linear hover:bg-[rgba(0,118,255,0.95)] hover:shadow-[0_6px_20px_rgba(0,118,255,23%)]">
+            <Link
+              href={"/sign-up"}
+              className="mt-6  rounded-md bg-[#2175d5] px-12 py-4 tracking-tight text-white shadow-[0_4px_14px_0_rgb(0,118,255,39%)] transition  duration-200 ease-linear hover:bg-[rgba(0,118,255,0.95)] hover:shadow-[0_6px_20px_rgba(0,118,255,23%)]"
+            >
               Create Now
-            </button>
+            </Link>
           </div>
           <div className="rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 p-4">
             <Image
@@ -309,7 +324,26 @@ export default function Home() {
         <Testimonals />
       </div> */}
       <div className="h-[2px] w-full bg-white/10" />
-      <PricingSection displayMode="landing" />
+      <div className=" my-24 flex w-full max-w-[1000px] flex-col bg-neutral-950">
+        <h2 className="text-center text-4xl font-bold ">
+          Grow your Channel Today
+        </h2>
+        <div
+          className="mt-10 grid w-full grid-cols-1 items-stretch gap-8 px-4 sm:grid-cols-2"
+          id="pricing"
+        >
+          <Suspense
+            fallback={
+              <>
+                <PricingCardSkeleton />
+                <PricingCardSkeleton />
+              </>
+            }
+          >
+            <PricingSection />
+          </Suspense>
+        </div>
+      </div>
       <Footer />
     </div>
   );

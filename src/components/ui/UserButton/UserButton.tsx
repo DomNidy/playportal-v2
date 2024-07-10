@@ -116,7 +116,7 @@ export default function UserButton({
           <DialogContent className="flex max-h-[600px] max-w-[90%] flex-col  justify-center rounded-lg md:max-w-[650px] lg:max-w-[850px] ">
             <DialogTitle>Subscription Plans</DialogTitle>
 
-            <div className="my-2 flex h-full  flex-col items-center justify-center gap-2 overflow-y-scroll pt-[320px] sm:flex-row sm:overflow-y-auto  sm:pt-0 ">
+            <div className="my-2 flex h-full flex-col items-stretch  justify-start gap-2 overflow-y-scroll  sm:flex-row sm:overflow-y-auto  sm:pt-0 ">
               <PricingSectionClientComponent
                 basicPlan={availableSubscriptionPlans?.basicPlan}
                 standardPlan={availableSubscriptionPlans?.standardPlan}

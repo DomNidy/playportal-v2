@@ -59,10 +59,9 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="flex  flex-col items-center leading-7">
-      <div className="landing-bg-gradient pointer-events-none absolute top-0 h-[2450px] w-full " />
+    <div className="flex   flex-col items-center leading-7">
 
-      <div className="mt-10 flex max-w-[650px] flex-col items-center space-y-12 px-[18px] py-10">
+      <div className="mt-10 flex max-w-[750px] flex-col items-center space-y-12 px-[18px] py-10">
         <div className="text-left" id="privacy-policy">
           <h2 className="mb-4 text-4xl font-bold">Privacy Policy</h2>
           <p className=" leading-7 text-[#F3F3F3] ">

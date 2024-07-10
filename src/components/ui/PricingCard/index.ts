@@ -1,2 +1,4 @@
 export { default as PricingCard } from "./PricingCard";
-export { type PricingPlan } from "./definitions";
+export { type PricingCardProps } from "./definitions";
+export { default as PricingCardCheckoutButton } from "./PricingCardCheckoutButton";
+export { default as PricingCardSkeleton } from "./PricingCardSkeleton";

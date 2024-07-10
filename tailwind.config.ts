@@ -23,6 +23,7 @@ const config = {
     extend: {
       colors: {
         ptl_accent: { def: "#BC38FA", hover: "#D074FB" },
+        landing_cta: { def: "#2175d5" },
         colors: {
           text: {
             50: "#f2f2f2",

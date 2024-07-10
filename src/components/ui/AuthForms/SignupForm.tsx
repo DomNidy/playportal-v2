@@ -100,7 +100,7 @@ export default function SignupForm() {
   }
 
   return (
-    <div className="authform-bg-gradient mx-auto w-fit max-w-md rounded-xl border-[1.8px] p-4 shadow-input md:p-8 ">
+    <div className=" mx-auto w-fit max-w-md rounded-xl border-[1.8px] p-4 shadow-input md:p-8 ">
       <h2 className="text-xl font-bold text-neutral-800 dark:text-neutral-200">
         Welcome to Playportal
       </h2>
@@ -226,7 +226,7 @@ export default function SignupForm() {
 const BottomGradient = () => {
   return (
     <>
-      <span className="absolute inset-x-0 -bottom-px block h-px w-full bg-gradient-to-r from-transparent via-ptl_accent-def to-transparent opacity-0 transition duration-500 group-hover/btn:opacity-100" />
+      <span className="via-landing_cta-def absolute inset-x-0 -bottom-px block h-px w-full bg-gradient-to-r from-transparent to-transparent opacity-0 transition duration-500 group-hover/btn:opacity-100" />
       <span className="absolute inset-x-10 -bottom-px mx-auto block h-px w-1/2 bg-gradient-to-r from-transparent via-indigo-500 to-transparent opacity-0 blur-sm transition duration-500 group-hover/btn:opacity-100" />
     </>
   );

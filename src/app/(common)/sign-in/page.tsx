@@ -25,7 +25,6 @@ export default async function Page() {
   if (!env.NEXT_PUBLIC_PLAYPORTAL_DISPLAY_SIGNUP_PAGE) {
     return (
       <div>
-        <div className="landing-bg-gradient pointer-events-none absolute top-0 h-[1450px] max-h-screen w-full " />
         <div className="dark mx-auto flex h-screen max-h-screen w-full max-w-[600px]  -translate-y-24  flex-col justify-center overflow-clip px-4 ">
           <h2 className="text-3xl font-semibold">
             We{"'re"} not ready yet, but we{"'re"} cooking.
@@ -48,7 +47,6 @@ export default async function Page() {
         height: "calc(100vh - 126px)",
       }}
     >
-      <div className="landing-bg-gradient pointer-events-none absolute top-0 h-[1650px] max-h-screen w-full " />
       <div className="w-full ">
         <SigninForm />
       </div>

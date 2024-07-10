@@ -76,7 +76,9 @@ export async function POST(req: Request) {
           break;
         case "customer.subscription.created":
         case "customer.subscription.updated":
+
         case "customer.subscription.deleted":
+          // This event occurs whenever a customers' subscription ends
           await manageSubscriptionStatusChange(
             event.data.object.id,
             event.data.object.customer as string,

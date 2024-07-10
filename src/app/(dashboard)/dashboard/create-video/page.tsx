@@ -28,7 +28,7 @@ export default async function CreateVideoPage() {
           restricting video creations to paid subscribers only. If you are
           interested in subscribing, please check out our pricing below.
         </p>
-        <PricingSection displayMode="account" />
+        <PricingSection />
       </div>
     );
   }

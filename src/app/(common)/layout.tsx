@@ -75,12 +75,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={` ${GeistSans.className} bg-black `}>
+      <body className={` ${GeistSans.className} bg-neutral-950 `}>
         <Suspense fallback={<LandingPageNavbarFallback />}>
           <LandingPageNavbar />
         </Suspense>
         <Providers>
-          <NextTopLoader color="#BC38FA" showSpinner={false} height={2} />
+          <NextTopLoader color="#2175d5" showSpinner={false} height={2} />
           {children}
         </Providers>
         <Analytics />

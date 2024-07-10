@@ -62,12 +62,12 @@ export default async function MusicKit({ ...kit }: KitData) {
 
   return (
     <div
-      className={`aspect flex w-[${imageSize}px] ${variant === "default" ? "flex-col" : "w-auto flex-col gap-2 sm:flex-row"} rounded-lg`}
+      className={`aspect flex w-[${imageSize}px] ${variant === "default" ? "flex-col" : "w-auto flex-col gap-2 sm:flex-row"} rounded-lg `}
     >
       {/** Turning off optimization since it seems it causes issues with our blur implementation */}
       <Image
         src={productImageURL}
-        className="aspect-square rounded-2xl"
+        className="aspect-square rounded-2xl "
         alt={`${title} kit image`}
         width={imageSize}
         height={imageSize}
@@ -76,7 +76,7 @@ export default async function MusicKit({ ...kit }: KitData) {
         unoptimized={true}
       />
 
-      <div className=" flex flex-col gap-1 rounded-lg p-1">
+      <div className=" flex flex-col gap-1 rounded-lg p-1 ">
         <Link
           className="mb-0.5 mt-2 flex text-xl font-semibold"
           href={`/downloads/${title}`}

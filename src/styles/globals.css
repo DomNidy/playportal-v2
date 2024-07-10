@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 @layer base {
+  /* We use these */
   :root {
     --background: 0 0% 0%;
 
@@ -127,29 +128,23 @@
 }
 
 .landing-bg-gradient {
-  background: rgb(211, 152, 239, 0.05);
+  background: rgb(121, 112, 122);
   background: -moz-linear-gradient(
     180deg,
-    rgba(211, 152, 239, 1, 0.05) 0%,
-    rgba(114, 106, 115, 0.05) 50%,
-    rgba(114, 106, 115, 0.0032) 75%,
-    rgba(163, 151, 243, 0) 73%
+    rgba(121, 112, 122, 0.06) 0%,
+    rgba(80, 76, 80, 0.04) 100%
   );
   background: -webkit-linear-gradient(
     180deg,
-    rgba(211, 152, 239, 0.05) 0%,
-    rgba(114, 106, 115, 0.05) 50%,
-    rgba(114, 106, 115, 0.0032) 75%,
-    rgba(163, 151, 243, 0) 73%
+    rgba(121, 112, 122, 0.06) 0%,
+    rgba(80, 76, 80, 0.04) 100%
   );
   background: linear-gradient(
     180deg,
-    rgba(211, 152, 239, 0.05) 0%,
-    rgba(114, 106, 115, 0.05) 50%,
-    rgba(114, 106, 115, 0.0032) 75%,
-    rgba(163, 151, 243, 0) 73%
+    rgba(121, 112, 122, 0.06) 0%,
+    rgba(80, 76, 80, 0.04) 100%
   );
-  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#d398ef",endColorstr="#a397f3",GradientType=1);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#79707a",endColorstr="#504c50",GradientType=1);
 }
 
 .authform-bg-gradient {
@@ -200,5 +195,21 @@
   );
 }
 .landing-grad {
-  background: linear-gradient(to bottom, rgba(125, 125, 155, 0.23), rgba(3, 3, 3, 1));
+  background: rgb(28, 27, 29);
+  background: -moz-linear-gradient(
+    180deg,
+    rgba(28, 27, 29, 1) 0%,
+    rgba(0, 0, 0, 1) 100%
+  );
+  background: -webkit-linear-gradient(
+    180deg,
+    rgba(28, 27, 29, 1) 0%,
+    rgba(0, 0, 0, 1) 100%
+  );
+  background: linear-gradient(
+    180deg,
+    rgba(28, 27, 29, 1) 0%,
+    rgba(0, 0, 0, 1) 100%
+  );
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#1c1b1d",endColorstr="#000000",GradientType=1);
 }
