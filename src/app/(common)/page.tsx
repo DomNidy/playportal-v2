@@ -296,7 +296,7 @@ export default function Home() {
             </button>
           </div>
           <video
-            src="/landing/video-preview.mp4"
+            src="https://playportal-static-content.s3.amazonaws.com/video-preview.mp4"
             autoPlay
             muted
             loop
