@@ -89,9 +89,12 @@ export default function Home() {
           </div>
         </div>
         <div className="container  flex justify-center md:justify-end">
-          <button className="mt-6 rounded-md bg-[#2175d5] px-12 py-4 tracking-tight text-white shadow-[0_4px_14px_0_rgb(0,118,255,39%)] transition  duration-200 ease-linear hover:bg-[rgba(0,118,255,0.95)] hover:shadow-[0_6px_20px_rgba(0,118,255,23%)]">
+          <Link
+            href={"/sign-up"}
+            className="mt-6 rounded-md bg-[#2175d5] px-12 py-4 tracking-tight text-white shadow-[0_4px_14px_0_rgb(0,118,255,39%)] transition  duration-200 ease-linear hover:bg-[rgba(0,118,255,0.95)] hover:shadow-[0_6px_20px_rgba(0,118,255,23%)]"
+          >
             Get Started
-          </button>
+          </Link>
         </div>
         <div className="container mt-12 grid grid-cols-1 items-stretch justify-stretch gap-8   text-start md:grid-cols-2 lg:grid-cols-3">
           <FeatureCard
@@ -118,8 +121,8 @@ export default function Home() {
       </div>
       <div className="h-[2px] w-full bg-white/10" />
       <div className="w-full bg-neutral-900 ">
-        <div className="container my-8 flex h-full w-full  flex-col items-center justify-between gap-4 px-4 md:my-24 md:flex-row-reverse md:items-start">
-          <div className="flex max-w-[26rem]  flex-col items-center gap-8 md:items-start">
+        <div className="container my-8 flex h-full w-full  flex-col items-center justify-between gap-4 px-4 md:my-24 md:flex-row md:items-start">
+          <div className="flex  max-w-[26rem]  flex-col items-center gap-8 md:items-start">
             <div className="flex  flex-row gap-4">
               <h2 className="text-left text-4xl font-bold">Tag Generator</h2>
               <p className="tracking inline w-fit self-center rounded-xl bg-gradient-to-r from-orange-600  to-red-500 p-2 text-center text-xs font-semibold">
@@ -153,7 +156,7 @@ export default function Home() {
       </div>
       <div className="h-[2px] w-full bg-white/10" />
       <div className="w-full bg-neutral-900 ">
-        <div className="container my-8 flex h-full w-full  flex-col items-center justify-between gap-4 px-4 md:my-24 md:flex-row md:items-start">
+        <div className="container my-8 flex h-full w-full  flex-col items-center justify-between gap-4 px-4 md:my-24 md:flex-row-reverse md:items-start">
           <div className="flex max-w-[26rem]  flex-col items-center gap-8 md:items-start">
             <div className="flex  flex-row gap-4">
               <h2 className="text-left  text-4xl font-bold">Title Builder</h2>
@@ -188,7 +191,7 @@ export default function Home() {
       </div>
       <div className="h-[2px] w-full bg-white/10" />
       <div className="w-full bg-neutral-950 ">
-        <div className="container my-8 flex h-full w-full  flex-col items-center justify-between gap-4 px-4 md:my-24 md:flex-row-reverse md:items-start">
+        <div className="container my-8 flex h-full w-full  flex-col items-center justify-between gap-4 px-4 md:my-24 md:flex-row md:items-start">
           <div className="flex max-w-[26rem]  flex-col items-center gap-8 md:max-w-[35rem] md:items-start">
             <div className="flex flex-row gap-4">
               <h2 className="text-center text-4xl font-bold md:text-left">
@@ -226,7 +229,7 @@ export default function Home() {
       </div>
       <div className="h-[2px] w-full bg-white/10" />
       <div className="w-full bg-neutral-950 ">
-        <div className="container my-8 flex h-full w-full  flex-col items-center justify-between gap-4 px-4 md:my-24 md:flex-row md:items-start">
+        <div className="container my-8 flex h-full   flex-col items-center justify-between gap-4 px-4 md:my-24 md:flex-row-reverse md:items-start">
           <div className="flex max-w-[26rem]  flex-col items-center gap-6 md:items-start">
             <h2 className="text-center text-4xl font-bold md:text-left">
               Custom text overlay

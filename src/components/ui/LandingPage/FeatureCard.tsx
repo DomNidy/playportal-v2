@@ -27,7 +27,7 @@ export default function FeatureCard({
       <CardHeader className="flex flex-row gap-4 pb-3">
         {Icon && (
           <Icon
-            className={`${iconBackgroundColor} z-50 h-8 w-8 rounded-full p-1.5`}
+            className={`${iconBackgroundColor} z-[45] h-8 w-8 rounded-full p-1.5`}
             color="white"
           />
         )}
