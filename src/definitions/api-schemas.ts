@@ -19,6 +19,13 @@ export enum Fonts {
   RobotoBlack = "RobotoBlack",
   RobotoBold = "RobotoBold",
 }
+export enum TextPositioning {
+  TopLeft = "TopLeft",
+  TopRight = "TopRight",
+  BottomLeft = "BottomLeft",
+  BottomRight = "BottomRight",
+  Center = "Center",
+}
 
 export const YoutubeUploadOptions = z.object({
   kind: z.literal("YoutubeUploadOptions"),
@@ -75,6 +82,9 @@ export const CreateVideoOptionsMessageSchema = z.object({
         background_box_color: z.string(),
         background_box_opacity: z.number(),
         background_box_padding: z.number(),
+        text_positioning: z
+          .nativeEnum(TextPositioning)
+          .default(TextPositioning.Center),
       })
       .optional(),
   }),

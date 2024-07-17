@@ -69,6 +69,7 @@ export default function CreateVideoFormSubmitStep() {
               fontColor: textOverlayFormStep.fontColor ?? "black",
               fontSize: textOverlayFormStep.fontSize,
               backgroundBox: isShowBackgroundTextBoxChecked ? true : false,
+              textPositioning: textOverlayFormStep.textPositioning,
               //* We need to set these values here to match the schema of the textOverlay object in the CreateVideoFormSchema
               backgroundBoxColor:
                 textOverlayFormStep?.backgroundBoxSettings

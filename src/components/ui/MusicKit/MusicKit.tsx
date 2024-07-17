@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { getURL } from "~/utils/utils";
+import { getURL, isRelativeUrl } from "~/utils/utils";
 import { Link } from "~/components/ui/Link";
 import MusicKitDownloadButton from "./MusicKitDownloadButton";
 import { getBlurData } from "~/utils/blur-data-generator";
@@ -48,17 +48,23 @@ function getBadgeColorFromKitType(kitType: KitType): {
   }
 }
 
+const placeholderImageURL = `${getURL()}/placeholder.jpg`;
+
+// If the url is relative to site, prepend it with site url
+// If the url is external, return it as is
+const resolveKitImageURL = (kitImageURL: string) =>
+  isRelativeUrl(kitImageURL) ? `${getURL()}/${kitImageURL}` : kitImageURL;
+
 export default async function MusicKit({ ...kit }: KitData) {
   const { title, description, imageSrc, variant } = kit;
 
-  const productImageURL = imageSrc
-    ? `${getURL()}/${kit.imageSrc}`
-    : `${getURL()}/placeholder.jpg`;
-
+  const resolvedImageURL = imageSrc
+    ? resolveKitImageURL(imageSrc)
+    : placeholderImageURL;
   const imageSize = variant === "default" ? 200 : 350;
+  const { base64 } = await getBlurData(resolvedImageURL);
 
   const { badgeColor, badgeHoverColor } = getBadgeColorFromKitType(kit.type);
-  const { base64 } = await getBlurData(productImageURL);
 
   return (
     <div
@@ -66,7 +72,7 @@ export default async function MusicKit({ ...kit }: KitData) {
     >
       {/** Turning off optimization since it seems it causes issues with our blur implementation */}
       <Image
-        src={productImageURL}
+        src={resolvedImageURL}
         className="aspect-square rounded-2xl "
         alt={`${title} kit image`}
         width={imageSize}

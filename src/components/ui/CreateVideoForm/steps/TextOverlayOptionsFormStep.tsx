@@ -2,7 +2,7 @@ import React from "react";
 import { useCreateVideoForm } from "../CreateVideoFormContext";
 import { useStepper } from "../../Stepper";
 import { Controller, useForm } from "react-hook-form";
-import { type z } from "zod";
+import { isValid, type z } from "zod";
 import { CreateVideoFormTextOverlaySchema } from "~/definitions/form-schemas";
 import {
   Form,
@@ -13,7 +13,7 @@ import {
   FormLabel,
   FormMessage,
 } from "../../Form";
-import { Fonts } from "~/definitions/api-schemas";
+import { Fonts, TextPositioning } from "~/definitions/api-schemas";
 import { Input } from "../../Input";
 import CreateVideoFormActions from "../CreateVideoFormActions";
 import { Checkbox } from "../../Checkbox";
@@ -57,6 +57,8 @@ export default function TextOverlayOptionsFormStep() {
         textOverlayFormStep?.text ??
         uploadVideoOptionsFormStep?.videoTitle ??
         "",
+      textPositioning:
+        textOverlayFormStep?.textPositioning ?? TextPositioning.Center,
       font: textOverlayFormStep?.font ?? Fonts.RobotoBlack,
       fontColor: localFontColor,
       fontSize: textOverlayFormStep?.fontSize ?? 104,
@@ -75,6 +77,8 @@ export default function TextOverlayOptionsFormStep() {
         textOverlayFormStep?.text ??
         uploadVideoOptionsFormStep?.videoTitle ??
         "",
+      textPositioning:
+        textOverlayFormStep?.textPositioning ?? TextPositioning.Center,
       font: textOverlayFormStep?.font ?? Fonts.RobotoBlack,
       fontSize: textOverlayFormStep?.fontSize ?? 104,
       //* Note: The reason this is reading as undefined, is because we only update the context on form submit, so it effectively is reset when other fields are changed
@@ -128,14 +132,53 @@ export default function TextOverlayOptionsFormStep() {
             <TextOverlayPreview
               imageObjectURL={imageObjectURL}
               textNode={
-                <div
-                  className={`absolute top-0 flex h-full w-full flex-col items-center justify-center `}
-                >
+                <div className={`absolute left-0 top-0 h-full w-full`}>
                   <div
-                    className=" flex h-fit w-fit flex-col items-center justify-center"
+                    className="absolute h-fit w-fit"
+                    data-pos={textOverlayFormStep?.textPositioning}
                     style={{
                       backgroundColor: `${backgroundCssClass}`,
                       padding: `${isShowBackgroundTextBoxChecked && textOverlayFormStep?.backgroundBoxSettings?.backgroundBoxPadding}px`,
+                      top:
+                        textOverlayFormStep?.textPositioning ===
+                        TextPositioning.Center
+                          ? "50%"
+                          : textOverlayFormStep?.textPositioning ===
+                                TextPositioning.TopLeft ||
+                              textOverlayFormStep?.textPositioning ===
+                                TextPositioning.TopRight
+                            ? "0"
+                            : "auto",
+                      left:
+                        textOverlayFormStep?.textPositioning ===
+                        TextPositioning.Center
+                          ? "50%"
+                          : textOverlayFormStep?.textPositioning ===
+                                TextPositioning.TopLeft ||
+                              textOverlayFormStep?.textPositioning ===
+                                TextPositioning.BottomLeft
+                            ? "0"
+                            : "auto",
+                      right:
+                        textOverlayFormStep?.textPositioning ===
+                          TextPositioning.TopRight ||
+                        textOverlayFormStep?.textPositioning ===
+                          TextPositioning.BottomRight
+                          ? "0"
+                          : "auto",
+                      bottom:
+                        textOverlayFormStep?.textPositioning ===
+                          TextPositioning.BottomLeft ||
+                        textOverlayFormStep?.textPositioning ===
+                          TextPositioning.BottomRight
+                          ? "0"
+                          : "auto",
+
+                      transform:
+                        textOverlayFormStep?.textPositioning ===
+                        TextPositioning.Center
+                          ? `translate(-50%, -50%)`
+                          : "none",
                     }}
                   >
                     <p
@@ -241,6 +284,66 @@ export default function TextOverlayOptionsFormStep() {
                     </Select>
                     <FormDescription>
                       How large should the text be
+                    </FormDescription>
+                  </div>
+                )}
+              />
+
+              <Controller
+                control={form.control}
+                shouldUnregister={true}
+                name="textPositioning"
+                render={({ field }) => (
+                  <div className="z-[47] space-y-2">
+                    <FormLabel>Text Positioning</FormLabel>
+                    <Select
+                      disabled={field.disabled}
+                      name={field.name}
+                      value={
+                        textOverlayFormStep?.textPositioning?.toString() ?? ""
+                      }
+                      onValueChange={(value) => {
+                        // We receive the actual value of the enum instead of the key,
+                        // So we create an array from all values of the enum, and try to find if the
+                        // passed value is a valid member of the enum
+                        const isValidTextPositioning = Object.values(
+                          TextPositioning,
+                        ).find(
+                          (textPos) => textPos === (value as TextPositioning),
+                        );
+
+                        if (isValidTextPositioning) {
+                          setTextOverlayFormStep((prev) => ({
+                            ...prev,
+                            textPositioning: value as TextPositioning,
+                          }));
+                          field.onChange(value);
+                        } else {
+                          console.warn(
+                            "onValueChange called with invalid value",
+                            value,
+                            "this is not a valid TextPositioning",
+                          );
+                        }
+                      }}
+                    >
+                      <SelectTrigger
+                        className="w-[180px]"
+                        ref={field.ref}
+                        onBlur={field.onBlur}
+                      >
+                        <SelectValue placeholder="Center" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(TextPositioning).map((item) => (
+                          <SelectItem key={item[0]} value={item[1]}>
+                            {item[0]}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>
+                      Where should the text be positioned?
                     </FormDescription>
                   </div>
                 )}

@@ -49,6 +49,16 @@ export const getURL = (path = "") => {
   return path ? `${url}/${path}` : url;
 };
 
+/**
+ * Checks if a URL is relative to the current site or external.
+ * @param url The URL to check.
+ * @returns true if the URL is relative to the current site, false if it is external.
+ */
+export function isRelativeUrl(url: string): boolean {
+  // A URL is considered relative if it doesn't start with 'http://' or 'https://'.
+  return !/^https?:\/\//i.test(url);
+}
+
 export enum ToastType {
   status,
   error,

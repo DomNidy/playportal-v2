@@ -9,6 +9,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { s3Client, sqsClient } from "~/server/clients/aws";
 import {
   Fonts,
+  TextPositioning,
   YoutubeUploadOptions,
   type CreateVideoOptionsMessageSchema,
 } from "~/definitions/api-schemas";
@@ -52,6 +53,7 @@ export const uploadRouter = createTRPCRouter({
             fontColor: z.string(),
             backgroundBox: z.boolean(),
             backgroundBoxColor: z.string(),
+            textPositioning: z.nativeEnum(TextPositioning),
             backgroundBoxOpacity: z.number().min(0).max(1),
             backgroundBoxPadding: z
               .number()
@@ -359,6 +361,7 @@ export const uploadRouter = createTRPCRouter({
                       input.textOverlay.backgroundBoxOpacity,
                     background_box_padding:
                       input.textOverlay.backgroundBoxPadding,
+                    text_positioning: input.textOverlay.textPositioning,
                     font: input.textOverlay.font,
                     font_color: input.textOverlay.fontColor,
                     font_size: input.textOverlay.fontSize,

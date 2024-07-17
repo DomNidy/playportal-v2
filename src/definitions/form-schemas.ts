@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Fonts, VideoPreset } from "./api-schemas";
+import { Fonts, TextPositioning, VideoPreset } from "./api-schemas";
 import { isFileExtensionInList } from "~/utils/utils";
 
 export const ResetPasswordFormSchema = z.object({
@@ -77,6 +77,7 @@ export const CreateVideoFormSchema = z.object({
       backgroundBoxColor: z.string(),
       backgroundBoxOpacity: z.number().min(0).max(1),
       backgroundBoxPadding: z.number().min(1, "Padding must be at least 1"),
+      textPositioning: z.nativeEnum(TextPositioning),
     })
     .optional(),
 
@@ -202,6 +203,7 @@ export const CreateVideoFormTextOverlaySchema = z.object({
   font: z.nativeEnum(Fonts),
   fontSize: z.number().min(1, "Font size must be at least 1"),
   fontColor: z.string(),
+  textPositioning: z.nativeEnum(TextPositioning),
   backgroundBoxSettings: z
     .object({
       backgroundBoxColor: z.string(),
