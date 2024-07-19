@@ -102,6 +102,10 @@ export default function TextOverlayOptionsFormStep() {
     nextStep();
   };
 
+  // We use this since on the initial render the configured text positioning may be undefined
+  const selectedTextPos =
+    textOverlayFormStep?.textPositioning ?? form.getValues("textPositioning");
+
   const backgroundCssClass = isShowBackgroundTextBoxChecked
     ? `${hexToRGBA(localBackgroundBoxColor, textOverlayFormStep?.backgroundBoxSettings?.backgroundBoxOpacity ?? 0.75)}`
     : ``;
@@ -135,48 +139,37 @@ export default function TextOverlayOptionsFormStep() {
                 <div className={`absolute left-0 top-0 h-full w-full`}>
                   <div
                     className="absolute h-fit w-fit"
-                    data-pos={textOverlayFormStep?.textPositioning}
+                    data-pos={selectedTextPos}
                     style={{
                       backgroundColor: `${backgroundCssClass}`,
                       padding: `${isShowBackgroundTextBoxChecked && textOverlayFormStep?.backgroundBoxSettings?.backgroundBoxPadding}px`,
                       top:
-                        textOverlayFormStep?.textPositioning ===
-                        TextPositioning.Center
+                        selectedTextPos === TextPositioning.Center
                           ? "50%"
-                          : textOverlayFormStep?.textPositioning ===
-                                TextPositioning.TopLeft ||
-                              textOverlayFormStep?.textPositioning ===
-                                TextPositioning.TopRight
+                          : selectedTextPos === TextPositioning.TopLeft ||
+                              selectedTextPos === TextPositioning.TopRight
                             ? "0"
                             : "auto",
                       left:
-                        textOverlayFormStep?.textPositioning ===
-                        TextPositioning.Center
+                        selectedTextPos === TextPositioning.Center
                           ? "50%"
-                          : textOverlayFormStep?.textPositioning ===
-                                TextPositioning.TopLeft ||
-                              textOverlayFormStep?.textPositioning ===
-                                TextPositioning.BottomLeft
+                          : selectedTextPos === TextPositioning.TopLeft ||
+                              selectedTextPos === TextPositioning.BottomLeft
                             ? "0"
                             : "auto",
                       right:
-                        textOverlayFormStep?.textPositioning ===
-                          TextPositioning.TopRight ||
-                        textOverlayFormStep?.textPositioning ===
-                          TextPositioning.BottomRight
+                        selectedTextPos === TextPositioning.TopRight ||
+                        selectedTextPos === TextPositioning.BottomRight
                           ? "0"
                           : "auto",
                       bottom:
-                        textOverlayFormStep?.textPositioning ===
-                          TextPositioning.BottomLeft ||
-                        textOverlayFormStep?.textPositioning ===
-                          TextPositioning.BottomRight
+                        selectedTextPos === TextPositioning.BottomLeft ||
+                        selectedTextPos === TextPositioning.BottomRight
                           ? "0"
                           : "auto",
 
                       transform:
-                        textOverlayFormStep?.textPositioning ===
-                        TextPositioning.Center
+                        selectedTextPos === TextPositioning.Center
                           ? `translate(-50%, -50%)`
                           : "none",
                     }}
@@ -255,7 +248,7 @@ export default function TextOverlayOptionsFormStep() {
                       }}
                     >
                       <SelectTrigger
-                        className="w-[180px]"
+                        className="min-w-[120px]"
                         ref={field.ref}
                         onBlur={field.onBlur}
                       >
@@ -328,7 +321,7 @@ export default function TextOverlayOptionsFormStep() {
                       }}
                     >
                       <SelectTrigger
-                        className="w-[180px]"
+                        className="min-w-[120px]"
                         ref={field.ref}
                         onBlur={field.onBlur}
                       >
@@ -369,7 +362,7 @@ export default function TextOverlayOptionsFormStep() {
                         }
                       }}
                     >
-                      <SelectTrigger ref={field.ref} className="w-[180px]">
+                      <SelectTrigger ref={field.ref} className="min-w-[120px]">
                         <SelectValue placeholder="Video preset" />
                       </SelectTrigger>
                       <SelectContent>
@@ -390,7 +383,7 @@ export default function TextOverlayOptionsFormStep() {
                 shouldUnregister={true}
                 name="fontColor"
                 render={({ field }) => (
-                  <div className="space-y-2">
+                  <div className="z-[50] space-y-2">
                     <FormLabel ref={field.ref}>Font Color</FormLabel>
                     <HexColorPicker
                       color={field.value}
@@ -509,7 +502,7 @@ export default function TextOverlayOptionsFormStep() {
                   name="backgroundBoxSettings.backgroundBoxColor"
                   shouldUnregister={true}
                   render={({ field }) => (
-                    <div className="space-y-2">
+                    <div className="z-50 space-y-2">
                       <FormLabel ref={field.ref}>
                         Background Box Color
                       </FormLabel>
