@@ -2,7 +2,7 @@ import React from "react";
 import { useCreateVideoForm } from "../CreateVideoFormContext";
 import { useStepper } from "../../Stepper";
 import { Controller, useForm } from "react-hook-form";
-import { isValid, type z } from "zod";
+import { type z } from "zod";
 import { CreateVideoFormTextOverlaySchema } from "~/definitions/form-schemas";
 import {
   Form,
