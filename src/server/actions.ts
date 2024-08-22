@@ -166,7 +166,7 @@ export async function signUp(
     },
   });
 
-  console.log("Sign up response", error, email, password, data);
+  console.log("Sign up response", error, email, data);
 
   if (error) {
     console.error(error);

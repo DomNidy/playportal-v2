@@ -22,6 +22,7 @@ import posthog from "posthog-js";
 import { ClipLoader } from "react-spinners";
 import { signUp } from "~/server/actions";
 import GoogleIcon from "~/components/icons/GoogleIcon";
+import { toast } from "../Toasts/use-toast";
 
 // Type used to track the status of the signup process
 type SignupStatus = {
@@ -36,9 +37,9 @@ const SignUpSchema = z
     confirmPassword: z
       .string()
       .min(8, "Password must contain at least 8 characters."),
-    agreesToTerms: z.boolean().refine((val) => !!val, {
-      message: "Please agree to terms and conditions.",
-    }),
+    // agreesToTerms: z.boolean().refine((val) => !!val, {
+    //   message: "Please agree to terms and conditions.",
+    // }),
   })
   .refine(
     (credentials) => credentials.password === credentials.confirmPassword,
@@ -68,7 +69,6 @@ export default function SignupForm() {
       email: "",
       password: "",
       confirmPassword: "",
-      agreesToTerms: false,
     },
   });
 
@@ -79,9 +79,18 @@ export default function SignupForm() {
     });
     const signUpResponse = await signUp(data.email, data.password);
     setIsSubmitting(false);
+
+    console.log(signUpResponse);
+
     if (signUpResponse && signUpResponse.status === "success") {
       setSignupStatus({ email: data.email, shouldCheckEmail: true });
       form.reset();
+    } else if (signUpResponse && signUpResponse.status === "ratelimited") {
+      toast({
+        title: "Slow down please!",
+        description: signUpResponse.text,
+        variant: "destructive",
+      });
     }
   }
 
@@ -226,7 +235,7 @@ export default function SignupForm() {
 const BottomGradient = () => {
   return (
     <>
-      <span className="via-landing_cta-def absolute inset-x-0 -bottom-px block h-px w-full bg-gradient-to-r from-transparent to-transparent opacity-0 transition duration-500 group-hover/btn:opacity-100" />
+      <span className="absolute inset-x-0 -bottom-px block h-px w-full bg-gradient-to-r from-transparent via-landing_cta-def to-transparent opacity-0 transition duration-500 group-hover/btn:opacity-100" />
       <span className="absolute inset-x-10 -bottom-px mx-auto block h-px w-1/2 bg-gradient-to-r from-transparent via-indigo-500 to-transparent opacity-0 blur-sm transition duration-500 group-hover/btn:opacity-100" />
     </>
   );

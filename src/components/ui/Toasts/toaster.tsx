@@ -21,6 +21,7 @@ export function Toaster() {
   const router = useRouter();
 
   useEffect(() => {
+    console.log(searchParams.forEach((p) => console.log(p)))
     const status = searchParams.get("status_name");
     const status_description = searchParams.get("status_description");
     const error = searchParams.get("error_name");
